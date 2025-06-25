@@ -1,15 +1,60 @@
+import SideBar from "@/components/sideBar";
+import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
+import QueryProvider from "./lib/queryProvider";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const pretendard = localFont({
+  src: [
+    {
+      path: "../public/fonts/Pretendard-Thin.woff2",
+      weight: "100",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/Pretendard-ExtraLight.woff2",
+      weight: "200",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/Pretendard-Light.woff2",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/Pretendard-Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/Pretendard-Medium.woff2",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/Pretendard-SemiBold.woff2",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/Pretendard-Bold.woff2",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/Pretendard-ExtraBold.woff2",
+      weight: "800",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/Pretendard-Black.woff2",
+      weight: "900",
+      style: "normal",
+    },
+  ],
+  display: "swap",
+  variable: "--font-pretendard", // CSS 변수명
 });
 
 export const metadata: Metadata = {
@@ -25,9 +70,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${pretendard.className} antialiased `}
       >
-        {children}
+        <QueryProvider>
+          <div className="flex">
+            <SideBar />
+            <main className="w-full h-screen overflow-y-auto">{children}</main>
+          </div>
+          <Toaster />
+        </QueryProvider>
       </body>
     </html>
   );
