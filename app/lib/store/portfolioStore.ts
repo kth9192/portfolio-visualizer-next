@@ -25,24 +25,28 @@ interface PortfolioStoreActions {
   updateSetting : (setting: PortfolioSettingCreateDTO) => void;
 }
 
+const initState = {
+  name: "",
+  initialAmount: 10000,
+  rebalanceFrequency: RebalanceFrequency.MONTHLY,
+  assets: [],
+  setting : {
+    startDate: null,
+    endDate: null,
+    rebalanceFrequency: RebalanceFrequency.MONTHLY,
+  },
+  user_id: "",
+  description: "",
+}
+
 export const usePortfolioStore = create<
   PortfolioStoreState & PortfolioStoreActions
 >()(
   devtools((set, get) => ({
-    name: "",
-    initAmount: 0,
-    rebalanceFrequency: RebalanceFrequency.MONTHLY,
-    assets: [],
-    setting : {
-      startDate: null,
-      endDate: null,
-      rebalanceFrequency: RebalanceFrequency.MONTHLY,
-    },
-    user_id: "",
-    description: "",
+    ...initState,
 
     setName: (name: string) => set({ name }),
-    setInitAmount: (amount: number) => set({ initAmount: amount }),
+    setInitAmount: (amount: number) => set({ initialAmount: amount }),
     setRebalanceFrequency: (frequency: RebalanceFrequency) =>
       set({ rebalanceFrequency: frequency }),
     setAssets: (assets: PortfolioAssetReqDTO[]) => set({ assets }),

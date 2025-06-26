@@ -2,7 +2,7 @@
 import { useQuery, useQueryClient ,type UseQueryOptions } from '@tanstack/react-query'
 import { getETFList } from '@/api/etf'
 import { ETFInfoDTO } from '@/app/interface/dto/etf'
-import { etfQueryKeys } from './keys'
+import { queryKeys } from './keys'
 import { AxiosResponse } from 'axios'
 import { ApiResponse } from '@/app/interface/dto/api'
 
@@ -13,7 +13,7 @@ interface useGetEtfInfosProps{
 function useGetEtfInfos({optios}:useGetEtfInfosProps) {
 
   return useQuery({
-    queryKey: etfQueryKeys.list,
+    queryKey: queryKeys.list,
     queryFn: getETFList,
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,

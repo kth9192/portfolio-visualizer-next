@@ -1,7 +1,9 @@
+'use client';
+
 import { deepMerge } from "@/app/lib/utils";
 import { ApexOptions } from "apexcharts";
-import React, { useMemo } from "react";
-import ReactApexChart from "react-apexcharts";
+import React, { lazy, useMemo } from "react";
+const ReactApexChart = lazy(() => import("react-apexcharts"));
 
 interface LineChartProps {
   options: ApexOptions;

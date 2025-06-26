@@ -99,7 +99,7 @@ export interface PortfolioSettingCreateDTO {
 
 export interface PortfolioCreateDTO {
   name: string;
-  initAmount: number;
+  initialAmount: number;
   description?: string;
   user_id?: string;
   rebalanceFrequency: RebalanceFrequency;
@@ -110,7 +110,7 @@ export interface PortfolioCreateDTO {
 export const createPortfolioCreateDTO = (portfolioData: PortfolioCreateDTO) => {
   return {
     name: portfolioData.name,
-    initAmount: portfolioData.initAmount,
+    initialAmount: portfolioData.initialAmount,
     description: portfolioData.description,
     user_id: portfolioData.user_id,
     rebalanceFrequency: portfolioData.rebalanceFrequency,

@@ -1,27 +1,277 @@
-'use client';
+"use client";
 
-import React from "react";
-import PortfolioBuilder from "./widget/portfolioBuilder";
-import PortfolioSetting from "./widget/portfolioSetting";
 import { Button } from "@/components/ui/button";
+import { format, isSameDay } from "date-fns";
+import { useCallback, useEffect, useMemo } from "react";
+import {
+  createPortfolioCreateDTO,
+  PortfolioSimulationData,
+} from "../interface/dto/portfolio";
+import { RebalanceFrequency } from "../interface/enum/rebanalceFrequency";
+import { getCommonDates, getRebalanceDates } from "../lib/calculator";
+import useGetBacktestingData from "../lib/hooks/query/useGetBacktestingData";
 import { usePortfolioValidation } from "../lib/hooks/usePortfolioValidationt";
 import { usePortfolioStore } from "../lib/store/portfolioStore";
-import { createPortfolioCreateDTO } from "../interface/dto/portfolio";
-import { RebalanceFrequency } from "../interface/enum/rebanalceFrequency";
+import PortfolioBuilder from "./widget/portfolioBuilder";
+import PortfolioMetrics from "./widget/portfolioMetrics";
+import PortfolioSetting from "./widget/portfolioSetting";
+import CustomSpinner from "@/components/spinner/customSpinner";
+import { useRef } from "react";
 
 function BacktestingPage() {
-  const { assets, setting } = usePortfolioStore();
+  const { assets, setting, initialAmount, name } = usePortfolioStore();
+  const metricsRef = useRef<HTMLDivElement>(null);
+
+  const {
+    data: backtestingData,
+    refetch: executeBacktesting,
+    isLoading: backtestingLoading,
+    isError: backtestingError,
+  } = useGetBacktestingData({
+    req: {
+      ticker: assets.map((asset) => asset.symbol),
+      startDate: setting.startDate,
+      endDate: setting.endDate,
+      rebalanceFrequency: setting.rebalanceFrequency!,
+    },
+    options: {
+      enabled: false,
+      retry: false,
+    },
+  });
 
   const { isPortfolioValid, errors, totalWeight } = usePortfolioValidation({
     portfolio: createPortfolioCreateDTO({
-      name: "",
-      initAmount: 0,
-      rebalanceFrequency: RebalanceFrequency.MONTHLY,
+      name: name,
+      initialAmount: initialAmount,
+      rebalanceFrequency: setting.rebalanceFrequency!,
       assets,
       setting,
     }),
     setting,
   });
+
+  const portfolioSimulationData = useMemo(() => {
+    if (!backtestingData?.priceInfos?.length || !assets.length) {
+      return [];
+    }
+
+    const priceInfos = backtestingData.priceInfos;
+
+    const result: PortfolioSimulationData[] = [];
+
+    //전체 티커에 모두 들어가 있는 날짜목록
+    const commonDates = getCommonDates(priceInfos);
+
+    const commonDatesSet = new Set(commonDates);
+
+    const timeSeries = commonDates.map((item) => new Date(item));
+
+    //adjClose 기반 가격 맵 - 배당금 효과 이미 반영됨
+    const priceMap = new Map<string, number[]>();
+
+    console.log("commonDatesSet", commonDatesSet);
+
+    priceInfos.forEach((priceInfo) => {
+      priceMap.set(
+        priceInfo.ticker,
+        priceInfo.prices
+          .filter((price) =>
+            commonDatesSet.has(format(price.date, "yyyy-MM-dd"))
+          )
+          .map((item) => item.adj_close)
+      );
+    });
+
+    if (!timeSeries?.length) return [];
+
+    //초기 포트폴리오 구성 - 완전 분할매수
+    const currentShares = new Map<string, number>();
+    let remainingCash = 0;
+
+    // 초기 매수: 모든 자산에 대해 정확한 비중으로 분할매수
+    assets.forEach((asset) => {
+      const initialPrice = priceMap.get(asset.symbol)?.[0] ?? 0;
+      if (initialPrice === 0) {
+        console.error(`${asset.symbol}의 초기 가격 데이터가 없습니다.`);
+        return;
+      }
+
+      const targetAmount = asset.weight * initialAmount;
+      const shares = targetAmount / initialPrice; //완전 분할매수
+
+      currentShares.set(asset.symbol, shares);
+    });
+
+    //초기 현금 계산 - 분할매수로 인한 잔액 최소화
+    const initialUsedAmount = assets.reduce((sum, asset) => {
+      const shares = currentShares.get(asset.symbol) ?? 0;
+      const price = priceMap.get(asset.symbol)?.[0] ?? 0;
+      return sum + shares * price;
+    }, 0);
+
+    remainingCash = initialAmount - initialUsedAmount;
+
+    //리밸런싱 날짜 계산
+    const rebalanceDates = getRebalanceDates(
+      timeSeries,
+      setting.startDate!,
+      setting.endDate!,
+      setting.rebalanceFrequency!
+    );
+
+    //일별 시뮬레이션
+    timeSeries.forEach((date, dayIdx) => {
+      const isRebalanceDay = rebalanceDates.some((rebalanceDate) =>
+        isSameDay(date, rebalanceDate)
+      );
+
+      //리밸런싱
+      if (isRebalanceDay && dayIdx > 0 && assets.length > 1) {
+        // 현재 총 포트폴리오 가치 계산 (현금 + 주식)
+        let totalPortfolioValue = remainingCash;
+
+        assets.forEach((asset) => {
+          const shares = currentShares.get(asset.symbol) ?? 0;
+          const currentPrice = priceMap.get(asset.symbol)?.[dayIdx] ?? 0;
+          totalPortfolioValue += shares * currentPrice;
+        });
+
+        // 목표 비중에 따라 새로운 주식 수량 계산
+        let totalUsedForRebalancing = 0;
+
+        assets.forEach((asset) => {
+          const currentPrice = priceMap.get(asset.symbol)?.[dayIdx] ?? 0;
+          const targetValue = totalPortfolioValue * asset.weight;
+          const newShares = targetValue / currentPrice; // 분할매수
+
+          currentShares.set(asset.symbol, newShares);
+          totalUsedForRebalancing += newShares * currentPrice;
+        });
+
+        // 리밸런싱 후 현금 재계산
+        remainingCash = totalPortfolioValue - totalUsedForRebalancing;
+
+        if (dayIdx <= 5 || isRebalanceDay) {
+          // 초기 몇 일과 리밸런싱 날짜 로깅
+          console.log(
+            `${format(
+              date,
+              "yyyy-MM-dd"
+            )} [리밸런싱]: 총 가치 $${totalPortfolioValue.toFixed(
+              2
+            )}, 현금 $${remainingCash.toFixed(2)}`
+          );
+        }
+      }
+
+      // 현재 포트폴리오 가치 계산
+      let currentPortfolioValue = remainingCash;
+
+      assets.forEach((asset) => {
+        const shares = currentShares.get(asset.symbol) ?? 0;
+        const currentPrice = priceMap.get(asset.symbol)?.[dayIdx] ?? 0;
+        currentPortfolioValue += shares * currentPrice;
+      });
+
+      // 수익률 계산
+      let dailyReturn = 0;
+      let cumulativeReturn = 0;
+      let cumulativeMultiplier = 1;
+
+      if (dayIdx === 0) {
+        cumulativeReturn = 0;
+        cumulativeMultiplier = 1;
+      } else {
+        const previousValue =
+          result[dayIdx - 1].portfolioValue ?? initialAmount;
+        dailyReturn = (currentPortfolioValue - previousValue) / previousValue;
+        cumulativeReturn =
+          (currentPortfolioValue - initialAmount) / initialAmount;
+        cumulativeMultiplier = currentPortfolioValue / initialAmount;
+      }
+
+      result.push({
+        date,
+        portfolioValue: currentPortfolioValue,
+        cumulativeReturn,
+        cumulativeReturnsPercent: cumulativeReturn * 100,
+        cumulativeMultiplier,
+        dailyReturn,
+        shares: Object.fromEntries(currentShares),
+      });
+    });
+
+    return result;
+  }, [ backtestingData]);
+
+  const chartSeries = useMemo(() => {
+    if (portfolioSimulationData.length > 0 && !backtestingData)
+      return [
+        {
+          name: "Portfolio",
+          data: [
+            {
+              x: 0,
+              y: 0,
+            },
+          ],
+        },
+      ];
+
+    return [
+      {
+        name: "Portfolio",
+        data: portfolioSimulationData.map((item) => ({
+          x: item.date.getTime(),
+          y: item.cumulativeReturnsPercent,
+        })),
+      },
+    ];
+  }, [portfolioSimulationData, backtestingData]);
+
+  const scrollToMetrics = useCallback(() => {
+    if (metricsRef.current) {
+      // 메트릭스 컴포넌트로 스크롤
+      metricsRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    } else {
+      // 대안: 페이지 하단으로 스크롤
+      requestAnimationFrame(() => {
+        const scrollHeight = Math.max(
+          document.body.scrollHeight,
+          document.documentElement.scrollHeight
+        );
+        window.scrollTo({
+          top: scrollHeight,
+          behavior: "smooth",
+        });
+      });
+    }
+  }, []);
+  
+  const handleBacktesting = useCallback(() => {
+    if (!isPortfolioValid) {
+      alert("포트폴리오가 유효하지 않습니다");
+      return;
+    }
+
+    executeBacktesting();
+  }, [executeBacktesting, isPortfolioValid]);
+
+  useEffect(() => {
+    if (portfolioSimulationData.length > 0 && !backtestingLoading) {
+      const timeoutId = setTimeout(() => {
+        requestAnimationFrame(() => {
+          scrollToMetrics();
+        });
+      }, 100); // 3초 → 100ms로 단축
+  
+      return () => clearTimeout(timeoutId);
+    }
+  }, [portfolioSimulationData, backtestingLoading, scrollToMetrics]);
 
   return (
     <section className="flex flex-col w-full 2xl:w-4/5 gap-10 p-6 ">
@@ -40,17 +290,38 @@ function BacktestingPage() {
           <div className="flex flex-col w-full gap-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h4 className="text-lg font-semibold ">검증 상태</h4>
             <ul className="flex flex-col gap-2">
-              {errors.map((error, index) => (
-                <li key={index} className="text-destructive text-sm">
-                  {error}
-                </li>
-              ))}
+              {assets.length > 0 &&
+                errors.map((error, index) => (
+                  <li key={index} className="text-destructive text-sm">
+                    {error}
+                  </li>
+                ))}
             </ul>
-            <Button className="w-full" disabled={!isPortfolioValid}>
-              백테스트 실행
+            <Button
+              onClick={handleBacktesting}
+              className="w-full"
+              disabled={!isPortfolioValid}
+            >
+              백테스트 시작
             </Button>
           </div>
         </div>
+
+        {backtestingLoading ? (
+          <CustomSpinner/>
+        ) : backtestingError ? (
+          <p className="text-destructive text-sm">
+            백테스트 중 오류가 발생했습니다
+          </p>
+        ) : (
+          portfolioSimulationData.length > 0 && (
+            <div ref={metricsRef}>
+            <PortfolioMetrics
+              portfolioSimulationData={portfolioSimulationData}
+              chartSeries={chartSeries}
+            /></div>
+          )
+        )}
       </div>
     </section>
   );

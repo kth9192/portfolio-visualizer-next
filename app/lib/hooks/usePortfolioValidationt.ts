@@ -38,6 +38,10 @@ export const usePortfolioValidation = ({
       errors.push("비중이 0인 자산이 존재합니다.");
     }
 
+    if(portfolio.initialAmount === 0 || !portfolio.initialAmount ){ 
+    errors.push("초기자금을 입력해주세요")
+    }
+
     const totalWeight = getTotalWeight(portfolio);
     if (Math.abs(totalWeight - 1) > 0.0001) {
       errors.push(

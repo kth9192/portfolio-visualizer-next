@@ -29,8 +29,7 @@ function PortfolioSetting() {
     <div className="flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <h3 className="text-lg font-semibold mb-4">백테스팅 설정</h3>
       <div className="space-y-4">
-     
-
+    
         <RangeCalendar
           selected={
             setting?.startDate && setting?.endDate

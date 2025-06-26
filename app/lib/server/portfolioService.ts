@@ -41,7 +41,7 @@ export class PortfolioService {
         const portfolio = await tx.portfolios.create({
           data: {
             name: portfolioData.name,
-            initial_amount: portfolioData.initAmount,
+            initial_amount: portfolioData.initialAmount,
             description: portfolioData.description,
             user_id: portfolioData.user_id,
           },
@@ -82,7 +82,7 @@ export class PortfolioService {
 
       return createPortfolioCreateDTO({
         name: portfolioData.name,
-        initAmount: portfolioData.initAmount,
+        initialAmount: portfolioData.initialAmount,
         description: portfolioData.description,
         rebalanceFrequency: portfolioData.rebalanceFrequency,
         startDate: portfolioData.startDate,

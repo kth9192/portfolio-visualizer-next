@@ -1,5 +1,10 @@
 import React from "react";
-import { DayPicker, DateRange, getDefaultClassNames } from "react-day-picker";
+import {
+  DayPicker,
+  DateRange,
+  getDefaultClassNames,
+  DropdownProps,
+} from "react-day-picker";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -10,6 +15,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import CustomDropdown from "../dropdown/customDropdown";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 interface RangeCalendarProps {
   selected?: DateRange;
@@ -17,6 +31,43 @@ interface RangeCalendarProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+}
+
+export function CustomSelectDropdown(props: DropdownProps) {
+  const { options, value, onChange } = props;
+
+  const handleValueChange = (newValue: string) => {
+    if (onChange) {
+      const syntheticEvent = {
+        target: {
+          value: newValue,
+        },
+      } as React.ChangeEvent<HTMLSelectElement>;
+
+      onChange(syntheticEvent);
+    }
+  };
+
+  return (
+    <Select value={value?.toString()} onValueChange={handleValueChange}>
+      <SelectTrigger className="border-none shadow-none cursor-pointer">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup className="flex flex-col-reverse h-100 overflow-y-auto">
+          {options?.map((option) => (
+            <SelectItem
+              key={option.value}
+              value={option.value.toString()}
+              disabled={option.disabled}
+            >
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
 }
 
 const RangeCalendar: React.FC<RangeCalendarProps> = ({
@@ -27,6 +78,8 @@ const RangeCalendar: React.FC<RangeCalendarProps> = ({
   className,
 }) => {
   const defaultClassNames = getDefaultClassNames();
+  const today = new Date();
+  const currentMonth = new Date(today.getFullYear(), today.getMonth());
 
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -50,7 +103,7 @@ const RangeCalendar: React.FC<RangeCalendarProps> = ({
     onSelect?.(range);
 
     // 시작일과 종료일이 모두 선택되면 팝오버 닫기
-    if (range?.from && range?.to) {
+    if (range?.from && range?.to && range.from !== range.to) {
       setIsOpen(false);
     }
   };
@@ -78,24 +131,32 @@ const RangeCalendar: React.FC<RangeCalendarProps> = ({
           align="start"
         >
           <DayPicker
-            
             mode="range"
             defaultMonth={selected?.from}
             selected={selected}
             onSelect={handleSelect}
-            numberOfMonths={2}
+            showOutsideDays={true}
+            fixedWeeks={true}
             locale={ko}
+            captionLayout="dropdown"
+            endMonth={currentMonth}
             classNames={{
-              "today":"text-red-800 font-medium",
-              "caption": "flex justify-center pt-1 relative items-center",
-              "range_start":"bg-blue-700 text-white rounded-l-md border-blue-700",
-              "range_end":"bg-blue-700 text-white rounded-r-md border-blue-700",
-              "range_middle":"bg-blue-200 font-semibold",
-              "day_hidden":"invisible",
-              "month_caption":"flex justify-center pt-1 relative items-center font-bold",
-              "selected":`font-bold`,
+              today: "text-red-800 font-medium",
+              caption: "flex justify-center pt-1 relative items-center",
+              outside:"opacity-20",
+              range_start:
+                "bg-blue-700 text-white rounded-l-md border-blue-700",
+              range_end: "bg-blue-700 text-white rounded-r-md border-blue-700",
+              range_middle: "bg-blue-200 font-semibold",
+              month_caption:
+                `${defaultClassNames.month_caption} flex justify-center pt-1 relative items-center font-bold `,
+              selected: `font-bold`,
+              dropdowns: "flex flex-row-reverse gap-2 z-50",
+              nav: `${defaultClassNames.nav} justify-between w-full  z-10`,
+              
             }}
             components={{
+              Dropdown: CustomSelectDropdown,
               Chevron: ({ className, orientation, ...props }) => {
                 if (orientation === "left") {
                   return (

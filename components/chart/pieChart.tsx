@@ -1,6 +1,8 @@
-import ApexCharts, { type ApexOptions } from "apexcharts";
+'use client';
+
 import React, { lazy } from "react";
 const ReactApexChart = lazy(() => import("react-apexcharts"));
+import { ApexOptions } from "apexcharts";
 
 interface PieChartProps {
   options?: ApexOptions;

@@ -7,6 +7,8 @@ import PieChart from "@/components/chart/pieChart";
 import CustomSelect from "@/components/select/customSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { format } from "date-fns";
+import { ko } from "date-fns/locale";
 import React, { useEffect, useMemo, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
@@ -15,7 +17,7 @@ interface PortfolioBuilderProps {}
 function PortfolioBuilder({}: PortfolioBuilderProps) {
   const {
     name,
-    initAmount,
+    initialAmount,
     rebalanceFrequency,
     assets,
     user_id,
@@ -111,7 +113,7 @@ function PortfolioBuilder({}: PortfolioBuilderProps) {
               type="number"
               placeholder="포트폴리오의 시작 금액(달러)을 입력하세요"
               className="border border-gray-300 px-2 py-1 rounded w-1/2"
-              value={initAmount}
+              value={initialAmount}
               onChange={(e) => setInitAmount(Number(e.target.value))}
             />
           </li>
@@ -243,20 +245,39 @@ function PortfolioBuilder({}: PortfolioBuilderProps) {
                     return val.toFixed(1) + "%";
                   },
                 },
+                labels: ratioData.map((item) => item.label),
                 legend: { show: true },
                 theme: { mode: "light" },
+                tooltip: {
+                  enabled: true,
+                  custom: function ({
+                    series,
+                    seriesIndex,
+                    dataPointIndex,
+                    w,
+                  }) {
+                    const ticker = w.config.labels[seriesIndex];
+                    return `<div class="p-3 shadow-lg rounded-lg ">
+                                            <div class="font-semibold text-gray-800">${ticker}</div>
+                                            <div class="flex items-center mt-1">
+                                              <span class="font-medium text-gray-600">비중 : </span>
+                                              <span class="ml-1 font-bold text-blue-600">${series}%</span>
+                                            </div>
+                                          </div>`;
+                  },
+                },
                 colors: [
-                      "#008FFB",
-                      "#00E396",
-                      "#FEB019",
-                      "#FF4560",
-                      "#775DD0",
-                      "#3F51B5",
-                      "#546E7A",
-                      "#D4526E",
-                      "#8D5B4C",
-                      "#F86624",
-                    ],
+                  "#008FFB",
+                  "#00E396",
+                  "#FEB019",
+                  "#FF4560",
+                  "#775DD0",
+                  "#3F51B5",
+                  "#546E7A",
+                  "#D4526E",
+                  "#8D5B4C",
+                  "#F86624",
+                ],
               }}
             />
           </div>

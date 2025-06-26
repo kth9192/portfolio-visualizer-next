@@ -5,6 +5,7 @@ export interface BacktestingReq {
   ticker: string[];
   startDate: Date | undefined;
   endDate: Date | undefined;
+  rebalanceFrequency: RebalanceFrequency;
 }
 
 export interface BacktestingRes {
