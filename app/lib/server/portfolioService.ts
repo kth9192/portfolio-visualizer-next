@@ -1,11 +1,16 @@
 import type { ETFPriceDTO } from "@/app/interface/dto/etf";
 import {
+  createPortfolioAssetDTO,
   createPortfolioCreateDTO,
+  createPortfolioDTO,
+  createPortfolioSettingDTO,
+  PortfolioAssetDTO,
   type PortfolioCreateDTO,
   type PortfolioDTO,
 } from "@/app/interface/dto/portfolio";
 import { PrismaClient } from "@prisma/client";
 import { format } from "date-fns";
+import { RebalanceFrequency } from "@/app/interface/enum/rebanalceFrequency";
 
 export class PortfolioService {
   private prisma: PrismaClient;
@@ -16,17 +21,47 @@ export class PortfolioService {
 
   async getPortfolios(): Promise<PortfolioDTO[]> {
     try {
-      const portfolios = await this.prisma.portfolios.findMany();
+      const portfolios = await this.prisma.portfolios.findMany({
+        include: {
+          portfolio_assets: true,
+          portfolio_settings: true,
+        },
+      });
 
-      return portfolios.map((portfolio) => ({
-        id: portfolio.id,
-        name: portfolio.name,
-        initAmount: portfolio.initial_amount.toNumber(),
-        created: portfolio.created,
-        updated: portfolio.updated,
-        description: portfolio.description,
-        user_id: portfolio.user_id,
-      })) as PortfolioDTO[];
+      return portfolios.map((portfolio) => {
+        const setting = portfolio.portfolio_settings[0];
+
+        return createPortfolioDTO({
+          id: portfolio.id,
+          name: portfolio.name,
+          initialAmount: portfolio.initial_amount.toNumber(),
+          created: portfolio.created,
+          updated: portfolio.updated,
+          description: portfolio.description || "",
+          user_id: portfolio.user_id || "",
+          assets: portfolio.portfolio_assets.map((asset) =>
+            createPortfolioAssetDTO({
+              id: asset.id,
+              portfolio_id: asset.portfolio_id,
+              symbol: asset.symbol,
+              weight: asset.weight.toNumber(),
+              shares: asset.shares?.toNumber() || 0,
+              created: asset.created,
+              updated: asset.updated,
+            })
+          ),
+          setting: createPortfolioSettingDTO({
+            id: setting.id,
+            portfolio_id: setting.portfolio_id,
+            startDate: setting.start_date,
+            endDate: setting.end_date,
+            rebalanceFrequency:
+              setting.rebalance_frequency as RebalanceFrequency,
+            created: setting.created,
+            updated: setting.updated,
+          }),
+        });
+      });
     } catch (error) {
       console.error(error);
 

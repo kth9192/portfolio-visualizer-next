@@ -45,7 +45,7 @@ function PortfolioBuilder({}: PortfolioBuilderProps) {
     isLoading,
     isError,
   } = useGetEtfInfos({
-    optios: {},
+    options: {},
   });
 
   const ratioData = useMemo(() => {

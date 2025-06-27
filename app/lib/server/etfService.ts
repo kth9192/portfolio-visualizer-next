@@ -3,41 +3,41 @@ import {
   type ETFInfoDTO,
   type ETFPriceDTO,
   type ETFTimeSeriesDTO,
-} from '@/app/interface/dto/etf';
-import { differenceInYears } from 'date-fns';
-import { PrismaClient , type etf_infos } from '@prisma/client';
+} from "@/app/interface/dto/etf";
+import { differenceInYears } from "date-fns";
+import { PrismaClient, type etf_infos } from "@prisma/client";
 
 export class ETFService {
-  private static DEFAULT_TICKERS = ['SPY', 'QQQ', 'VTI', 'BND', 'TLT'];
+  private static DEFAULT_TICKERS = ["SPY", "QQQ", "VTI", "BND", "TLT"];
 
   private prisma: PrismaClient;
 
   constructor(prismaClient: PrismaClient) {
-    this.prisma = prismaClient || new PrismaClient(); 
+    this.prisma = prismaClient || new PrismaClient();
   }
 
   async getETFList(): Promise<ETFInfoDTO[]> {
     try {
       const etfs: etf_infos[] = await this.prisma.etf_infos.findMany({
         orderBy: {
-          symbol: 'asc',
+          symbol: "asc",
         },
       });
 
-      console.log('etfs', etfs);
+      console.log("etfs", etfs);
 
       return etfs.map((item) =>
         createETFInfoDTO({
           ...item,
-          shortName: item.short_name || '',
-          longName: item.long_name || '',
-          quoteType: item.quote_type || '',
-          exchange: item.exchange || '',
-          currency: item.currency || '',
-        }),
+          shortName: item.short_name || "",
+          longName: item.long_name || "",
+          quoteType: item.quote_type || "",
+          exchange: item.exchange || "",
+          currency: item.currency || "",
+        })
       );
     } catch (error) {
-      console.error('getETFList error', error);
+      console.error("getETFList error", error);
 
       return [];
     }
@@ -46,7 +46,7 @@ export class ETFService {
   async getETFHistory(
     symbols: string[],
     startDate: Date,
-    endDate: Date,
+    endDate: Date
   ): Promise<ETFTimeSeriesDTO[]> {
     try {
       const pricesData = await this.prisma.etf_prices.findMany({
@@ -59,7 +59,7 @@ export class ETFService {
             lte: endDate,
           },
         },
-        orderBy: [{ symbol: 'asc' }, { date: 'asc' }],
+        orderBy: [{ symbol: "asc" }, { date: "asc" }],
       });
 
       const groupedData = pricesData.reduce((acc, price) => {
@@ -89,8 +89,39 @@ export class ETFService {
         endDate,
       }));
     } catch (error) {
-      console.error('ETF 히스토리 조회 실패:', error);
-      throw new Error('ETF 가격 데이터를 가져올 수 없습니다.');
+      console.error("ETF 히스토리 조회 실패:", error);
+      throw new Error("ETF 가격 데이터를 가져올 수 없습니다.");
+    }
+  }
+
+  async getTrends(days: number): Promise<ETFPriceDTO[]> {
+    try {
+      const result = await this.prisma.etf_prices.findMany({
+        where: {
+          symbol: {
+            in: ETFService.DEFAULT_TICKERS,
+          },
+        },
+        orderBy: [{ date: "asc" }],
+        take: days,
+      });
+
+      return result.map((item) => ({
+        id: Number(item.id),
+        symbol: item.symbol,
+        date: item.date,
+        open: item.open?.toNumber() ?? 0,
+        high: item.high?.toNumber() ?? 0,
+        low: item.low?.toNumber() ?? 0,
+        close: item.close?.toNumber() ?? 0,
+        adj_close: item.adj_close?.toNumber() ?? item.close?.toNumber() ?? 0,
+        volume: item.volume?.toNumber() ?? 0,
+        dividend: item.dividend?.toNumber() ?? 0,
+      }));
+    } catch (error) {
+      console.error("getTrends error", error);
+
+      return [];
     }
   }
 }

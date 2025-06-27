@@ -1,21 +1,41 @@
 import apiInstance from "./apiInstance";
-import { ETFInfoDTO } from "@/app/interface/dto/etf";
+import { ETFInfoDTO, ETFPriceDTO } from "@/app/interface/dto/etf";
 import { ApiResponse } from "@/app/interface/dto/api";
 import { AxiosResponse } from "axios";
 
-export const getETFList = async (): Promise<AxiosResponse<ApiResponse<ETFInfoDTO[]>>> => {
-    const response = await apiInstance.get("/etf");
-    console.log('getetflist',response);
-    
-    return response.data;
-}
+export const getETFList = async (): Promise<ApiResponse<ETFInfoDTO[]>> => {
+  const response = await apiInstance.get<ApiResponse<ETFInfoDTO[]>>("/etf");
+  console.log("getetflist", response);
 
-export const getSearchEtf = async(ticker:string) : Promise<AxiosResponse<ApiResponse<ETFInfoDTO[]>>> =>{
-const response = await apiInstance.get("/etf/search",{
-    params:{
-        ticker
+  return response.data;
+};
+
+export const getSearchEtf = async (
+  ticker: string
+): Promise<ApiResponse<ETFInfoDTO[]>> => {
+  const response = await apiInstance.get<ApiResponse<ETFInfoDTO[]>>(
+    "/etf/search",
+    {
+      params: {
+        ticker,
+      },
     }
-});
+  );
 
-return response;
-}
+  return response.data;
+};
+
+export const getTrends = async (
+  days: number
+): Promise<ApiResponse<ETFPriceDTO[]>> => {
+  const response = await apiInstance.get<ApiResponse<ETFPriceDTO[]>>(
+    "/etf/trends",
+    {
+      params: {
+        days,
+      },
+    }
+  );
+
+  return response.data;
+};

@@ -10,7 +10,7 @@ import {
 import { RebalanceFrequency } from "../interface/enum/rebanalceFrequency";
 import { getCommonDates, getRebalanceDates } from "../lib/calculator";
 import useGetBacktestingData from "../lib/hooks/query/useGetBacktestingData";
-import { usePortfolioValidation } from "../lib/hooks/usePortfolioValidationt";
+import { usePortfolioValidation } from "../lib/hooks/usePortfolioValidation";
 import { usePortfolioStore } from "../lib/store/portfolioStore";
 import PortfolioBuilder from "./widget/portfolioBuilder";
 import PortfolioMetrics from "./widget/portfolioMetrics";

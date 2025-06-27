@@ -59,7 +59,7 @@ export interface PortfolioSimulationData {
 export interface PortfolioDTO {
   id: string;
   name: string;
-  initAmount: number;
+  initialAmount: number;
   created: Date;
   updated: Date;
   description?: string;
@@ -68,9 +68,23 @@ export interface PortfolioDTO {
   setting: PortfolioSettingDTO;
 }
 
+export const createPortfolioDTO = (portfolioData: PortfolioDTO) => {
+  return {
+    id: portfolioData.id,
+    name: portfolioData.name,
+    initialAmount: portfolioData.initialAmount,
+    created: portfolioData.created,
+    updated: portfolioData.updated,
+    description: portfolioData.description,
+    user_id: portfolioData.user_id,
+    assets: portfolioData.assets,
+    setting: portfolioData.setting,
+  };
+};
+
 export interface PortfolioAssetDTO {
   id: string;
-  portfolioId: string;
+  portfolio_id: string;
   symbol: string;
   weight: number;
   created: Date;
@@ -78,15 +92,43 @@ export interface PortfolioAssetDTO {
   shares: number;
 }
 
+export const createPortfolioAssetDTO = (
+  portfolioAssetData: PortfolioAssetDTO
+) => {
+  return {
+    id: portfolioAssetData.id,
+    portfolio_id: portfolioAssetData.portfolio_id,
+    symbol: portfolioAssetData.symbol,
+    weight: portfolioAssetData.weight,
+    created: portfolioAssetData.created,
+    updated: portfolioAssetData.updated,
+    shares: portfolioAssetData.shares,
+  };
+};
+
 export interface PortfolioSettingDTO {
   id: string;
-  portfolioId: string;
+  portfolio_id: string;
   startDate: Date;
   endDate: Date;
   rebalanceFrequency: RebalanceFrequency;
   created: Date;
   updated: Date;
 }
+
+export const createPortfolioSettingDTO = (
+  portfolioSettingData: PortfolioSettingDTO
+) => {
+  return {
+    id: portfolioSettingData.id,
+    portfolio_id: portfolioSettingData.portfolio_id,
+    startDate: portfolioSettingData.startDate,
+    endDate: portfolioSettingData.endDate,
+    rebalanceFrequency: portfolioSettingData.rebalanceFrequency,
+    created: portfolioSettingData.created,
+    updated: portfolioSettingData.updated,
+  };
+};
 
 export interface PortfolioSettingCreateDTO {
   startDate: Date;
