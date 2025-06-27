@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { format, isSameDay } from "date-fns";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   createPortfolioCreateDTO,
   PortfolioSimulationData,
@@ -17,10 +17,19 @@ import PortfolioMetrics from "./widget/portfolioMetrics";
 import PortfolioSetting from "./widget/portfolioSetting";
 import CustomSpinner from "@/components/spinner/customSpinner";
 import { useRef } from "react";
+import { twMerge } from "tailwind-merge";
+import { postSavePortfolio } from "@/api/portfolio";
+import { showToast } from "@/components/toast/customToast";
 
 function BacktestingPage() {
-  const { assets, setting, initialAmount, name } = usePortfolioStore();
-  const metricsRef = useRef<HTMLDivElement>(null);
+  const {
+    assets,
+    setting,
+    initialAmount,
+    name,
+    description,
+    rebalanceFrequency,
+  } = usePortfolioStore();
 
   const {
     data: backtestingData,
@@ -203,7 +212,7 @@ function BacktestingPage() {
     });
 
     return result;
-  }, [ backtestingData]);
+  }, [backtestingData]);
 
   const chartSeries = useMemo(() => {
     if (portfolioSimulationData.length > 0 && !backtestingData)
@@ -230,48 +239,34 @@ function BacktestingPage() {
     ];
   }, [portfolioSimulationData, backtestingData]);
 
-  const scrollToMetrics = useCallback(() => {
-    if (metricsRef.current) {
-      // 메트릭스 컴포넌트로 스크롤
-      metricsRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    } else {
-      // 대안: 페이지 하단으로 스크롤
-      requestAnimationFrame(() => {
-        const scrollHeight = Math.max(
-          document.body.scrollHeight,
-          document.documentElement.scrollHeight
-        );
-        window.scrollTo({
-          top: scrollHeight,
-          behavior: "smooth",
-        });
-      });
-    }
-  }, []);
-  
   const handleBacktesting = useCallback(() => {
     if (!isPortfolioValid) {
-      alert("포트폴리오가 유효하지 않습니다");
+      showToast.error("포트폴리오가 유효하지 않습니다");
       return;
     }
 
     executeBacktesting();
   }, [executeBacktesting, isPortfolioValid]);
 
-  useEffect(() => {
-    if (portfolioSimulationData.length > 0 && !backtestingLoading) {
-      const timeoutId = setTimeout(() => {
-        requestAnimationFrame(() => {
-          scrollToMetrics();
-        });
-      }, 100); // 3초 → 100ms로 단축
-  
-      return () => clearTimeout(timeoutId);
+  const handleSave = async () => {
+    if (!name || !setting.startDate || !setting.endDate) {
+      showToast.error("포트폴리오 이름, 시작일, 종료일을 입력해주세요");
+      return;
     }
-  }, [portfolioSimulationData, backtestingLoading, scrollToMetrics]);
+
+    const res = await postSavePortfolio({
+      name,
+      initialAmount,
+      description,
+      rebalanceFrequency,
+      assets,
+      setting,
+    });
+
+    console.log("save portfolio", res);
+
+    showToast.success("포트폴리오가 저장되었습니다");
+  };
 
   return (
     <section className="flex flex-col w-full 2xl:w-4/5 gap-10 p-6 ">
@@ -307,21 +302,21 @@ function BacktestingPage() {
           </div>
         </div>
 
-        {backtestingLoading ? (
-          <CustomSpinner/>
-        ) : backtestingError ? (
-          <p className="text-destructive text-sm">
-            백테스트 중 오류가 발생했습니다
-          </p>
-        ) : (
-          portfolioSimulationData.length > 0 && (
-            <div ref={metricsRef}>
-            <PortfolioMetrics
-              portfolioSimulationData={portfolioSimulationData}
-              chartSeries={chartSeries}
-            /></div>
-          )
-        )}
+        <PortfolioMetrics
+          portfolioSimulationData={portfolioSimulationData}
+          chartSeries={chartSeries}
+          backtestingLoading={backtestingLoading}
+          backtestingError={backtestingError}
+        />
+        <div className="flex justify-center items-center">
+          <Button
+            onClick={handleSave}
+            className="w-full"
+            disabled={portfolioSimulationData.length === 0}
+          >
+            저장하기
+          </Button>
+        </div>
       </div>
     </section>
   );

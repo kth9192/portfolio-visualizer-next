@@ -143,17 +143,15 @@ const RangeCalendar: React.FC<RangeCalendarProps> = ({
             classNames={{
               today: "text-red-800 font-medium",
               caption: "flex justify-center pt-1 relative items-center",
-              outside:"opacity-20",
+              outside: "opacity-20",
               range_start:
                 "bg-blue-700 text-white rounded-l-md border-blue-700",
               range_end: "bg-blue-700 text-white rounded-r-md border-blue-700",
-              range_middle: "bg-blue-200 font-semibold",
-              month_caption:
-                `${defaultClassNames.month_caption} flex justify-center pt-1 relative items-center font-bold `,
+              range_middle: "bg-blue-200 font-semibold text-gray-500",
+              month_caption: `${defaultClassNames.month_caption} flex justify-center pt-1 relative items-center font-bold `,
               selected: `font-bold`,
               dropdowns: "flex flex-row-reverse gap-2 z-50",
               nav: `${defaultClassNames.nav} justify-between w-full  z-10`,
-              
             }}
             components={{
               Dropdown: CustomSelectDropdown,

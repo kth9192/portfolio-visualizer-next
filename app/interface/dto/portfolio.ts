@@ -2,8 +2,6 @@ import { RebalanceFrequency } from "../enum/rebanalceFrequency";
 import { BacktestingSetting } from "./backtesting";
 import { ETFInfoDTO } from "./etf";
 
-
-
 export interface Portfolio {
   name: string;
   description?: string;
@@ -58,7 +56,6 @@ export interface PortfolioSimulationData {
   cumulativeMultiplier: number;
 }
 
-
 export interface PortfolioDTO {
   id: string;
   name: string;
@@ -92,9 +89,9 @@ export interface PortfolioSettingDTO {
 }
 
 export interface PortfolioSettingCreateDTO {
-    startDate?: Date;
-    endDate?: Date;
-    rebalanceFrequency?: RebalanceFrequency;
+  startDate: Date;
+  endDate: Date;
+  rebalanceFrequency: RebalanceFrequency;
 }
 
 export interface PortfolioCreateDTO {
@@ -104,7 +101,7 @@ export interface PortfolioCreateDTO {
   user_id?: string;
   rebalanceFrequency: RebalanceFrequency;
   assets: PortfolioAssetReqDTO[];
-  setting:PortfolioSettingCreateDTO;
+  setting: PortfolioSettingCreateDTO;
 }
 
 export const createPortfolioCreateDTO = (portfolioData: PortfolioCreateDTO) => {
@@ -115,7 +112,7 @@ export const createPortfolioCreateDTO = (portfolioData: PortfolioCreateDTO) => {
     user_id: portfolioData.user_id,
     rebalanceFrequency: portfolioData.rebalanceFrequency,
     assets: portfolioData.assets,
-    setting:portfolioData.setting,
+    setting: portfolioData.setting,
   };
 };
 

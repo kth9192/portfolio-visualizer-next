@@ -3,8 +3,9 @@ import {
   createPortfolioCreateDTO,
   type PortfolioCreateDTO,
   type PortfolioDTO,
-} from '@/app/interface/dto/portfolio';
+} from "@/app/interface/dto/portfolio";
 import { PrismaClient } from "@prisma/client";
+import { format } from "date-fns";
 
 export class PortfolioService {
   private prisma: PrismaClient;
@@ -53,8 +54,8 @@ export class PortfolioService {
           data: {
             portfolio_id: portfolio.id,
             rebalance_frequency: portfolioData.rebalanceFrequency,
-            start_date: portfolioData.startDate,
-            end_date: portfolioData.endDate,
+            start_date: portfolioData.setting.startDate!,
+            end_date: portfolioData.setting.endDate!,
           },
         });
 
@@ -85,8 +86,7 @@ export class PortfolioService {
         initialAmount: portfolioData.initialAmount,
         description: portfolioData.description,
         rebalanceFrequency: portfolioData.rebalanceFrequency,
-        startDate: portfolioData.startDate,
-        endDate: portfolioData.endDate,
+        setting: portfolioData.setting,
         assets: portfolioData.assets,
       });
     } catch (error) {

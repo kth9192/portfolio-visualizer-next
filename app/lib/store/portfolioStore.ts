@@ -9,20 +9,20 @@ import { RebalanceFrequency } from "@/app/interface/enum/rebanalceFrequency";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-interface PortfolioStoreState extends PortfolioCreateDTO {
+export interface PortfolioStoreState extends PortfolioCreateDTO {
   setting: PortfolioSettingCreateDTO;
 }
 
-interface PortfolioStoreActions {
+export interface PortfolioStoreActions {
   setName: (name: string) => void;
   setInitAmount: (amount: number) => void;
   setRebalanceFrequency: (frequency: RebalanceFrequency) => void;
   setAssets: (assets: PortfolioAssetReqDTO[]) => void;
   setUser_id: (id: string) => void;
   setDescription: (description: string) => void;
-  
+
   addAsset: (asset: PortfolioAssetReqDTO) => void;
-  updateSetting : (setting: PortfolioSettingCreateDTO) => void;
+  updateSetting: (setting: PortfolioSettingCreateDTO) => void;
 }
 
 const initState = {
@@ -30,14 +30,14 @@ const initState = {
   initialAmount: 10000,
   rebalanceFrequency: RebalanceFrequency.MONTHLY,
   assets: [],
-  setting : {
+  setting: {
     startDate: null,
     endDate: null,
     rebalanceFrequency: RebalanceFrequency.MONTHLY,
   },
   user_id: "",
   description: "",
-}
+};
 
 export const usePortfolioStore = create<
   PortfolioStoreState & PortfolioStoreActions
@@ -55,6 +55,7 @@ export const usePortfolioStore = create<
     setDescription: (description: string) => set({ description }),
     addAsset: (asset: PortfolioAssetReqDTO) =>
       set({ assets: get().assets.concat(asset) }),
-    updateSetting : (setting: PortfolioSettingCreateDTO) => set({ setting: {...get().setting, ...setting} }),
+    updateSetting: (setting: PortfolioSettingCreateDTO) =>
+      set({ setting: { ...get().setting, ...setting } }),
   }))
 );

@@ -2,7 +2,11 @@
 
 import { ETFInfoDTO } from "@/app/interface/dto/etf";
 import useGetEtfInfos from "@/app/lib/hooks/query/useGetEtfInfos";
-import { usePortfolioStore } from "@/app/lib/store/portfolioStore";
+import {
+  PortfolioStoreActions,
+  PortfolioStoreState,
+  usePortfolioStore,
+} from "@/app/lib/store/portfolioStore";
 import PieChart from "@/components/chart/pieChart";
 import CustomSelect from "@/components/select/customSelect";
 import { Button } from "@/components/ui/button";
@@ -11,25 +15,30 @@ import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import React, { useEffect, useMemo, useState } from "react";
 import { twMerge } from "tailwind-merge";
+import { useShallow } from "zustand/react/shallow";
 
 interface PortfolioBuilderProps {}
 
 function PortfolioBuilder({}: PortfolioBuilderProps) {
   const {
     name,
-    initialAmount,
-    rebalanceFrequency,
     assets,
-    user_id,
-    description,
     setName,
-    setInitAmount,
-    setRebalanceFrequency,
     setAssets,
-    setUser_id,
-    setDescription,
     addAsset,
-  } = usePortfolioStore();
+    initialAmount,
+    setInitAmount,
+  } = usePortfolioStore(
+    useShallow((state: PortfolioStoreState & PortfolioStoreActions) => ({
+      name: state.name,
+      assets: state.assets,
+      setName: state.setName,
+      setAssets: state.setAssets,
+      addAsset: state.addAsset,
+      initialAmount: state.initialAmount,
+      setInitAmount: state.setInitAmount,
+    }))
+  );
 
   const {
     data: etfList,
@@ -148,7 +157,22 @@ function PortfolioBuilder({}: PortfolioBuilderProps) {
               <h4 className="text-sm font-medium text-gray-700">
                 선택된 ETF ({assets.length}개)
               </h4>
+            </div>
+            <div className="flex flex-row  items-center gap-2 text-sm text-gray-700">
+              <div className="space-x-2">
+                <span>총 비중:</span>
+                <span
+                  className={twMerge(
+                    "font-semibold",
 
+                    Math.abs(totalWeight * 100 - 100) < 0.0001
+                      ? "text-green-500"
+                      : "text-red-500"
+                  )}
+                >
+                  {totalWeight * 100}%
+                </span>
+              </div>
               {assets.length > 0 && (
                 <div className="flex gap-2">
                   <Button
@@ -160,20 +184,6 @@ function PortfolioBuilder({}: PortfolioBuilderProps) {
                   </Button>
                 </div>
               )}
-            </div>
-            <div className="text-sm text-gray-700">
-              <span>총 비중:</span>
-              <span
-                className={twMerge(
-                  "font-semibold",
-
-                  Math.abs(totalWeight * 100 - 100) < 0.0001
-                    ? "text-green-500"
-                    : "text-red-500"
-                )}
-              >
-                {totalWeight * 100}%
-              </span>
             </div>
           </div>
 
