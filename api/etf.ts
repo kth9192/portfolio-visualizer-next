@@ -1,5 +1,5 @@
 import apiInstance from "./apiInstance";
-import { ETFInfoDTO, ETFPriceDTO } from "@/app/interface/dto/etf";
+import { ETFInfoDTO, ETFPriceDTO, ETFTrendDTO } from "@/app/interface/dto/etf";
 import { ApiResponse } from "@/app/interface/dto/api";
 import { AxiosResponse } from "axios";
 
@@ -25,16 +25,9 @@ export const getSearchEtf = async (
   return response.data;
 };
 
-export const getTrends = async (
-  days: number
-): Promise<ApiResponse<ETFPriceDTO[]>> => {
+export const getTrends = async (): Promise<ApiResponse<ETFPriceDTO[]>> => {
   const response = await apiInstance.get<ApiResponse<ETFPriceDTO[]>>(
-    "/etf/trends",
-    {
-      params: {
-        days,
-      },
-    }
+    "/etf/trends"
   );
 
   return response.data;

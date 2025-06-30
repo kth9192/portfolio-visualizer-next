@@ -1,19 +1,45 @@
 "use client";
 
-import Link from "next/link";
-import useGetPortfolios from "./lib/hooks/query/useGetPortfolios";
-import { Button } from "@/components/ui/button";
-import { useEffect } from "react";
 import CustomSpinner from "@/components/spinner/customSpinner";
+import { Button } from "@/components/ui/button";
+import { differenceInDays } from "date-fns";
+import Link from "next/link";
+import { useMemo } from "react";
+import useGetPortfolios from "./lib/hooks/query/useGetPortfolios";
+import useGetTrends from "./lib/hooks/query/useGetTrends";
+import { DEFAULT_TICKERS } from "./lib/resource";
+import { twMerge } from "tailwind-merge";
 
 export default function Home() {
   const { data, isLoading, error } = useGetPortfolios({
     options: {},
   });
 
-  useEffect(() => {
-    console.log(data);
-  }, [data]);
+  const {
+    data: trends,
+    isLoading: trendsLoading,
+    error: trendsError,
+  } = useGetTrends({});
+
+  const dataSource = useMemo(() => {
+    return DEFAULT_TICKERS.map((ticker) => {
+      return {
+        symbol: ticker,
+        prices:
+          trends
+            ?.filter((item) => item.symbol === ticker)
+            .sort((pre, post) => differenceInDays(post.date, pre.date)) ?? [],
+      };
+    });
+  }, [trends]);
+
+  const getChangeColor = (changePercent: number) => {
+    return changePercent > 0
+      ? "text-green-600"
+      : changePercent < 0
+      ? "text-red-600"
+      : "text-gray-600";
+  };
 
   return (
     <section className="flex flex-col w-full 2xl:w-4/5 gap-10 p-6">
@@ -63,7 +89,7 @@ export default function Home() {
                   <span className="text-sm">
                     {portfolio.assets?.length}개의 자산
                   </span>
-                  <ul className="flex gap-2">
+                  <ul className="flex gap-2 text-gray-400 text-sm">
                     {portfolio.assets?.map((asset) => (
                       <li key={asset.id}>{asset.symbol}</li>
                     ))}
@@ -82,6 +108,56 @@ export default function Home() {
           <Button className="w-full mx-auto">포트폴리오 추가하기</Button>
         </div>
       )}
+
+      <div className="flex flex-col w-full gap-6 p-6">
+        <h2 className="text-lg font-bold text-gray-900">오늘의 시장</h2>
+
+        {trendsLoading ? (
+          <div className="flex flex-col items-center justify-center w-full gap-4 bg-white rounded-lg shadow-sm border border-gray-200 p-12">
+            <CustomSpinner />
+          </div>
+        ) : trendsError ? (
+          <p>{trendsError.message}</p>
+        ) : (
+          <ol className="flex items-center gap-4">
+            {dataSource?.map((trend) => (
+              <li
+                key={trend.symbol}
+                className={twMerge(
+                  "flex  items-center gap-4 bg-white rounded-lg shadow p-6 border border-gray-200",
+                )}
+              >
+                <span className="font-medium ">{trend.symbol}</span>
+                {trend?.prices[1].adj_close - trend?.prices[0].adj_close > 0 ? (
+                  <div
+                    className={twMerge(
+                      "flex items-center gap-2",
+                      getChangeColor(
+                        trend?.prices[1].adj_close - trend?.prices[0].adj_close
+                      )
+                    )}
+                  >
+                    <span>
+                     📈 
+                      {(
+                        trend?.prices[1].adj_close - trend?.prices[0].adj_close
+                      ).toFixed(2)}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-red-500">
+                    <span>
+                     📉 {(
+                        trend?.prices[1].adj_close - trend?.prices[0].adj_close
+                      ).toFixed(2)}
+                    </span>
+                  </div>
+                )}
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
     </section>
   );
 }

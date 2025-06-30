@@ -1,12 +1,11 @@
 import { getTrends } from "@/api/etf";
 import { ApiResponse } from "@/app/interface/dto/api";
-import { ETFPriceDTO } from "@/app/interface/dto/etf";
+import { ETFPriceDTO, ETFTrendDTO } from "@/app/interface/dto/etf";
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
 import { queryKeys } from "./keys";
 
 interface useGetTrendsProps {
-  days: number;
   options?: Omit<
     UseQueryOptions<
       ApiResponse<ETFPriceDTO[]>,
@@ -18,10 +17,10 @@ interface useGetTrendsProps {
   >;
 }
 
-function useGetTrends({ options, days }: useGetTrendsProps) {
+function useGetTrends({ options }: useGetTrendsProps) {
   return useQuery({
     queryKey: queryKeys.trends,
-    queryFn: () => getTrends(days),
+    queryFn: getTrends,
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
     retry: 3,

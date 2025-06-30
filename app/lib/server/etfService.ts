@@ -1,5 +1,6 @@
 import {
   createETFInfoDTO,
+  ETFTrendDTO,
   type ETFInfoDTO,
   type ETFPriceDTO,
   type ETFTimeSeriesDTO,
@@ -8,7 +9,7 @@ import { differenceInYears } from "date-fns";
 import { PrismaClient, type etf_infos } from "@prisma/client";
 
 export class ETFService {
-  private static DEFAULT_TICKERS = ["SPY", "QQQ", "VTI", "BND", "TLT"];
+  private static DEFAULT_TICKERS = ["VOO", "QQQ", "VTI", "BND", "VXUS"];
 
   private prisma: PrismaClient;
 
@@ -94,30 +95,37 @@ export class ETFService {
     }
   }
 
-  async getTrends(days: number): Promise<ETFPriceDTO[]> {
+  async getTrends(): Promise<ETFPriceDTO[]> {
     try {
-      const result = await this.prisma.etf_prices.findMany({
-        where: {
-          symbol: {
-            in: ETFService.DEFAULT_TICKERS,
-          },
-        },
-        orderBy: [{ date: "asc" }],
-        take: days,
-      });
+      const result = await Promise.all(
+        ETFService.DEFAULT_TICKERS.map(async (ticker) => {
+          const prices = await this.prisma.etf_prices.findMany({
+            where: {
+              symbol: ticker,
+            },
+            orderBy: [{ date: "desc" }],
+            take: 2,
+          });
 
-      return result.map((item) => ({
+          return prices;
+        })
+      );
+
+      const test = result.flat();
+
+     return test.map((item) => ({
+       
         id: Number(item.id),
         symbol: item.symbol,
         date: item.date,
-        open: item.open?.toNumber() ?? 0,
-        high: item.high?.toNumber() ?? 0,
-        low: item.low?.toNumber() ?? 0,
-        close: item.close?.toNumber() ?? 0,
-        adj_close: item.adj_close?.toNumber() ?? item.close?.toNumber() ?? 0,
-        volume: item.volume?.toNumber() ?? 0,
-        dividend: item.dividend?.toNumber() ?? 0,
-      }));
+        open: Number(item.open || 0),
+        high: Number(item.high || 0),
+        low: Number(item.low || 0),
+        close: Number(item.close),
+        adj_close: Number(item.adj_close || item.close),
+        volume: Number(item.volume || 0),
+        dividend: Number(item.dividend || 0),
+     }));
     } catch (error) {
       console.error("getTrends error", error);
 
