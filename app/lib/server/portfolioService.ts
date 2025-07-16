@@ -83,7 +83,6 @@ export class PortfolioService {
           },
         });
 
-        console.log("portfolio", portfolio);
 
         const setting = await tx.portfolio_settings.create({
           data: {
@@ -94,7 +93,6 @@ export class PortfolioService {
           },
         });
 
-        console.log("setting", setting);
 
         const assets = await tx.portfolio_assets.createMany({
           data: portfolioData.assets.map((asset) => ({
@@ -105,7 +103,6 @@ export class PortfolioService {
           })),
         });
 
-        console.log("assets", assets);
 
         return {
           portfolio,
@@ -114,7 +111,6 @@ export class PortfolioService {
         };
       });
 
-      console.log("database save", result);
 
       return createPortfolioCreateDTO({
         name: portfolioData.name,

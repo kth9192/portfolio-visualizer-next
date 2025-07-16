@@ -79,8 +79,6 @@ function BacktestingPage() {
     //adjClose 기반 가격 맵 - 배당금 효과 이미 반영됨
     const priceMap = new Map<string, number[]>();
 
-    console.log("commonDatesSet", commonDatesSet);
-
     priceInfos.forEach((priceInfo) => {
       priceMap.set(
         priceInfo.ticker,
@@ -107,7 +105,7 @@ function BacktestingPage() {
       }
 
       const targetAmount = asset.weight * initialAmount;
-      const shares = targetAmount / initialPrice; //완전 분할매수
+      const shares = Math.floor(targetAmount / initialPrice); //완전 분할매수
 
       currentShares.set(asset.symbol, shares);
     });
@@ -152,7 +150,7 @@ function BacktestingPage() {
         assets.forEach((asset) => {
           const currentPrice = priceMap.get(asset.symbol)?.[dayIdx] ?? 0;
           const targetValue = totalPortfolioValue * asset.weight;
-          const newShares = targetValue / currentPrice; // 분할매수
+          const newShares = Math.floor(targetValue / currentPrice); // 분할매수
 
           currentShares.set(asset.symbol, newShares);
           totalUsedForRebalancing += newShares * currentPrice;
@@ -200,6 +198,13 @@ function BacktestingPage() {
         cumulativeMultiplier = currentPortfolioValue / initialAmount;
       }
 
+      // setAssets(
+      //   assets.map((asset) => ({
+      //     ...asset,
+      //     shares: currentShares.get(asset.symbol) ?? 0,
+      //   }))
+      // );
+
       result.push({
         date,
         portfolioValue: currentPortfolioValue,
@@ -228,7 +233,7 @@ function BacktestingPage() {
         },
       ];
 
-    return [
+    const result = [
       {
         name: "Portfolio",
         data: portfolioSimulationData.map((item) => ({
@@ -237,6 +242,7 @@ function BacktestingPage() {
         })),
       },
     ];
+    return result;
   }, [portfolioSimulationData, backtestingData]);
 
   const handleBacktesting = useCallback(() => {
@@ -262,8 +268,6 @@ function BacktestingPage() {
       assets,
       setting,
     });
-
-    console.log("save portfolio", res);
 
     showToast.success("포트폴리오가 저장되었습니다");
   };
@@ -297,7 +301,7 @@ function BacktestingPage() {
               className="w-full"
               disabled={!isPortfolioValid}
             >
-              백테스트 시작
+              백테스트 실행
             </Button>
           </div>
         </div>

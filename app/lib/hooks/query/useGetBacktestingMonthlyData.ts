@@ -1,28 +1,28 @@
 import { ApiResponse } from "@/app/interface/dto/api";
-import { BacktestingRes } from "@/app/interface/dto/backtesting";
+import { ETFPriceMonthlyDTO } from "@/app/interface/dto/etf";
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { queryKeys } from "./keys";
-import { getBacktestingData } from "@/api/backtesting";
+import { getBacktestDataMonthly } from "@/api/backtesting";
 import { BacktestingReq } from "@/app/interface/dto/backtesting";
 
-interface useGetBacktestingDataProps {
+interface useGetBacktestingMonthlyDataProps {
   req: BacktestingReq;
   options?: Omit<
     UseQueryOptions<
-      ApiResponse<BacktestingRes>,
+      ApiResponse<ETFPriceMonthlyDTO[]>,
       Error,
-      BacktestingRes,
+      ETFPriceMonthlyDTO[],
       readonly unknown[]
     >,
     "queryKey" | "queryFn"
   >;
 }
 
-function useGetBacktestingData({ req, options }: useGetBacktestingDataProps) {
+function useGetBacktestingMonthlyData({ req, options }: useGetBacktestingMonthlyDataProps) {
   return useQuery({
-    queryKey: [queryKeys.backtesting , req.ticker, req.startDate, req.endDate, req.rebalanceFrequency],
+    queryKey: [queryKeys.backtestingMonthly , req.ticker, req.startDate, req.endDate, req.rebalanceFrequency],
     queryFn: () =>
-      getBacktestingData({
+      getBacktestDataMonthly({
         ticker: req.ticker,
         startDate: req.startDate,
         endDate: req.endDate,
@@ -37,4 +37,4 @@ function useGetBacktestingData({ req, options }: useGetBacktestingDataProps) {
   });
 }
 
-export default useGetBacktestingData;
+export default useGetBacktestingMonthlyData;

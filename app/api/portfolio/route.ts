@@ -29,11 +29,8 @@ export async function POST(req: NextRequest) {
 
     const res = await portfolioService.savePortfolio(validatedData);
 
-    console.log("post save", res);
 
-    return NextResponse.json(createApiResponse(res, true, "success", 200), {
-      status: 200,
-    });
+    return NextResponse.json(createApiResponse(res, true, "success", 201), { status: 201 });
   } catch (error) {
     console.error("post save error", error);
     return NextResponse.json(

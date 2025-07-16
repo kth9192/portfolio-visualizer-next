@@ -8,7 +8,6 @@ import {
 
 export const getPortfolios = async (): Promise<ApiResponse<PortfolioDTO[]>> => {
   const res = await apiInstance.get<ApiResponse<PortfolioDTO[]>>("/portfolio");
-  console.log("getportfolios", res.data);
 
   return res.data;
 };

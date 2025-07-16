@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createETFService } from "@/app/lib/server/database";
 import { parse } from "date-fns";
-import { createBacktestingRes } from "@/app/interface/dto/backtesting";
 import { createApiResponse } from "@/app/interface/dto/api";
 
 export const GET = async (request: NextRequest) => {
@@ -21,23 +20,14 @@ export const GET = async (request: NextRequest) => {
     }
 
     const etfService = createETFService();
-    const etfHistories = await etfService.getETFHistory(
+    const etfHistories = await etfService.getETFHistoryMonth(
       searchParams.get("ticker")!.split(","),
       parse(searchParams.get("start_date")!, "yyyy-MM-dd", new Date()),
       parse(searchParams.get("end_date")!, "yyyy-MM-dd", new Date())
     );
 
     const res = createApiResponse(
-      createBacktestingRes({
-        priceInfos: etfHistories.map((item) => ({
-          ...item,
-          prices: item.prices.map((price) => ({
-            ...price,
-            date: price.date,
-          })),
-        })),
-        metrics: {},
-      }),
+      etfHistories,
       true,
       "success",
       200

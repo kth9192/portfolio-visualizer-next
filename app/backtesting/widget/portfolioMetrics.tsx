@@ -10,6 +10,8 @@ import {
   calculateVariance,
   calculatMaximumDrawdown,
 } from "@/app/lib/calculator";
+import useGetBenchmarkInfos from "@/app/lib/hooks/query/useGetBenchmarks";
+import { twColor } from "@/app/lib/resource";
 import { usePortfolioStore } from "@/app/lib/store/portfolioStore";
 import { formatWithCommas } from "@/app/lib/utils";
 import LineChart from "@/components/chart/lineChart";
@@ -39,6 +41,15 @@ function PortfolioMetrics({
   const { setting, initialAmount } = usePortfolioStore();
   const metricsRef = useRef<HTMLDivElement>(null);
 
+  const {
+    data: benchmarks,
+    isLoading: benchmarkLoading,
+    error: benchmarkError,
+  } = useGetBenchmarkInfos({
+    startDate: setting.startDate!,
+    endDate: setting.endDate!,
+  });
+
   const scrollToMetrics = useCallback(() => {
     metricsRef.current?.scrollIntoView({
       behavior: "smooth",
@@ -46,17 +57,29 @@ function PortfolioMetrics({
     });
   }, []);
 
-  const tw = (color: string) => {
-    const colors = {
-      "blue-600": "#2563eb",
-      "green-500": "#10b981",
-      "red-500": "#ef4444",
-      "purple-500": "#8b5cf6",
-      "yellow-500": "#f59e0b",
-      "gray-500": "#6b7280",
-    };
-    return colors[color as keyof typeof colors] || "#000000";
-  };
+  const reworkChartSeries = useMemo<
+    ApexAxisChartSeries | ApexNonAxisChartSeries | undefined
+  >(() => {
+    const symbols = Array.from(
+      new Set(benchmarks?.map((benchmark) => benchmark.symbol))
+    );
+
+    const source = symbols?.map((symbol) => {
+      return {
+        name: symbol,
+        data:
+          benchmarks
+            ?.filter((benchmark) => benchmark.symbol === symbol)
+            .sort((pre, post) => pre.year_month.localeCompare(post.year_month))
+            .map((data) => ({
+              x: new Date(data.year_month).getTime(),
+              y: data.cumulative_value - 100,
+            })) ?? [],
+      };
+    });
+
+    return chartSeries.concat(source);
+  }, [chartSeries, benchmarks]);
 
   // 성과지표 계산
   let metrics = useMemo(() => {
@@ -160,7 +183,7 @@ function PortfolioMetrics({
                     show: true,
                   },
                 },
-                colors: [tw("red-500"), tw("blue-600")],
+                colors: [twColor("red-500"), twColor("blue-600")],
                 dataLabels: {
                   enabled: false,
                 },
@@ -225,7 +248,7 @@ function PortfolioMetrics({
                 },
               } as ApexOptions
             }
-            series={chartSeries}
+            series={reworkChartSeries}
             containerClass="w-full h-80"
           />
         )}

@@ -246,7 +246,7 @@ export const getCommonDates = (pricesInfo: ETFTimeSeriesDTO[]): string[] => {
     .map(([key]) => key)
     .sort((pre, post) => new Date(pre).getTime() - new Date(post).getTime());
 
-  console.log("dateResult", dateResult);
 
   return dateResult;
 };
+

@@ -1,4 +1,5 @@
 import { RebalanceFrequency } from "../enum/rebanalceFrequency";
+import { RiskType } from "../enum/riskType";
 import { BacktestingSetting } from "./backtesting";
 import { ETFInfoDTO } from "./etf";
 
@@ -39,7 +40,7 @@ export const createETFAssetDTO = (
     exchange: data.exchange,
     currency: data.currency,
     market: data.market,
-    sector: data.sector,
+    sectors: data.sectors,
     industry: data.industry,
     weight: weight,
     shares: shares,
@@ -169,5 +170,27 @@ export const createPortfolioAssetReqDTO = (data: PortfolioAssetReqDTO) => {
     symbol: data.symbol,
     weight: data.weight,
     shares: data.shares,
+  };
+};
+
+export interface PortfolioPreset {
+  name: string;
+  description: string;
+  riskType: RiskType;
+  rebalanceFrequency: RebalanceFrequency;
+  assets: PortfolioAssetReqDTO[];
+}
+
+export interface PortfolioAssetPackage {
+  name:string;
+  assets: PortfolioAssetReqDTO[];
+  rebalanceFrequency: RebalanceFrequency;
+}
+
+export const createPortfolioAssetPackage = (data: PortfolioAssetPackage) => {
+  return {
+    name: data.name,
+    assets: data.assets,
+    rebalanceFrequency: data.rebalanceFrequency,
   };
 };

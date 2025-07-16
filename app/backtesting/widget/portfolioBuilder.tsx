@@ -22,8 +22,10 @@ interface PortfolioBuilderProps {}
 function PortfolioBuilder({}: PortfolioBuilderProps) {
   const {
     name,
+    description,
     assets,
     setName,
+    setDescription,
     setAssets,
     addAsset,
     initialAmount,
@@ -32,11 +34,13 @@ function PortfolioBuilder({}: PortfolioBuilderProps) {
     useShallow((state: PortfolioStoreState & PortfolioStoreActions) => ({
       name: state.name,
       assets: state.assets,
+      description: state.description,
       setName: state.setName,
       setAssets: state.setAssets,
       addAsset: state.addAsset,
       initialAmount: state.initialAmount,
       setInitAmount: state.setInitAmount,
+      setDescription: state.setDescription,
     }))
   );
 
@@ -108,6 +112,23 @@ function PortfolioBuilder({}: PortfolioBuilderProps) {
               className="border border-gray-300 px-2 py-1 rounded w-1/2"
               value={name}
               onChange={(e) => setName(e.target.value)}
+            />
+          </li>
+          <li className="info-row">
+            <label
+              htmlFor="portfolioName"
+              className="text-gray-700 text-sm font-medium"
+            >
+              설명
+            </label>
+            <Input
+              type="text"
+              id="description"
+              name="description"
+              placeholder="포트폴리오의 설명을 입력하세요"
+              className="border border-gray-300 px-2 py-1 rounded w-1/2"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
             />
           </li>
           <li className="info-row">

@@ -1,12 +1,21 @@
 import {
+  createETFDetail,
+  createETFHolding,
   createETFInfoDTO,
+  createETFPriceMonthlyDTO,
+  createETFSector,
+  ETFDetail,
+  ETFHolding,
+  ETFPriceMonthlyDTO,
+  ETFSector,
   ETFTrendDTO,
   type ETFInfoDTO,
   type ETFPriceDTO,
   type ETFTimeSeriesDTO,
 } from "@/app/interface/dto/etf";
-import { differenceInYears } from "date-fns";
+import { differenceInYears, format } from "date-fns";
 import { PrismaClient, type etf_infos } from "@prisma/client";
+import { create } from "domain";
 
 export class ETFService {
   private static DEFAULT_TICKERS = ["VOO", "QQQ", "VTI", "BND", "VXUS"];
@@ -19,24 +28,60 @@ export class ETFService {
 
   async getETFList(): Promise<ETFInfoDTO[]> {
     try {
-      const etfs: etf_infos[] = await this.prisma.etf_infos.findMany({
-        orderBy: {
-          symbol: "asc",
-        },
+      const [etfs, allHoldings, allSectorWeights] = await Promise.all([
+        this.prisma.etf_infos.findMany({
+          orderBy: { symbol: "asc" },
+        }),
+        this.prisma.etf_holdings.findMany({
+          orderBy: { symbol: "asc" },
+        }),
+        this.prisma.etf_sector_weights.findMany({
+          orderBy: { symbol: "asc" },
+        }),
+      ]);
+
+      const holdingsMap = new Map<string, typeof allHoldings>();
+      const sectorsMap = new Map<string, typeof allSectorWeights>();
+
+      allHoldings.forEach((holding) => {
+        if (!holdingsMap.has(holding.symbol)) {
+          holdingsMap.set(holding.symbol, []);
+        }
+        holdingsMap.get(holding.symbol)!.push(holding);
       });
 
-      console.log("etfs", etfs);
+      allSectorWeights.forEach((sector) => {
+        if (!sectorsMap.has(sector.symbol)) {
+          sectorsMap.set(sector.symbol, []);
+        }
+        sectorsMap.get(sector.symbol)!.push(sector);
+      });
 
-      return etfs.map((item) =>
-        createETFInfoDTO({
+      return etfs.map((item) => {
+        const etfHoldings = holdingsMap.get(item.symbol) || [];
+        const etfSectors = sectorsMap.get(item.symbol) || [];
+
+        return createETFInfoDTO({
           ...item,
           shortName: item.short_name || "",
           longName: item.long_name || "",
           quoteType: item.quote_type || "",
           exchange: item.exchange || "",
           currency: item.currency || "",
-        })
-      );
+          holdings: etfHoldings.map((holding) =>
+            createETFHolding({
+              name: holding.name,
+              weight: holding.weight.toNumber(),
+            })
+          ),
+          sectors: etfSectors.map((sector) =>
+            createETFSector({
+              sectorName: sector.sector,
+              sectorWeight: sector.weight.toNumber(),
+            })
+          ),
+        });
+      });
     } catch (error) {
       console.error("getETFList error", error);
 
@@ -113,8 +158,7 @@ export class ETFService {
 
       const test = result.flat();
 
-     return test.map((item) => ({
-       
+      return test.map((item) => ({
         id: Number(item.id),
         symbol: item.symbol,
         date: item.date,
@@ -125,11 +169,69 @@ export class ETFService {
         adj_close: Number(item.adj_close || item.close),
         volume: Number(item.volume || 0),
         dividend: Number(item.dividend || 0),
-     }));
+      }));
     } catch (error) {
       console.error("getTrends error", error);
 
       return [];
+    }
+  }
+
+  async getETFHistoryMonth(
+    symbols: string[],
+    startDate: Date,
+    endDate: Date
+  ): Promise<ETFPriceMonthlyDTO[]> {
+    try {
+      const pricesData = await this.prisma.etf_prices_monthly.findMany({
+        where: {
+          symbol: {
+            in: symbols,
+          },
+          date: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+        orderBy: [{ symbol: "asc" }, { date: "asc" }],
+      });
+
+      const groupedData = pricesData.reduce((acc, price) => {
+        if (!acc[price.symbol]) {
+          acc[price.symbol] = [];
+        }
+
+        acc[price.symbol].push({
+          id: Number(price.id),
+          symbol: price.symbol,
+          date: price.date,
+          open: Number(price.open || 0),
+          high: Number(price.high || 0),
+          low: Number(price.low || 0),
+          close: Number(price.close),
+          adj_close: Number(price.adj_close || price.close),
+          volume: Number(price.volume || 0),
+          dividend: Number(price.dividend || 0),
+        });
+
+        return acc;
+      }, {} as Record<string, ETFPriceDTO[]>);
+
+      return pricesData.map(price => createETFPriceMonthlyDTO({
+        id: Number(price.id),
+        symbol: price.symbol,
+        year_month: format(price.date, "yyyy-MM"),
+        open: Number(price.open || 0),
+        high: Number(price.high || 0),
+        low: Number(price.low || 0),
+        close: Number(price.close),
+        adj_close: Number(price.adj_close || price.close),
+        volume: Number(price.volume || 0),
+        dividend: Number(price.dividend || 0),
+      }));
+    } catch (error) {
+      console.error("ETF 히스토리 조회 실패:", error);
+      throw new Error("ETF 가격 데이터를 가져올 수 없습니다.");
     }
   }
 }

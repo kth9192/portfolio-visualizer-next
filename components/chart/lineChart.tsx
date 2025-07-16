@@ -1,9 +1,18 @@
 'use client';
 
+import dynamic from 'next/dynamic';
+
 import { deepMerge } from "@/app/lib/utils";
 import { ApexOptions } from "apexcharts";
 import React, { lazy, useMemo } from "react";
-const ReactApexChart = lazy(() => import("react-apexcharts"));
+const ReactApexChart = dynamic(() => import('react-apexcharts'), {
+  ssr: false,
+  loading: () => (
+    <div className="animate-pulse bg-gray-200 h-64 rounded">
+      차트 로딩 중...
+    </div>
+  )
+});
 
 interface LineChartProps {
   options: ApexOptions;

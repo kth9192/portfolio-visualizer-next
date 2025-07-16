@@ -29,7 +29,7 @@ function SideBar() {
       <div className="flex h-fit justify-between items-center mb-10 px-4 py-2">
         {isOpen && <p className="text-xl font-bold ">Portfolio Visualizer</p>}
 
-        <Button onClick={handleToggleSidebar} variant={"ghost"} className={twMerge("my-auto size-8 p-0 has-[>svg]:px-0 cursor-pointer" , !isOpen &&"mx-auto")}>
+        <Button onClick={handleToggleSidebar} variant={"ghost"} className={twMerge("my-auto size-8 p-0 has-[>svg]:px-0 cursor-pointer hover:text-black" , !isOpen &&"mx-auto")}>
           {isOpen ? <PanelLeftClose className="size-6" /> : <PanelLeftOpen className="size-6" />}
         </Button>
       </div>
@@ -43,7 +43,7 @@ function SideBar() {
           )}
         >
           <CustomTooltip
-            trigger={
+            children={
               <div className="flex items-center gap-2 cursor-pointer">
                 <Home />
                 <div
@@ -63,7 +63,7 @@ function SideBar() {
           )}
         >
           <CustomTooltip
-            trigger={
+            children={
               <div className="flex items-center gap-2 cursor-pointer">
                 <FlaskConical />
                 <div

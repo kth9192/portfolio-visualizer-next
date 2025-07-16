@@ -2,6 +2,7 @@
 import { PrismaClient} from '@prisma/client'
 import { ETFService } from './etfService';
 import { PortfolioService } from '@/app/lib/server/portfolioService';
+import { BenchmarkService } from './benchmarkService';
 
 let prisma: PrismaClient;
 
@@ -28,6 +29,10 @@ export function createETFService() {
 
 export function createPortfolioService() {
   return new PortfolioService(prisma);
+}
+
+export function createBenchmarkService() {
+    return new BenchmarkService(prisma);
 }
 
 export async function checkDatabaseConnection() {

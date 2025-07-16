@@ -19,7 +19,7 @@ interface useGetPortfoliosProps {
 
 function useGetPortfolios({ options }: useGetPortfoliosProps) {
   return useQuery({
-    queryKey: queryKeys.list,
+    queryKey: queryKeys.portfolio,
     queryFn: getPortfolios,
     select: (data) => (data.success ? data.data : []),
     staleTime: 1000 * 60 * 5,
