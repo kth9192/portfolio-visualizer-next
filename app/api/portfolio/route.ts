@@ -1,6 +1,6 @@
 import { createApiResponse } from "@/app/interface/dto/api";
 import { portfolioCreateSchema } from "@/app/interface/schema/portfolio";
-import { createPortfolioService } from "@/app/lib/server/database";
+import { createPortfolioService } from "@/lib/server/database";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {

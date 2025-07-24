@@ -1,5 +1,5 @@
 import { createApiResponse } from "@/app/interface/dto/api";
-import { createETFService } from "@/app/lib/server/database";
+import { createETFService } from "@/lib/server/database";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {

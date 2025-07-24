@@ -1,4 +1,4 @@
-import { createETFService } from "@/app/lib/server/database";
+import { createETFService } from "@/lib/server/database";
 import { NextRequest, NextResponse } from "next/server";
 import { createApiResponse } from "@/app/interface/dto/api";
 

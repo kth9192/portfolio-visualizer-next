@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createETFService } from "@/app/lib/server/database";
+import { createETFService } from "@/lib/server/database";
 import { parse } from "date-fns";
 import { createBacktestingRes } from "@/app/interface/dto/backtesting";
 import { createApiResponse } from "@/app/interface/dto/api";

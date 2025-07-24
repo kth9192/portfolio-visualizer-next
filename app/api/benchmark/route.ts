@@ -1,5 +1,5 @@
 import { createApiResponse } from "@/app/interface/dto/api";
-import { createBenchmarkService, createETFService } from "@/app/lib/server/database";
+import { createBenchmarkService, createETFService } from "@/lib/server/database";
 import { startOfDay, subYears } from "date-fns";
 import { NextRequest, NextResponse } from "next/server";
 

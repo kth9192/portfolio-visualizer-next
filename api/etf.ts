@@ -38,6 +38,9 @@ export const getTrends = async (): Promise<ApiResponse<ETFPriceDTO[]>> => {
     "/etf/trends"
   );
 
+  console.log("get trends result", response);
+  
+
   return response.data;
 };
 

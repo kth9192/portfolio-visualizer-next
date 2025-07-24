@@ -14,9 +14,11 @@ function CustomSpinner({ className, size = 20 }: CustomSpinnerProps) {
   return (
     <div
       className={twMerge(
-        `size-${size} bg-transparent border-${borderWidth} border-blue-600 border-t-blue-200 rounded-full animate-spin`,
+        `bg-transparent border-${borderWidth} border-blue-600 border-t-blue-200 rounded-full animate-spin`,
+
         className
       )}
+      style={{ width: `${size}px`, height: `${size}px` }}
     ></div>
   );
 }

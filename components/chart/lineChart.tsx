@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 
-import { deepMerge } from "@/app/lib/utils";
+import { deepMerge } from "@/lib/utils";
 import { ApexOptions } from "apexcharts";
 import React, { lazy, useMemo } from "react";
 const ReactApexChart = dynamic(() => import('react-apexcharts'), {

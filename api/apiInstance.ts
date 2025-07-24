@@ -1,5 +1,4 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
-import { useRouter } from "next/router";
 import { showToast } from "@/components/toast/customToast";
 import { ApiError, ApiResponse, createApiResponse } from "@/app/interface/dto/api";
 

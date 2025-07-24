@@ -1,4 +1,5 @@
-import { createETFService } from "@/app/lib/server/database";
+import { createApiResponse } from "@/app/interface/dto/api";
+import { createETFService } from "@/lib/server/database";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -7,5 +8,5 @@ export async function GET(request: NextRequest) {
   const etfService = createETFService();
   const etfTrends = await etfService.getTrends();
 
-  return NextResponse.json(etfTrends, { status: 200 });
+  return NextResponse.json(createApiResponse(etfTrends, true, "success", 200), { status: 200 });
 }
