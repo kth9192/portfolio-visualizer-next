@@ -1,6 +1,6 @@
 import { useMutation, UseMutationOptions, useQueryClient } from "@tanstack/react-query"
 import { queryKeys } from "./keys"
-import { getGuestLogin } from "@/api/auth"
+import { postGuestLogin } from "@/api/auth"
 import { GuestLoginRes } from "@/app/interface/dto/auth"
 import { ApiResponse } from "@/app/interface/dto/api"
 
@@ -17,7 +17,7 @@ export const usePostGuestLogin = ({onCreateSuccess, onCreateError, mutationOptio
     
     return useMutation({
         mutationFn:async () => {
-            const res = await getGuestLogin()
+            const res = await postGuestLogin()
             return res
         },
         onSuccess: (response) => {

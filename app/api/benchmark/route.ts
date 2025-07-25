@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
       new Date(endDate)
     );
 
-    console.log(" api benchmark", benchmarkInfos);
 
     const res = createApiResponse(benchmarkInfos, true, "success", 200);
     return NextResponse.json(res, { status: 200 });

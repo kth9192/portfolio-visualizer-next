@@ -8,7 +8,7 @@ import { queryKeys } from "./keys";
 interface useGetTrendsProps {
   options?: Omit<
     UseQueryOptions<
-       ETFPriceDTO[],
+      ApiResponse<ETFPriceDTO[]>,
       Error,
       ETFPriceDTO[],
       readonly unknown[]
@@ -26,7 +26,7 @@ function useGetTrends({ options }: useGetTrendsProps) {
     // select로 실제 데이터만 추출
     select: (data:  ApiResponse<ETFPriceDTO[]>):ETFPriceDTO[] => {
       
-      console.log("data", data);
+
       
       return data.data || []},
   };
@@ -35,7 +35,6 @@ function useGetTrends({ options }: useGetTrendsProps) {
     queryKey: queryKeys.trends,
     queryFn: async () => {
       const result = await getTrends();
-      console.log("result", result);
 
       return result;
     },

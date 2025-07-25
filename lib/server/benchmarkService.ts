@@ -33,7 +33,6 @@ export class BenchmarkService {
         },
       });
 
-      console.log("get benchmark result", result);
 
       return result.map((item) =>
         createBenchmarkData({

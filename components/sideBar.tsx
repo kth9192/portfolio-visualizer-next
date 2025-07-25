@@ -6,10 +6,13 @@ import { Button } from "./ui/button";
 import {
   FlaskConical,
   Home,
+  LogOut,
+  LogOutIcon,
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
 import CustomTooltip from "./tooltip/customTooltip";
+import { logoutAction } from "@/app/action/auth";
 
 function SideBar() {
   const [isOpen, setIsOpen] = useState(true);
@@ -75,6 +78,11 @@ function SideBar() {
           />
         </a>
       </nav>
+      <form action={logoutAction} className="mt-auto ml-auto px-4">
+        <Button type="submit" variant={"ghost"} className={twMerge("my-auto size-8 p-0 has-[>svg]:px-0 cursor-pointer hover:text-black" , !isOpen &&"mx-auto")}>
+          <LogOutIcon/>
+        </Button>
+      </form>
     </div>
   );
 }

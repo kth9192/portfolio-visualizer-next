@@ -1,17 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  console.log("🔥🔥🔥 MIDDLEWARE START 🔥🔥🔥");
+  console.log("MIDDLEWARE START");
 
   if (
     pathname.startsWith("/_next") ||
-    pathname.startsWith("/api") ||
+
     pathname.includes(".")
   ) {
     return NextResponse.next();
+  }
+
+
+  if(pathname.startsWith("/api")){
+
+    if(pathname.startsWith("/api/guest") || pathname.startsWith("/api/auth")){
+      return NextResponse.next();
+    }
+
+    const sessionCookie = request.cookies.get("better-auth.session_token");
+    const isLoggedIn = !!sessionCookie?.value;
+
+    console.log("API Session cookie exists:", isLoggedIn  , pathname);
+    if(isLoggedIn){
+      return NextResponse.next();
+    }
+
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   console.log(`Auth middleware: ${request.nextUrl.pathname}`);
@@ -22,8 +38,8 @@ export async function middleware(request: NextRequest) {
   const isAuthPage =
     pathname.startsWith("/auth") || pathname.startsWith("/login");
 
-  console.log("🍪 Session cookie exists:", isLoggedIn);
-  console.log("📍 Is auth page:", isAuthPage);
+  console.log(" Session cookie exists:", isLoggedIn, pathname);
+  console.log(" Is auth page:", isAuthPage);
 
   // 로그인된 사용자가 인증 페이지에 접근
   if (isLoggedIn && isAuthPage) {

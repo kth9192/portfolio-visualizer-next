@@ -13,7 +13,7 @@ function LoginPage() {
   const { mutateAsync, isPending } = usePostGuestLogin({
     onCreateSuccess: (data) => {
       showToast.success("로그인 성공");
-      router.push("/");
+      router.refresh();
     },
     onCreateError: (error) => {
       showToast.error("로그인 실패");
@@ -25,8 +25,6 @@ function LoginPage() {
     try {
       await mutateAsync();
 
-      router.push("/");
-      router.refresh();
     } catch (error) {
       console.error(error);
     }

@@ -7,7 +7,6 @@ export const POST = async (request: NextRequest) => {
     const authGuestService = createAuthGuestService();
     const result = await authGuestService.createGuestAccount();
 
-    console.log("Login Response Headers:", result.loginResponse?.headers);
 
     if (result.loginResponse?.headers) {
       const setCookieHeader = result.loginResponse.headers.get("set-cookie");

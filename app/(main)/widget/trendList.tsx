@@ -28,7 +28,6 @@ function TrendList() {
 
   const dataSource = useMemo(() => {
 
-    console.log('trends' , trends);
     
     return DEFAULT_TICKERS.map((ticker) => {
       return {
@@ -42,10 +41,7 @@ function TrendList() {
     
   }, [trends]);
 
-  useEffect(() => {
-    
-    console.log(dataSource , trends)
-  }, [ dataSource , trends ])
+
 
   const getChangeColor = (changePercent: number) => {
     return changePercent > 0
