@@ -1,7 +1,7 @@
+
 import { ApiResponse } from "@/app/interface/dto/api";
 import { PortfolioDTO } from "@/app/interface/dto/portfolio";
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
-import { AxiosResponse } from "axios";
 import { queryKeys } from "./keys";
 import { getPortfolios } from "@/api/portfolio";
 

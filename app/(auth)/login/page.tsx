@@ -60,7 +60,7 @@ function LoginPage() {
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full bg-black text-white py-3 px-6 rounded-none font-medium hover:bg-gray-800 transition-colors"
+                className="w-full bg-black text-white py-3 px-6 rounded-none hover:bg-black/80 transition-colors"
               >
                 로그인
               </button>
@@ -73,7 +73,7 @@ function LoginPage() {
           {isPending ? (
             <CustomSpinner className="size-10" />
           ) : (
-            <Button className="rounded" onClick={handleGuestLogin}>
+            <Button type="button" variant="ghost" className="w-full underline rounded-none py-3 hover:bg-black hover:text-white transition-colors " onClick={handleGuestLogin}>
               게스트 계정으로 시작하기
             </Button>
           )}

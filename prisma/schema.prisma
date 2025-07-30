@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,8 +7,6 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 
 model etf_infos {
   id                 BigInt               @id @default(autoincrement())
@@ -35,8 +32,6 @@ model etf_infos {
   @@index([symbol], map: "idx_etf_infso_symbol")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-
 model etf_prices {
   id        BigInt    @id @default(autoincrement())
   symbol    String
@@ -58,8 +53,6 @@ model etf_prices {
   @@index([symbol, date], map: "idx_etf_prices_symbol_date")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-
 model etf_prices_monthly {
   id         BigInt    @id @default(autoincrement())
   symbol     String
@@ -80,9 +73,6 @@ model etf_prices_monthly {
   @@index([symbol, year_month], map: "idx_etf_prices_monthly_symbol_year_month")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-
 model portfolio_assets {
   id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   portfolio_id String     @db.Uuid
@@ -99,9 +89,6 @@ model portfolio_assets {
   @@index([symbol], map: "idx_portfolio_assets_symbol")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-
 model portfolio_settings {
   id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   portfolio_id        String              @db.Uuid
@@ -115,9 +102,6 @@ model portfolio_settings {
   @@index([portfolio_id], map: "idx_portfolio_settings_portfolio_id")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-
 model portfolios {
   id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   created            DateTime             @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
@@ -125,15 +109,13 @@ model portfolios {
   name               String
   description        String?
   initial_amount     Decimal              @default(10000) @db.Decimal(15, 2)
-  user_id            String?              @db.Uuid
+  user_id            String?
   portfolio_assets   portfolio_assets[]
   portfolio_settings portfolio_settings[]
+  user               User?                @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id], map: "idx_portfolios_user_id")
 }
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 
 model etf_holdings {
   id          BigInt    @id @default(autoincrement())
@@ -152,8 +134,6 @@ model etf_holdings {
   @@index([symbol, weight(sort: Desc)], map: "idx_etf_holdings_symbol_weight")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-
 model etf_sector_weights {
   id          BigInt    @id(map: "etf_sector_weight_pkey") @default(autoincrement())
   inserted_at DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
@@ -169,8 +149,6 @@ model etf_sector_weights {
   @@index([symbol, weight(sort: Desc)], map: "idx_etf_sector_weight_etf_weight")
   @@index([sector], map: "idx_etf_sector_weight_sector")
 }
-
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 
 model benchmark_data {
   id               BigInt   @id @default(autoincrement())
@@ -189,36 +167,27 @@ model benchmark_data {
   @@index([year_month], map: "idx_benchmark_data_year_month")
 }
 
-enum rebalance_frequency {
-  monthly
-  quarterly
-  semiannually
-  annually
-}
-
 model User {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified Boolean
-  image         String?
-  createdAt     DateTime
-  updatedAt     DateTime
-  sessions      Session[]
-  accounts      Account[]
+  id             String       @id
+  name           String
+  email          String       @unique
+  emailVerified  Boolean
+  image          String?
+  createdAt      DateTime
+  updatedAt      DateTime
+  guestExpiresAt DateTime?
+  isGuest        Boolean      @default(false)
+  accounts       Account[]
+  portfolios     portfolios[]
+  sessions       Session[]
 
-  isGuest         Boolean   @default(false)
-  guestExpiresAt  DateTime?
-
-
-  @@unique([email])
   @@map("user")
 }
 
 model Session {
   id        String   @id
   expiresAt DateTime
-  token     String
+  token     String   @unique
   createdAt DateTime
   updatedAt DateTime
   ipAddress String?
@@ -226,7 +195,6 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@map("session")
 }
 
@@ -235,7 +203,6 @@ model Account {
   accountId             String
   providerId            String
   userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -245,6 +212,7 @@ model Account {
   password              String?
   createdAt             DateTime
   updatedAt             DateTime
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("account")
 }
@@ -258,4 +226,11 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+enum rebalance_frequency {
+  monthly
+  quarterly
+  semiannually
+  annually
 }

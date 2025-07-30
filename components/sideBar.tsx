@@ -59,7 +59,7 @@ function SideBar() {
         </a>
 
         <a
-          href="/backtesting"
+          href="/portfolio"
           className={twMerge(
             "flex w-full h-fit items-center gap-2 px-2 py-2 rounded-lg hover:bg-gray-800 cursor-pointer",
             !isOpen && "justify-center"

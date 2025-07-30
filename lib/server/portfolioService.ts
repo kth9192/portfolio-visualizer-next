@@ -11,6 +11,8 @@ import {
 import { PrismaClient } from "@prisma/client";
 import { format } from "date-fns";
 import { RebalanceFrequency } from "@/app/interface/enum/rebanalceFrequency";
+import { auth } from "../auth";
+import { headers } from "next/headers";
 
 export class PortfolioService {
   private prisma: PrismaClient;
@@ -21,7 +23,15 @@ export class PortfolioService {
 
   async getPortfolios(): Promise<PortfolioDTO[]> {
     try {
+
+      const session = await auth.api.getSession({
+        headers: await headers() 
+    })
+    
       const portfolios = await this.prisma.portfolios.findMany({
+        where: {
+          user_id: session.user.id,
+        },
         include: {
           portfolio_assets: true,
           portfolio_settings: true,

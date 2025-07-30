@@ -2,24 +2,19 @@
 
 import { Button } from "@/components/ui/button";
 import { format, isSameDay } from "date-fns";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  createPortfolioCreateDTO,
-  PortfolioSimulationData,
-} from "../interface/dto/portfolio";
-import { RebalanceFrequency } from "../interface/enum/rebanalceFrequency";
-import { getCommonDates, getRebalanceDates } from "../../lib/calculator";
-import useGetBacktestingData from "../../lib/hooks/query/useGetBacktestingData";
-import { usePortfolioValidation } from "../../lib/hooks/usePortfolioValidation";
-import { usePortfolioStore } from "../../lib/store/portfolioStore";
+import { useCallback, useMemo } from "react";
+
+
+import { postSavePortfolio } from "@/api/portfolio";
+import { createPortfolioCreateDTO, PortfolioSimulationData } from "@/app/interface/dto/portfolio";
+import { showToast } from "@/components/toast/customToast";
+import { getCommonDates, getRebalanceDates } from "@/lib/calculator";
+import useGetBacktestingData from "@/lib/hooks/query/useGetBacktestingData";
+import { usePortfolioValidation } from "@/lib/hooks/usePortfolioValidation";
+import { usePortfolioStore } from "@/lib/store/portfolioStore";
 import PortfolioBuilder from "./widget/portfolioBuilder";
 import PortfolioMetrics from "./widget/portfolioMetrics";
 import PortfolioSetting from "./widget/portfolioSetting";
-import CustomSpinner from "@/components/spinner/customSpinner";
-import { useRef } from "react";
-import { twMerge } from "tailwind-merge";
-import { postSavePortfolio } from "@/api/portfolio";
-import { showToast } from "@/components/toast/customToast";
 
 function BacktestingPage() {
   const {

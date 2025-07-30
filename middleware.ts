@@ -43,13 +43,13 @@ export async function middleware(request: NextRequest) {
 
   // 로그인된 사용자가 인증 페이지에 접근
   if (isLoggedIn && isAuthPage) {
-    console.log("🚀 Redirecting logged user to dashboard");
+    console.log("Redirecting logged user to dashboard");
     return NextResponse.redirect(new URL("/", request.url));
   }
 
   // 로그인하지 않은 사용자가 보호된 페이지에 접근
   if (!isLoggedIn && !isAuthPage) {
-    console.log("🔒 Redirecting to login");
+    console.log("Redirecting to login");
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
