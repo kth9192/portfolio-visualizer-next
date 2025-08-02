@@ -1,6 +1,6 @@
 export const queryKeys = {
   list: ["etf-infos"] as const,
-  portfolio: ["portfolios"] as const,
+  portfolios: ["portfolios"] as const,
   portfolioSave: ["portfolio-save"] as const,
   backtesting: ["backtesting"] as const,
   backtestingMonthly: ["backtesting-monthly"] as const,

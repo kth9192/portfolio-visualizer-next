@@ -71,10 +71,10 @@ function SideBar() {
                 <FlaskConical />
                 <div
                   className={twMerge("text-white", !isOpen && "sr-only")}
-                >백테스팅</div>
+                >포트폴리오</div>
               </div>
             }
-            content={<p>백테스팅</p>}
+            content={<p>포트폴리오</p>}
           />
         </a>
       </nav>

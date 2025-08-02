@@ -15,8 +15,11 @@ import { usePortfolioStore } from "@/lib/store/portfolioStore";
 import PortfolioBuilder from "./widget/portfolioBuilder";
 import PortfolioMetrics from "./widget/portfolioMetrics";
 import PortfolioSetting from "./widget/portfolioSetting";
+import { useRouter } from "next/navigation";
+import useCreatePortfolio from "@/lib/hooks/mutation/useCreatePortfolio";
 
 function BacktestingPage() {
+  const router= useRouter()
   const {
     assets,
     setting,
@@ -25,6 +28,8 @@ function BacktestingPage() {
     description,
     rebalanceFrequency,
   } = usePortfolioStore();
+
+  const createPortfolioMutation = useCreatePortfolio();
 
   const {
     data: backtestingData,
@@ -255,7 +260,7 @@ function BacktestingPage() {
       return;
     }
 
-    const res = await postSavePortfolio({
+    await createPortfolioMutation.mutateAsync({
       name,
       initialAmount,
       description,
@@ -265,6 +270,8 @@ function BacktestingPage() {
     });
 
     showToast.success("포트폴리오가 저장되었습니다");
+
+    router.push(`/portfolio`);
   };
 
   return (

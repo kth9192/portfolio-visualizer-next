@@ -28,3 +28,19 @@ export const postSavePortfolio = async (
 
   return res.data;
 };
+
+export const deletePortfolio = async (
+  portfolioId: string
+): Promise<ApiResponse<PortfolioDTO>> => {
+  const res = await apiInstance.delete<ApiResponse<PortfolioDTO>>(
+    `/portfolio/${portfolioId}`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    }
+  );
+
+  return res.data;
+};

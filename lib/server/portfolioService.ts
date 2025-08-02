@@ -23,11 +23,10 @@ export class PortfolioService {
 
   async getPortfolios(): Promise<PortfolioDTO[]> {
     try {
-
       const session = await auth.api.getSession({
-        headers: await headers() 
-    })
-    
+        headers: await headers(),
+      });
+
       const portfolios = await this.prisma.portfolios.findMany({
         where: {
           user_id: session.user.id,
@@ -39,7 +38,7 @@ export class PortfolioService {
       });
 
       return portfolios.map((portfolio) => {
-        const setting = portfolio.portfolio_settings[0];
+        const setting = portfolio.portfolio_settings;
 
         return createPortfolioDTO({
           id: portfolio.id,
@@ -93,7 +92,6 @@ export class PortfolioService {
           },
         });
 
-
         const setting = await tx.portfolio_settings.create({
           data: {
             portfolio_id: portfolio.id,
@@ -102,7 +100,6 @@ export class PortfolioService {
             end_date: portfolioData.setting.endDate!,
           },
         });
-
 
         const assets = await tx.portfolio_assets.createMany({
           data: portfolioData.assets.map((asset) => ({
@@ -113,14 +110,12 @@ export class PortfolioService {
           })),
         });
 
-
         return {
           portfolio,
           setting,
           assets,
         };
       });
-
 
       return createPortfolioCreateDTO({
         name: portfolioData.name,
@@ -132,6 +127,63 @@ export class PortfolioService {
       });
     } catch (error) {
       console.error("portfolio service save error", error);
+
+      return null;
+    }
+  }
+
+  async deletePortfolio(portfolioId: string): Promise<PortfolioDTO | null> {
+    console.log("portfolioId", portfolioId);
+
+    try {
+      const portfolioWithRelations = await this.prisma.portfolios.findUnique({
+        where: { id: portfolioId },
+        include: {
+          portfolio_assets: true,
+          portfolio_settings: true,
+        },
+      });
+
+      const portfolio = await this.prisma.portfolios.delete({
+        where: {
+          id: portfolioId,
+        },
+      });
+
+      console.log("portfolio is deleted", portfolio);
+
+      return createPortfolioDTO({
+        id: portfolioWithRelations.id,
+        name: portfolioWithRelations.name,
+        initialAmount: portfolioWithRelations.initial_amount.toNumber(),
+        created: portfolioWithRelations.created,
+        updated: portfolioWithRelations.updated,
+        description: portfolioWithRelations.description || "",
+        user_id: portfolioWithRelations.user_id || "",
+        assets: portfolioWithRelations.portfolio_assets.map((asset) =>
+          createPortfolioAssetDTO({
+            id: asset.id,
+            portfolio_id: asset.portfolio_id,
+            symbol: asset.symbol,
+            weight: asset.weight.toNumber(),
+            shares: asset.shares?.toNumber() || 0,
+            created: asset.created,
+            updated: asset.updated,
+          })
+        ),
+        setting: createPortfolioSettingDTO({
+          id: portfolioWithRelations.portfolio_settings.id,
+          portfolio_id: portfolioWithRelations.portfolio_settings.portfolio_id,
+          startDate: portfolioWithRelations.portfolio_settings.start_date,
+          endDate: portfolioWithRelations.portfolio_settings.end_date,
+          rebalanceFrequency: portfolioWithRelations.portfolio_settings
+            .rebalance_frequency as RebalanceFrequency,
+          created: portfolioWithRelations.portfolio_settings.created,
+          updated: portfolioWithRelations.portfolio_settings.updated,
+        }),
+      });
+    } catch (error) {
+      console.error("portfolio service delete error", error);
 
       return null;
     }
