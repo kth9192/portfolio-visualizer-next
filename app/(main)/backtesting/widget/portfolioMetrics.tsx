@@ -21,6 +21,8 @@ import { differenceInYears, format } from "date-fns";
 import { ko } from "date-fns/locale";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { twMerge } from "tailwind-merge";
+import { useFormContext } from "react-hook-form";
+import { PortfolioCreateSchemaType } from "@/app/interface/schema/portfolio";
 
 interface PortfolioMetricsProps {
   portfolioSimulationData: PortfolioSimulationData[];
@@ -38,7 +40,10 @@ function PortfolioMetrics({
   backtestingLoading,
   backtestingError,
 }: PortfolioMetricsProps) {
-  const { setting, initialAmount } = usePortfolioStore();
+  // const { setting, initialAmount } = usePortfolioStore();
+
+  const { watch, setValue } = useFormContext<PortfolioCreateSchemaType>();
+
   const metricsRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -46,8 +51,8 @@ function PortfolioMetrics({
     isLoading: benchmarkLoading,
     error: benchmarkError,
   } = useGetBenchmarkInfos({
-    startDate: setting.startDate!,
-    endDate: setting.endDate!,
+    startDate: watch("setting.startDate"),
+    endDate: watch("setting.endDate"),
   });
 
   const scrollToMetrics = useCallback(() => {
@@ -60,26 +65,65 @@ function PortfolioMetrics({
   const reworkChartSeries = useMemo<
     ApexAxisChartSeries | ApexNonAxisChartSeries | undefined
   >(() => {
+    if (!benchmarks?.length) {
+      return chartSeries;
+    }
+
+    const startDate = new Date(watch("setting.startDate"));
+    const endDate = new Date(watch("setting.endDate"));
+
+    // 벤치마크 데이터 필터링 및 정제
+    const filteredBenchmarks = benchmarks.filter((benchmark) => {
+      const benchmarkDate = new Date(`${benchmark.year_month}-01`);
+      const portfolioStart = new Date(
+        startDate.getFullYear(),
+        startDate.getMonth(),
+        1
+      );
+      const portfolioEnd = new Date(
+        endDate.getFullYear(),
+        endDate.getMonth(),
+        1
+      );
+
+      return benchmarkDate >= portfolioStart && benchmarkDate <= portfolioEnd;
+    });
+
     const symbols = Array.from(
-      new Set(benchmarks?.map((benchmark) => benchmark.symbol))
+      new Set(filteredBenchmarks.map((benchmark) => benchmark.symbol))
     );
 
-    const source = symbols?.map((symbol) => {
+    const benchmarkSeries = symbols.map((symbol) => {
+      const symbolData = filteredBenchmarks
+        .filter((benchmark) => benchmark.symbol === symbol)
+        .sort((a, b) => a.year_month.localeCompare(b.year_month));
+
+      // 첫 번째 데이터의 cumulative_value를 기준점으로 설정
+      const baseValue = symbolData[0]?.cumulative_value || 100;
+
       return {
-        name: symbol,
-        data:
-          benchmarks
-            ?.filter((benchmark) => benchmark.symbol === symbol)
-            .sort((pre, post) => pre.year_month.localeCompare(post.year_month))
-            .map((data) => ({
-              x: new Date(data.year_month).getTime(),
-              y: data.cumulative_value - 100,
-            })) ?? [],
+        name: `${symbol} (벤치마크)`,
+        data: symbolData.map((data) => {
+          // 월의 마지막 날짜로 설정 (더 정확한 비교를 위해)
+          const [year, month] = data.year_month.split("-").map(Number);
+          const lastDayOfMonth = new Date(year, month, 0); // 해당 월의 마지막 날
+
+          return {
+            x: lastDayOfMonth.getTime(),
+            // 첫 번째 값을 0%로 정규화
+            y: ((data.cumulative_value - baseValue) / baseValue) * 100,
+          };
+        }),
       };
     });
 
-    return chartSeries.concat(source);
-  }, [chartSeries, benchmarks]);
+    return [...chartSeries, ...benchmarkSeries];
+  }, [
+    chartSeries,
+    benchmarks,
+    watch("setting.startDate"),
+    watch("setting.endDate"),
+  ]);
 
   // 성과지표 계산
   let metrics = useMemo(() => {
@@ -90,7 +134,7 @@ function PortfolioMetrics({
         mdd: 0,
         volatility: 0,
         sharpRatio: 0,
-        finalAmount: initialAmount,
+        finalAmount: watch("initialAmount"),
       };
     }
 
@@ -103,12 +147,15 @@ function PortfolioMetrics({
     // 최종 포트폴리오 가치
     const finalAmount =
       portfolioSimulationData[portfolioSimulationData.length - 1]
-        ?.portfolioValue || initialAmount;
+        ?.portfolioValue || watch("initialAmount");
 
     // CAGR 계산
     const totalReturnPercent =
       chartSeries[0].data[chartSeries[0].data.length - 1]?.y || 0;
-    const years = differenceInYears(setting.endDate!, setting.startDate!);
+    const years = differenceInYears(
+      watch("setting.endDate"),
+      watch("setting.startDate")
+    );
     const cagr =
       years > 0 ? calculateCAGR(100, 100 + totalReturnPercent, years) : 0;
 
@@ -133,6 +180,15 @@ function PortfolioMetrics({
     const sharpRatio =
       cagr && volatility && volatility !== 0 ? cagr / volatility : 0;
 
+    setValue("metrics", {
+      totalReturn,
+      cagr,
+      mdd,
+      volatility,
+      sharpRatio,
+      finalAmount,
+    });
+
     return {
       totalReturn,
       cagr,
@@ -141,9 +197,16 @@ function PortfolioMetrics({
       sharpRatio,
       finalAmount,
     };
-  }, [portfolioSimulationData, chartSeries, setting, initialAmount]);
+  }, [
+    portfolioSimulationData,
+    chartSeries,
+    watch("setting"),
+    watch("initialAmount"),
+  ]);
 
   useEffect(() => {
+    console.log("portfolioSimulationData", portfolioSimulationData);
+
     const timeoutId = setTimeout(() => {
       requestAnimationFrame(() => {
         scrollToMetrics();
@@ -183,7 +246,7 @@ function PortfolioMetrics({
                     show: true,
                   },
                 },
-                colors: [twColor("red-500"), twColor("blue-600")],
+                colors: [twColor("red-500"), twColor("blue-600") , twColor("green-500")],
                 dataLabels: {
                   enabled: false,
                 },
@@ -192,8 +255,10 @@ function PortfolioMetrics({
                   labels: {
                     datetimeUTC: false,
                     format:
-                      differenceInYears(setting.endDate!, setting.startDate!) >=
-                      2
+                      differenceInYears(
+                        watch("setting.endDate"),
+                        watch("setting.startDate")
+                      ) >= 2
                         ? "yy-MM"
                         : "yyyy-MM-dd",
                   },
@@ -208,6 +273,8 @@ function PortfolioMetrics({
                 },
                 tooltip: {
                   enabled: true,
+                  shared: true,
+                  intersect: false,
                   x: {
                     format: "yyyy-MM-dd",
                   },
@@ -218,21 +285,41 @@ function PortfolioMetrics({
                     w,
                   }) {
                     const date = format(
-                      new Date(w.globals.seriesX[seriesIndex][dataPointIndex]),
+                      new Date(w.globals.seriesX[0][dataPointIndex]),
                       "yyyy-MM-dd",
                       { locale: ko }
                     );
+
                     const value =
                       series[seriesIndex][dataPointIndex].toFixed(2);
-                    return `
-                          <div class="p-3 bg-white shadow-lg rounded-lg ">
-                            <div class="font-semibold text-gray-800">${date}</div>
-                            <div class="flex items-center mt-1">
-                              <span class="font-medium text-gray-600">수익률 : </span>
-                              <span class="ml-1 font-bold text-blue-600">${value}%</span>
-                            </div>
+
+                    let tooltipContent = `<div class="p-3 bg-white shadow-lg rounded-lg ">
+                      <div class="font-semibold text-gray-800 mb-3 text-center">${date}</div>
+                      <div class="space-y-2">
+                      `;
+
+                    series.forEach((seriesItem: number[], seriesIndex) => {
+                      const seriesName = w.config.series[seriesIndex].name;
+                      const seriesValue = seriesItem[dataPointIndex];
+                      const seriesColor = w.globals.colors[seriesIndex]; 
+
+                      const value = typeof seriesValue === 'number' ? seriesValue : Number(seriesValue);
+      
+                      if (!isNaN(value) && value !== null && value !== undefined) {
+                        const isPortfolio = seriesName.includes('Portfolio');
+                        
+                        tooltipContent += `
+                          <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-700">${seriesName}:</span>
+                            <span class="ml-2 font-bold " style="color:${seriesColor}">${value.toFixed(2)}%</span>
                           </div>
                         `;
+                      }
+                    });
+
+                    tooltipContent += `</div></div>`;
+
+                    return tooltipContent;
                   },
                 },
                 stroke: {
@@ -262,7 +349,7 @@ function PortfolioMetrics({
             <li className="p-3 bg-gray-50 rounded-lg">
               <h3 className="text-sm font-medium text-gray-600">시작 금액</h3>
               <p className="text-lg font-medium text-gray-900">
-                ${formatWithCommas(initialAmount)}
+                ${formatWithCommas(watch("initialAmount"))}
               </p>
             </li>
 
@@ -336,7 +423,11 @@ function PortfolioMetrics({
             <li className="p-3 bg-gray-50 rounded-lg">
               <h3 className="text-sm font-medium text-gray-600">분석 기간</h3>
               <p className="text-lg font-medium text-gray-900">
-                {differenceInYears(setting.endDate!, setting.startDate!)}년
+                {differenceInYears(
+                  watch("setting.endDate"),
+                  watch("setting.startDate")
+                )}
+                년
               </p>
             </li>
           </ul>

@@ -16,6 +16,8 @@ import { ko } from "date-fns/locale";
 import React, { useEffect, useMemo, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { useShallow } from "zustand/react/shallow";
+import { useFormContext } from "react-hook-form";
+import { PortfolioCreateSchemaType } from "@/app/interface/schema/portfolio";
 
 interface PortfolioBuilderProps {}
 
@@ -44,6 +46,9 @@ function PortfolioBuilder({}: PortfolioBuilderProps) {
     }))
   );
 
+  const { register ,control, watch , setValue} = useFormContext<PortfolioCreateSchemaType>()
+
+
   const {
     data: etfList,
     isLoading,
@@ -53,12 +58,12 @@ function PortfolioBuilder({}: PortfolioBuilderProps) {
   });
 
   const ratioData = useMemo(() => {
-    const result = assets.map((asset) => ({
+    const result = watch('assets')?.map((asset) => ({
       label: asset.symbol,
       value: asset.weight * 100,
     }));
     return result;
-  }, [assets]);
+  }, [watch('assets')]);
 
   const totalWeight = useMemo(() => {
     const result = assets.reduce((acc, asset) => acc + asset.weight, 0);
@@ -67,28 +72,28 @@ function PortfolioBuilder({}: PortfolioBuilderProps) {
 
   function handleETFSelect(value: string): void {
     const searchedETF = etfList?.find((asset) => asset.symbol === value);
-    searchedETF &&
-      addAsset({
-        symbol: searchedETF.symbol,
-        weight: 0,
-        shares: 0,
-      });
+   
+    searchedETF && setValue('assets', [...watch('assets'), { symbol: searchedETF.symbol, weight: 0, shares: 0 }])
   }
 
   const updateWeight = (symbol: string, weight: number) => {
-    setAssets(
-      assets.map((asset) =>
-        asset.symbol === symbol ? { ...asset, weight: weight / 100 } : asset
-      )
-    );
+    setValue('assets', watch('assets').map((asset) =>
+      asset.symbol === symbol ? { ...asset, weight: weight / 100 } : asset
+    ) , {
+      shouldValidate: true,
+    })
   };
 
   const removeAsset = (symbol: string) => {
-    setAssets(assets.filter((asset) => asset.symbol !== symbol));
+    setValue('assets', watch('assets').filter((asset) => asset.symbol !== symbol) , {
+      shouldValidate: true,
+    });
   };
 
   const resetWeights = () => {
-    setAssets(assets.map((asset) => ({ ...asset, weight: 0 })));
+    setValue('assets', watch('assets').map((asset) => ({ ...asset, weight: 0 })) , {
+      shouldValidate: true,
+    });
   };
 
   return (
@@ -110,8 +115,8 @@ function PortfolioBuilder({}: PortfolioBuilderProps) {
               name="portfolioName"
               placeholder="포트폴리오의 제목을 입력하세요"
               className="border border-gray-300 px-2 py-1 rounded w-1/2"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={watch("name")}
+              {...register("name")}
             />
           </li>
           <li className="info-row">
@@ -127,8 +132,8 @@ function PortfolioBuilder({}: PortfolioBuilderProps) {
               name="description"
               placeholder="포트폴리오의 설명을 입력하세요"
               className="border border-gray-300 px-2 py-1 rounded w-1/2"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              value={watch("description")}
+              {...register("description")}
             />
           </li>
           <li className="info-row">
@@ -143,8 +148,8 @@ function PortfolioBuilder({}: PortfolioBuilderProps) {
               type="number"
               placeholder="포트폴리오의 시작 금액(달러)을 입력하세요"
               className="border border-gray-300 px-2 py-1 rounded w-1/2"
-              value={initialAmount}
-              onChange={(e) => setInitAmount(Number(e.target.value))}
+              value={watch("initialAmount")}
+              {...register("initialAmount" , { valueAsNumber: true})}
             />
           </li>
         </ol>
@@ -209,7 +214,7 @@ function PortfolioBuilder({}: PortfolioBuilderProps) {
           </div>
 
           <ul className="space-y-2 max-h-64 overflow-y-auto py-1">
-            {assets.map((asset) => (
+            {watch('assets')?.map((asset) => (
               <li
                 key={asset.symbol}
                 className="flex items-center justify-between p-3 rounded-lg border border-gray-500"
@@ -251,7 +256,7 @@ function PortfolioBuilder({}: PortfolioBuilderProps) {
             ))}
           </ul>
 
-          {assets.length === 0 && (
+          {watch('assets')?.length === 0 && (
             <div className="text-center py-8 text-gray-500 border-2 border-dashed border-gray-300 rounded-lg">
               <p>ETF를 선택해서 포트폴리오를 구성해보세요</p>
             </div>
@@ -263,7 +268,7 @@ function PortfolioBuilder({}: PortfolioBuilderProps) {
         <h4 className="font-semibold text-lg text-gray-700  mb-3 ">
           포트폴리오 비중
         </h4>
-        {assets.length > 0 && ratioData.some((item) => item.value > 0) ? (
+        {watch('assets')?.length > 0 && ratioData.some((item) => item.value > 0) ? (
           <div className="flex-1 min-h-0 h-40">
             <PieChart
               series={ratioData.map((item) => item.value)}

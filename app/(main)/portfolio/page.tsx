@@ -1,29 +1,25 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import {
+  rebalanceFrequencyToKorean
+} from "@/app/interface/enum/rebanalceFrequency";
+import DeletePortfolioDialog from "@/components/dialog/deletePortfolioDialog";
+import CustomSpinner from "@/components/spinner/customSpinner";
+import { Button } from "@/components/ui/button";
+import useDeletePortfolio from "@/lib/hooks/mutation/useDeleteProtfolio";
+import useGetPortfolios from "@/lib/hooks/query/useGetPortfolios";
+import { formatWithCommas } from "@/lib/utils";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
-import { Button } from "@/components/ui/button";
-import {
-  RebalanceFrequency,
-  rebalanceFrequencyToKorean,
-} from "@/app/interface/enum/rebanalceFrequency";
-import useGetPortfolios from "@/lib/hooks/query/useGetPortfolios";
 import {
   Calendar,
   CircleOff,
   DollarSign,
-  Eye,
   SquarePen,
   Trash,
-  Zap,
+  Zap
 } from "lucide-react";
-import CustomSpinner from "@/components/spinner/customSpinner";
-import { formatWithCommas } from "@/lib/utils";
-import BacktestingViewDialog from "@/components/dialog/backtestingViewDialog";
-import useDeletePortfolio from "@/lib/hooks/mutation/useDeleteProtfolio";
-import DeletePortfolioDialog from "@/components/dialog/deletePortfolioDialog";
+import { useRouter } from "next/navigation";
 
 function PortfolioListPage() {
   const { data: portfolios, isLoading, error } = useGetPortfolios({});
@@ -129,6 +125,7 @@ function PortfolioListPage() {
                     </p>
                   )}
 
+        
                   <div className="flex items-center gap-6 text-sm text-gray-500">
                     <div className="flex items-center gap-1">
                       <DollarSign className="size-4" />
@@ -153,43 +150,35 @@ function PortfolioListPage() {
                       </span>
                     </div>
                   </div>
+                  <ul className="flex gap-2 text-sm">
+                    {portfolio.assets.map((asset) => (
+                      <li key={asset.id} className="text-gray-600">
+                        {asset.symbol} ({asset.weight * 100}%)
+                      </li>
+                    ))}
+                  </ul>
+
                 </div>
 
                 <div className="flex gap-2 ml-4">
-                  <BacktestingViewDialog asChild portfolioId={portfolio.id}>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex items-center gap-1"
-                    >
-                      <Eye />
-                      보기
-                    </Button>
-                  </BacktestingViewDialog>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEditPortfolio(portfolio.id)}
-                    className="flex items-center gap-1"
-                  >
-                    <SquarePen />
-                    수정
-                  </Button>
-
+            
                   <Button
                     size="sm"
                     onClick={() =>
-                      router.push(`/backtesting?portfolio=${portfolio.id}`)
+                      router.push(`/backtesting?id=${portfolio.id}`)
                     }
                     className="flex items-center gap-1"
                   >
                     <Zap />
-                    백테스팅
+                    수정
                   </Button>
 
-                  <DeletePortfolioDialog portfolioId={portfolio.id} onDelete={() => handleDeletePortfolio(portfolio.id)}>
+                  <DeletePortfolioDialog
+                    portfolioId={portfolio.id}
+                    onDelete={() => handleDeletePortfolio(portfolio.id)}
+                  >
                     <Button
-                    type="button"
+                      type="button"
                       variant="destructive"
                       size="sm"
                       className="flex items-center gap-1"

@@ -67,6 +67,7 @@ export interface PortfolioDTO {
   user_id?: string;
   assets: PortfolioAssetDTO[];
   setting: PortfolioSettingDTO;
+  metrics: PortfolioMetricsDTO;
 }
 
 export const createPortfolioDTO = (portfolioData: PortfolioDTO) => {
@@ -80,6 +81,7 @@ export const createPortfolioDTO = (portfolioData: PortfolioDTO) => {
     user_id: portfolioData.user_id,
     assets: portfolioData.assets,
     setting: portfolioData.setting,
+    metrics: portfolioData.metrics,
   };
 };
 
@@ -101,8 +103,26 @@ export const createPortfolioAssetDTO = (
     portfolio_id: portfolioAssetData.portfolio_id,
     symbol: portfolioAssetData.symbol,
     weight: portfolioAssetData.weight,
+    shares: portfolioAssetData.shares,
     created: portfolioAssetData.created,
     updated: portfolioAssetData.updated,
+  };
+};
+
+export interface PortfolioAssetCreateDTO {
+  portfolio_id: string;
+  symbol: string;
+  weight: number;
+  shares: number;
+}
+
+export const createPortfolioAssetCreateDTO = (
+  portfolioAssetData: PortfolioAssetCreateDTO
+) => {
+  return {
+    portfolio_id: portfolioAssetData.portfolio_id,
+    symbol: portfolioAssetData.symbol,
+    weight: portfolioAssetData.weight,
     shares: portfolioAssetData.shares,
   };
 };
@@ -131,31 +151,95 @@ export const createPortfolioSettingDTO = (
   };
 };
 
-export interface PortfolioSettingCreateDTO {
+
+export interface PortfolioSettingReqDTO {
   startDate: Date;
   endDate: Date;
   rebalanceFrequency: RebalanceFrequency;
 }
+
+export const createPortfolioSettingReqDTO = (
+  portfolioSettingData: PortfolioSettingReqDTO
+) => {
+  return {
+    startDate: portfolioSettingData.startDate,
+    endDate: portfolioSettingData.endDate,
+    rebalanceFrequency: portfolioSettingData.rebalanceFrequency,
+  };
+};
+
+export interface PortfolioMetricsDTO {
+  id: string;
+  portfolio_id: string;
+  totalReturn: number;
+  cagr: number;
+  mdd: number;
+  volatility: number;
+  sharpRatio: number;
+  finalAmount: number;
+  created: Date;
+  updated: Date;
+}
+
+export const createPortfolioMetricsDTO = (
+  portfolioMetricsData: PortfolioMetricsDTO
+) => {
+  return {
+    id: portfolioMetricsData.id,
+    portfolio_id: portfolioMetricsData.portfolio_id,
+    totalReturn: portfolioMetricsData.totalReturn,
+    cagr: portfolioMetricsData.cagr,
+    mdd: portfolioMetricsData.mdd,
+    volatility: portfolioMetricsData.volatility,
+    sharpRatio: portfolioMetricsData.sharpRatio,
+    finalAmount: portfolioMetricsData.finalAmount,
+    created: portfolioMetricsData.created,
+    updated: portfolioMetricsData.updated,
+  };
+};
+
+export interface PortfolioMetricsReqDTO {
+  totalReturn: number;
+  cagr: number;
+  mdd: number;
+  volatility: number;
+  sharpRatio: number;
+  finalAmount: number;
+}
+
+
+export const createPortfolioMetricsReqDTO = (
+  portfolioMetricsData: PortfolioMetricsReqDTO
+) => {
+  return {
+    totalReturn: portfolioMetricsData.totalReturn,
+    cagr: portfolioMetricsData.cagr,
+    mdd: portfolioMetricsData.mdd,
+    volatility: portfolioMetricsData.volatility,
+    sharpRatio: portfolioMetricsData.sharpRatio,
+    finalAmount: portfolioMetricsData.finalAmount,
+  };
+};
 
 export interface PortfolioCreateDTO {
   name: string;
   initialAmount: number;
   description?: string;
   user_id?: string;
-  rebalanceFrequency: RebalanceFrequency;
   assets: PortfolioAssetReqDTO[];
-  setting: PortfolioSettingCreateDTO;
+  setting: PortfolioSettingReqDTO;
+  metrics: PortfolioMetricsReqDTO;
 }
 
-export const createPortfolioCreateDTO = (portfolioData: PortfolioCreateDTO) => {
+export const createPortfolioReqDTO = (portfolioData: PortfolioCreateDTO) => {
   return {
     name: portfolioData.name,
     initialAmount: portfolioData.initialAmount,
     description: portfolioData.description,
     user_id: portfolioData.user_id,
-    rebalanceFrequency: portfolioData.rebalanceFrequency,
     assets: portfolioData.assets,
     setting: portfolioData.setting,
+    metrics: portfolioData.metrics,
   };
 };
 

@@ -23,7 +23,7 @@ interface useGetBenchmarksProps {
 
 function useGetBenchmarkInfos({ startDate, endDate, options }: useGetBenchmarksProps) {
   return useQuery({
-    queryKey: queryKeys.benchmarks,
+    queryKey: [queryKeys.benchmarks, startDate, endDate],
     queryFn: () => getBenchMarks(startDate, endDate),
     select: (data) => (data.success ? data.data : []),
     staleTime: 1000 * 60 * 5,

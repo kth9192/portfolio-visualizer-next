@@ -1,5 +1,5 @@
 import { createApiResponse } from "@/app/interface/dto/api";
-import { createPortfolioCreateDTO } from "@/app/interface/dto/portfolio";
+import { createPortfolioAssetReqDTO, createPortfolioMetricsReqDTO, createPortfolioReqDTO, createPortfolioSettingReqDTO } from "@/app/interface/dto/portfolio";
 import { portfolioCreateSchema } from "@/app/interface/schema/portfolio";
 import { createPortfolioService } from "@/lib/server/database";
 import { headers } from "next/headers";
@@ -41,21 +41,28 @@ export async function POST(req: NextRequest) {
 
     const portfolioService = await createPortfolioService();
 
-    const res = await portfolioService.savePortfolio(createPortfolioCreateDTO({
+    const res = await portfolioService.savePortfolio(createPortfolioReqDTO({
       name: validatedData.data.name,
       initialAmount: validatedData.data.initialAmount,
       description: validatedData.data.description,
-      rebalanceFrequency: validatedData.data.rebalanceFrequency,
-      assets: validatedData.data.assets.map((asset) => ({
+      assets: validatedData.data.assets.map((asset) => createPortfolioAssetReqDTO({
         symbol: asset.symbol,
         weight: asset.weight,
         shares: asset.shares,
       })),
-      setting:  {
-        rebalanceFrequency: validatedData.data.rebalanceFrequency,
+      setting: createPortfolioSettingReqDTO({
+        rebalanceFrequency: validatedData.data.setting.rebalanceFrequency,
         startDate: validatedData.data.setting.startDate,
         endDate: validatedData.data.setting.endDate,
-      },
+      }),
+      metrics: createPortfolioMetricsReqDTO({
+        totalReturn: validatedData.data.metrics.totalReturn,
+        cagr: validatedData.data.metrics.cagr,
+        mdd: validatedData.data.metrics.mdd,
+        volatility: validatedData.data.metrics.volatility,
+        sharpRatio: validatedData.data.metrics.sharpRatio,
+        finalAmount: validatedData.data.metrics.finalAmount,
+      }),
       user_id: session.user.id,
     }));
 

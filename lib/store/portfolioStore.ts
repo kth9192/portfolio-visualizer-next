@@ -2,15 +2,16 @@ import {
   PortfolioAssetDTO,
   PortfolioAssetReqDTO,
   PortfolioCreateDTO,
-  PortfolioSettingCreateDTO,
+  PortfolioSettingReqDTO,
   PortfolioSettingDTO,
 } from "@/app/interface/dto/portfolio";
 import { RebalanceFrequency } from "@/app/interface/enum/rebanalceFrequency";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
+import { subscribeWithSelector } from 'zustand/middleware';
 
 export interface PortfolioStoreState extends PortfolioCreateDTO {
-  setting: PortfolioSettingCreateDTO;
+  setting: PortfolioSettingReqDTO;
 }
 
 export interface PortfolioStoreActions {
@@ -22,7 +23,9 @@ export interface PortfolioStoreActions {
   setDescription: (description: string) => void;
 
   addAsset: (asset: PortfolioAssetReqDTO) => void;
-  updateSetting: (setting: PortfolioSettingCreateDTO) => void;
+  updateSetting: (setting: PortfolioSettingReqDTO) => void;
+
+  initPortfolioEdit: (portfolio: PortfolioStoreState) => void;
 }
 
 const initState = {
@@ -55,7 +58,10 @@ export const usePortfolioStore = create<
     setDescription: (description: string) => set({ description }),
     addAsset: (asset: PortfolioAssetReqDTO) =>
       set({ assets: get().assets.concat(asset) }),
-    updateSetting: (setting: PortfolioSettingCreateDTO) =>
+    updateSetting: (setting: PortfolioSettingReqDTO) =>
       set({ setting: { ...get().setting, ...setting } }),
+
+    initPortfolioEdit: (portfolio: PortfolioStoreState) =>
+      set({ ...portfolio }),
   }))
 );

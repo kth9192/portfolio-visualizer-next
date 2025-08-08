@@ -12,6 +12,16 @@ export const getPortfolios = async (): Promise<ApiResponse<PortfolioDTO[]>> => {
   return res.data;
 };
 
+export const getPortfolioById = async (
+  portfolioId: string
+): Promise<ApiResponse<PortfolioDTO>> => {
+  const res = await apiInstance.get<ApiResponse<PortfolioDTO>>(
+    `/portfolio/${portfolioId}`
+  );
+
+  return res.data;
+};
+
 export const postSavePortfolio = async (
   portfolio: PortfolioCreateDTO
 ): Promise<ApiResponse<PortfolioDTO>> => {
