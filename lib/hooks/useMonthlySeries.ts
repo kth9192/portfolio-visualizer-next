@@ -39,10 +39,10 @@ const getCommonMonths = (
     const monthPrices = priceMap.get(yearMonth);
     if (!monthPrices) continue;
 
-    const hasAllSymbols = symbols.every((symbol) => 
-      monthPrices.has(symbol) && monthPrices.get(symbol)! > 0
+    const hasAllSymbols = symbols.every(
+      (symbol) => monthPrices.has(symbol) && monthPrices.get(symbol)! > 0
     );
-    
+
     if (hasAllSymbols) {
       commonMonths.push(yearMonth);
     }
@@ -68,16 +68,16 @@ const calculateCumulative = (
   }[] = [];
 
   if (commonMonths.length === 0) {
-    console.warn('No common months found');
+    console.warn("No common months found");
     return result;
   }
 
   const currentShares = new Map<string, number>();
-  
+
   // 초기 주식 수량 계산
   const firstMonthPrices = priceMap.get(commonMonths[0]);
   if (!firstMonthPrices) {
-    console.error('First month prices not found');
+    console.error("First month prices not found");
     return result;
   }
 
@@ -88,7 +88,7 @@ const calculateCumulative = (
       console.error(`Invalid price for ${asset.symbol}: ${price}`);
       return;
     }
-    
+
     const targetAmount = asset.weight * initialAmount;
     const shares = targetAmount / price;
     currentShares.set(asset.symbol, shares);
@@ -100,7 +100,11 @@ const calculateCumulative = (
     if (!monthPrices) return;
 
     // 리밸런싱 체크
-    const isRebalanceMonth = checkRebalanceCondition(yearMonth, idx, rebalanceFrequency);
+    const isRebalanceMonth = checkRebalanceCondition(
+      yearMonth,
+      idx,
+      rebalanceFrequency
+    );
 
     if (isRebalanceMonth && idx > 0) {
       // 현재 포트폴리오 가치 계산
@@ -112,7 +116,12 @@ const calculateCumulative = (
       });
 
       // 리밸런싱 실행
-      rebalancePortfolio(portfolio, currentShares, currentPortfolioValue, monthPrices);
+      rebalancePortfolio(
+        portfolio,
+        currentShares,
+        currentPortfolioValue,
+        monthPrices
+      );
     }
 
     // 포트폴리오 가치 계산
@@ -126,11 +135,12 @@ const calculateCumulative = (
     // 수익률 계산
     const cumulativeReturn = (portfolioValue - initialAmount) / initialAmount;
     const cumulativeReturnsPercent = cumulativeReturn * 100;
-    
+
     let monthlyReturn = 0;
     if (idx > 0 && result[idx - 1]) {
       const prevValue = result[idx - 1].portfolio_value;
-      monthlyReturn = prevValue > 0 ? (portfolioValue - prevValue) / prevValue : 0;
+      monthlyReturn =
+        prevValue > 0 ? (portfolioValue - prevValue) / prevValue : 0;
     }
 
     result.push({
@@ -154,7 +164,7 @@ const checkRebalanceCondition = (
   if (index === 0) return false; // 첫 번째 월은 리밸런싱 하지 않음
 
   const [year, month] = yearMonth.split("-").map(Number);
-  
+
   if (isNaN(year) || isNaN(month)) {
     console.error(`Invalid year_month format: ${yearMonth}`);
     return false;
@@ -183,12 +193,12 @@ const rebalancePortfolio = (
   portfolio.assets.forEach((asset) => {
     const targetAmount = asset.weight * currentPortfolioValue;
     const price = monthPrices.get(asset.symbol);
-    
+
     if (!price || price <= 0) {
       console.error(`Invalid price for rebalancing ${asset.symbol}: ${price}`);
       return;
     }
-    
+
     const newShares = targetAmount / price;
     currentShares.set(asset.symbol, newShares);
   });
@@ -203,10 +213,9 @@ export const useMonthlySeries = ({
 }: useMonthlySeriesProps) => {
   const { data: backtestingMonthlyData } = useGetBacktestingMonthlyData({
     req: {
-      ticker: portfolio
-        .flatMap((portfolioInfo) =>
-          portfolioInfo.assets.map((asset) => asset.symbol)
-        ),
+      ticker: portfolio.flatMap((portfolioInfo) =>
+        portfolioInfo.assets.map((asset) => asset.symbol)
+      ),
       startDate: startOfDay(subYears(new Date(), 3)),
       endDate: startOfDay(new Date()),
       rebalanceFrequency,
@@ -214,29 +223,31 @@ export const useMonthlySeries = ({
   });
 
   if (!backtestingMonthlyData || backtestingMonthlyData.length === 0) {
-    console.warn('No backtesting monthly data available');
+    console.warn("No backtesting monthly data available");
     return [];
   }
 
   // 날짜 필터링 개선
   const filteredData = backtestingMonthlyData.filter((data) => {
-    const [year, month] = data.year_month.split('-').map(Number);
+    const [year, month] = data.year_month.split("-").map(Number);
     const dataDate = new Date(year, month - 1, 1); // month는 0-based
     return dataDate >= startDate && dataDate <= endDate;
   });
 
   if (filteredData.length === 0) {
-    console.warn('No data after filtering by date range');
+    console.warn("No data after filtering by date range");
     return [];
   }
 
   const priceMap = makePriceMap(filteredData);
-  
+
   const result = portfolio.map((portfolioInfo) => {
     const commonMonths = getCommonMonths(priceMap, portfolioInfo.assets);
-    
+
+    console.log(commonMonths);
+
     if (commonMonths.length === 0) {
-      console.warn('No common months found for portfolio');
+      console.warn("No common months found for portfolio");
       return [];
     }
 

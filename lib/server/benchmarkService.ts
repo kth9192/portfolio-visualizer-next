@@ -40,7 +40,7 @@ export class BenchmarkService {
           year_month: item.year_month,
           monthly_return: Number(item.monthly_return),
           cumulative_value: Number(item.cumulative_value),
-          close_price: Number(item.close_price),
+          close: Number(item.close),
         })
       );
     } catch (error) {

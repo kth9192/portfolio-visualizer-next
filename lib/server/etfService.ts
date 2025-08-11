@@ -196,6 +196,10 @@ export class ETFService {
         orderBy: [{ symbol: "asc" }, { date: "asc" }],
       });
 
+
+      console.log('pricesData',pricesData);
+      
+
       const groupedData = pricesData.reduce((acc, price) => {
         if (!acc[price.symbol]) {
           acc[price.symbol] = [];

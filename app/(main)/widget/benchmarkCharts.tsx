@@ -55,7 +55,7 @@ function BenchmarkCharts() {
 
       if (tickerData.length === 0) return null;
 
-      const baseVal = tickerData[0].close_price;
+      const baseVal = tickerData[0].close;
 
       if (!baseVal || baseVal <= 0) {
         console.warn(`Invalid base price for ${ticker}:`, baseVal);
@@ -63,7 +63,7 @@ function BenchmarkCharts() {
       }
 
       const calculateCumulativeSeriesData = tickerData.map((data) => {
-        const accumulateValue = (data.close_price - baseVal) / baseVal;
+        const accumulateValue = (data.close - baseVal) / baseVal;
 
         return {
           x: data.year_month,

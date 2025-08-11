@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { queryKeys } from "./keys";
 import { BenchmarkData } from "@/app/interface/dto/benchmark";
+import { format } from "date-fns";
 
 interface useGetBenchmarksProps {
   startDate: Date;
@@ -23,7 +24,7 @@ interface useGetBenchmarksProps {
 
 function useGetBenchmarkInfos({ startDate, endDate, options }: useGetBenchmarksProps) {
   return useQuery({
-    queryKey: [queryKeys.benchmarks, startDate, endDate],
+    queryKey: [queryKeys.benchmarks, format(startDate , 'yyyy-MM-dd'), format(endDate, 'yyyy-MM-dd')],
     queryFn: () => getBenchMarks(startDate, endDate),
     select: (data) => (data.success ? data.data : []),
     staleTime: 1000 * 60 * 5,
