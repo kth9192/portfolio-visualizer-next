@@ -244,7 +244,6 @@ export const useMonthlySeries = ({
   const result = portfolio.map((portfolioInfo) => {
     const commonMonths = getCommonMonths(priceMap, portfolioInfo.assets);
 
-    console.log(commonMonths);
 
     if (commonMonths.length === 0) {
       console.warn("No common months found for portfolio");

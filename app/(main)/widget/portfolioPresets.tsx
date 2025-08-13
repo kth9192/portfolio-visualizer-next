@@ -1,6 +1,5 @@
 "use client";
 
-
 import { riskTypeToKorean } from "@/app/interface/enum/riskType";
 import CustomSpinner from "@/components/spinner/customSpinner";
 import CustomTag from "@/components/tag/customTag";
@@ -69,16 +68,18 @@ function PortfolioPresets() {
                                   )?.longName
                                 }
                               </div>
-                              <div>
-                                {etfInfos
-                                  ?.find((item) => item.symbol === asset.symbol)
-                                  ?.holdings?.map((holding) => holding.name)}
-                              </div>
-                              <div>
-                                {etfInfos
-                                  ?.find((item) => item.symbol === asset.symbol)
-                                  ?.sectors?.map((sector) => sector.sectorName)}
-                              </div>
+
+                              {etfInfos
+                                ?.find((item) => item.symbol === asset.symbol)
+                                ?.holdings?.map((holding) => (
+                                  <div key={holding.name}>{holding.name}</div>
+                                ))}
+
+                              {etfInfos
+                                ?.find((item) => item.symbol === asset.symbol)
+                                ?.sectors?.map((sector) => (
+                                  <div key={sector.sectorName}>{sector.sectorName}</div>
+                                ))}
                             </div>
                           }
                         >
@@ -90,15 +91,14 @@ function PortfolioPresets() {
                 </ul>
               </div>
             </div>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="rounded-full hover:bg-blue-50 text-blue-600 hover:text-blue-700 w-10 h-10 group transition-all duration-200"
-                aria-label="포트폴리오 분석 시작"
-              >
-                <ArrowRight className="size-6 group-hover:translate-x-0.5 transition-transform" />
-              </Button>
-          
+            <Button
+              size="icon"
+              variant="ghost"
+              className="rounded-full hover:bg-blue-50 text-blue-600 hover:text-blue-700 w-10 h-10 group transition-all duration-200"
+              aria-label="포트폴리오 분석 시작"
+            >
+              <ArrowRight className="size-6 group-hover:translate-x-0.5 transition-transform" />
+            </Button>
           </li>
         ))}
       </ul>

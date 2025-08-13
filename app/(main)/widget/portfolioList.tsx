@@ -11,10 +11,12 @@ import { DEFAULT_TICKERS } from "@/lib/resource";
 import { formatWithCommas } from "@/lib/utils";
 import { differenceInDays } from "date-fns";
 import { Link } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 
 
 function PortfolioList() {
+  const router= useRouter();
   const {
     data: portfolios,
     isLoading,
@@ -60,6 +62,10 @@ function PortfolioList() {
         }, 0)
         .toFixed(2)
     );
+  };
+
+  const handleMoveToCreatePortfolio = () => {
+    router.push("/backtesting");
   };
 
   return isLoading ? (
@@ -150,7 +156,7 @@ function PortfolioList() {
         과거 데이터를 기반으로 포트폴리오 성과를 미리 확인하고, 데이터 기반의
         투자 결정을 내려보세요!
       </p>
-      <Button className="w-full mx-auto">포트폴리오 추가하기</Button>
+      <Button className="w-full mx-auto" onClick={handleMoveToCreatePortfolio}>포트폴리오 추가하기</Button>
     </div>
   );
 }

@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 function LoginPage() {
   const router = useRouter();
 
-  const { mutateAsync, isPending } = usePostGuestLogin({
+  const { mutateAsync, isPending, isError } = usePostGuestLogin({
     onCreateSuccess: (data) => {
       showToast.success("로그인 성공");
       router.refresh();
@@ -24,9 +24,9 @@ function LoginPage() {
   const handleGuestLogin = async () => {
     try {
       await mutateAsync();
-
     } catch (error) {
       console.error(error);
+      showToast.error("로그인 실패");
     }
   };
 
@@ -73,7 +73,13 @@ function LoginPage() {
           {isPending ? (
             <CustomSpinner className="size-10" />
           ) : (
-            <Button type="button" variant="ghost" className="w-full underline rounded-none py-3 hover:bg-black hover:text-white transition-colors " onClick={handleGuestLogin}>
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full underline rounded-none py-3 hover:bg-gray-100 hover:text-black transition-colors "
+              onClick={handleGuestLogin}
+            >
+              {" "}
               게스트 계정으로 시작하기
             </Button>
           )}

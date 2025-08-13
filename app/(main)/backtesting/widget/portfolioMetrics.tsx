@@ -205,7 +205,6 @@ function PortfolioMetrics({
   ]);
 
   useEffect(() => {
-    console.log("portfolioSimulationData", portfolioSimulationData);
 
     const timeoutId = setTimeout(() => {
       requestAnimationFrame(() => {

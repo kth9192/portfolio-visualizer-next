@@ -159,7 +159,6 @@ export class PortfolioService {
   }
 
   async getPortfolioById(id:string){
-    console.log("portfolioId", id);
 
     try {
 

@@ -173,14 +173,14 @@ function BenchmarkCharts() {
                                     item: { name: string; value: number },
                                     idx: number
                                   ) =>
-                                    `<li class="flex flex-row justify-between items-center gap-3">
+                                    `<li class="flex flex-row justify-between items-center gap-3" style="${item.value > 0 ? "" : "display: none;"}">
                                       <div class="flex flex-row items-center gap-1">
                                         <div class="size-2 rounded-full" style="background-color:${w.config.colors[idx]};">
                                         </div>
                                         <span>${item.name}</span>
                                       </div>
-                                    <span class="ml-1 font-bold" style="color:${w.config.colors[idx]}">${item.value}%</span>
-                                  </li>`
+                                      <span class="ml-1 font-bold" style="color:${w.config.colors[idx]};">${item.value}%</span>
+                                    </li>`
                                 )
                                 .join("")}
                               

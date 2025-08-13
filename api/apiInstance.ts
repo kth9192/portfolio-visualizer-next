@@ -21,6 +21,7 @@ const apiInstance = axios.create({
 
 apiInstance.defaults.withCredentials = true;
 apiInstance.defaults.headers.common.Accept = "application/json";
+apiInstance.defaults.timeout = 10000;
 
 // 클라이언트 사이드에서만 localStorage 접근
 const getStorageItem = (key: string): string | null => {
