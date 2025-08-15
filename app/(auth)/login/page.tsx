@@ -13,7 +13,7 @@ function LoginPage() {
   const { mutateAsync, isPending,  } = usePostGuestLogin({
     onCreateSuccess: () => {
       showToast.success("로그인 성공");
-      router.refresh();
+      router.replace('/');
     },
     onCreateError: (error) => {
       showToast.error("로그인 실패");
