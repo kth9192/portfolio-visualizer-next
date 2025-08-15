@@ -2,7 +2,7 @@ import { createApiResponse } from "@/app/interface/dto/api";
 import { createAuthGuestService } from "@/lib/server/database";
 import { NextRequest, NextResponse } from "next/server";
 
-export const POST = async (_request: NextRequest) => {
+export const POST = async () => {
   try {
     const authGuestService = createAuthGuestService();
     const result = await authGuestService.createGuestAccount();
