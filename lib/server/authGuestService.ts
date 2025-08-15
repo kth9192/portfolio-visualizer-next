@@ -15,14 +15,14 @@ export class AuthGuestService {
     const generateRandomString = createRandomStringGenerator("A-Z", "0-9", "a-z");
 
     const guestId = `guest_${generateRandomString(10)}`;
-    const guestEmaile = `${guestId}@guest.tmp`;
+    const guestEmail = `${guestId}@guest.tmp`;
     const guestPassword = generateRandomString(32);
 
     try {
       const user = await auth.api.signUpEmail({
         body: {
           name: `guest-${guestId}`,
-          email: guestEmaile,
+          email: guestEmail,
           password: guestPassword,
         },
       });
@@ -43,7 +43,7 @@ export class AuthGuestService {
 
       const loginResponse = await auth.api.signInEmail({
         body: {
-          email: guestEmaile,
+          email: guestEmail,
           password: guestPassword,
         },
         asResponse: true,
@@ -53,7 +53,7 @@ export class AuthGuestService {
         user: updateUser,
         loginResponse,
         credentials: {
-          email: guestEmaile,
+          email: guestEmail,
           password: guestPassword,
         },
       };

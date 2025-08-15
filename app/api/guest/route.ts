@@ -7,25 +7,22 @@ export const POST = async (request: NextRequest) => {
     const authGuestService = createAuthGuestService();
     const result = await authGuestService.createGuestAccount();
 
+    const res = createApiResponse(result, true, "success", 200);
+    const response = NextResponse.json(res, { status: 200 });
 
+    // Better Auth 세션 쿠키 설정
     if (result.loginResponse?.headers) {
       const setCookieHeader = result.loginResponse.headers.get("set-cookie");
-
+      
       if (setCookieHeader) {
-        const cookieMatches = setCookieHeader.match(/([^=]+)=([^;]+)/g);
-        if (cookieMatches) {
-          cookieMatches.forEach((cookie) => {
-            const [name, value] = cookie.split("=");
-
-            request.cookies.set(name.trim(), value.trim());
-          });
-        }
+        console.log("Original cookie header:", setCookieHeader);
+        
+        // Better Auth 쿠키를 그대로 클라이언트에 전달
+        response.headers.set("Set-Cookie", setCookieHeader);
       }
     }
 
-    const res = createApiResponse(result, true, "success", 200);
-
-    return NextResponse.json(res, { status: 200 });
+    return response;
   } catch (error) {
     console.error("createGuestAccount error", error);
     return NextResponse.json(
