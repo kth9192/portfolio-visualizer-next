@@ -2,7 +2,7 @@ import { ApiResponse } from "@/app/interface/dto/api";
 import { BacktestingRes } from "@/app/interface/dto/backtesting";
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { queryKeys } from "./keys";
-import { getBacktestingData } from "@/api/backtesting";
+import { getBacktestingData } from "@/lib/api/backtesting";
 import { BacktestingReq } from "@/app/interface/dto/backtesting";
 
 interface useGetBacktestingDataProps {

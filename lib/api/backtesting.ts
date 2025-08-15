@@ -1,11 +1,8 @@
-import { BacktestingRes } from "@/app/interface/dto/backtesting";
 import { ApiResponse } from "@/app/interface/dto/api";
-import { AxiosResponse } from "axios";
-import apiInstance from "./apiInstance";
-import { BacktestingReq } from "@/app/interface/dto/backtesting";
-import { RebalanceFrequency } from "@/app/interface/enum/rebanalceFrequency";
-import { format } from "date-fns";
+import { BacktestingReq, BacktestingRes } from "@/app/interface/dto/backtesting";
 import { ETFPriceMonthlyDTO } from "@/app/interface/dto/etf";
+import { format } from "date-fns";
+import apiInstance from "./apiInstance";
 
 export const getBacktestingData = async ({
   ticker,

@@ -1,16 +1,11 @@
-import apiInstance from "./apiInstance";
-import {
-  ETFDetail,
-  ETFDetailDTO,
-  ETFInfoDTO,
-  ETFPriceDTO,
-  ETFTimeSeriesDTO,
-  ETFTrendDTO,
-} from "@/app/interface/dto/etf";
 import { ApiResponse } from "@/app/interface/dto/api";
-import { AxiosResponse } from "axios";
 import { BenchmarkData } from "@/app/interface/dto/benchmark";
+import {
+  ETFInfoDTO,
+  ETFPriceDTO
+} from "@/app/interface/dto/etf";
 import { format } from "date-fns";
+import apiInstance from "./apiInstance";
 
 export const getETFList = async (): Promise<ApiResponse<ETFInfoDTO[]>> => {
   const response = await apiInstance.get<ApiResponse<ETFInfoDTO[]>>("/etf");

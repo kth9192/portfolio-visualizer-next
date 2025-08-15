@@ -1,4 +1,4 @@
-import { getTrends } from "@/api/etf";
+import { getTrends } from "@/lib/api/etf";
 import { ApiResponse } from "@/app/interface/dto/api";
 import { ETFPriceDTO } from "@/app/interface/dto/etf";
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";

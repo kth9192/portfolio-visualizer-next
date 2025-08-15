@@ -1,4 +1,4 @@
-import { getETFList } from "@/api/etf";
+import { getETFList } from "@/lib/api/etf";
 import { ApiResponse } from "@/app/interface/dto/api";
 import { ETFInfoDTO } from "@/app/interface/dto/etf";
 import {

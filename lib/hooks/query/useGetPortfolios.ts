@@ -3,7 +3,7 @@ import { ApiResponse } from "@/app/interface/dto/api";
 import { PortfolioDTO } from "@/app/interface/dto/portfolio";
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { queryKeys } from "./keys";
-import { getPortfolios } from "@/api/portfolio";
+import { getPortfolios } from "@/lib/api/portfolio";
 
 interface useGetPortfoliosProps {
   options?: Omit<
