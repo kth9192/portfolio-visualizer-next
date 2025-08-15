@@ -10,7 +10,7 @@ export interface BacktestingReq {
 
 export interface BacktestingRes {
   priceInfos: ETFTimeSeriesDTO[];
-  metrics: any;
+  metrics: unknown;
 }
 
 export const createBacktestingRes = ({
@@ -18,7 +18,7 @@ export const createBacktestingRes = ({
   metrics,
 }: {
   priceInfos: ETFTimeSeriesDTO[];
-  metrics: any;
+  metrics: unknown;
 }): BacktestingRes => ({ priceInfos, metrics });
 
 export interface BacktestingSetting {

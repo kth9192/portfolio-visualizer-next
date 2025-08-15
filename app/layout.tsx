@@ -1,8 +1,7 @@
-import SideBar from "@/components/sideBar";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import QueryProvider from "./lib/queryProvider";
+import QueryProvider from "../lib/queryProvider";
 import "./globals.css";
 
 const pretendard = localFont({
@@ -69,14 +68,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${pretendard.className} antialiased `}
-      >
+      <body className={`${pretendard.className} antialiased `}>
         <QueryProvider>
-          <div className="flex">
-            <SideBar />
-            <main className="w-full h-screen overflow-y-auto">{children}</main>
-          </div>
+          {children}
           <Toaster />
         </QueryProvider>
       </body>

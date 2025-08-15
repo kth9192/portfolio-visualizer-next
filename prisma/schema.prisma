@@ -4,11 +4,10 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url       = env("NEXT_DATABASE_URL")
-  directUrl = env("NEXT_DIRECT_URL")
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model etf_infos {
   id                 BigInt               @id @default(autoincrement())
   symbol             String               @unique
@@ -24,14 +23,15 @@ model etf_infos {
   inception_date     DateTime?            @db.Date
   created            DateTime?            @default(now()) @db.Timestamptz(6)
   updated            DateTime?            @default(now()) @db.Timestamptz(6)
+  etf_holdings       etf_holdings[]
   etf_prices         etf_prices[]
   etf_prices_monthly etf_prices_monthly[]
+  etf_sector_weights etf_sector_weights[]
   portfolio_assets   portfolio_assets[]
 
   @@index([symbol], map: "idx_etf_infso_symbol")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model etf_prices {
   id        BigInt    @id @default(autoincrement())
   symbol    String
@@ -53,7 +53,6 @@ model etf_prices {
   @@index([symbol, date], map: "idx_etf_prices_symbol_date")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model etf_prices_monthly {
   id         BigInt    @id @default(autoincrement())
   symbol     String
@@ -74,8 +73,6 @@ model etf_prices_monthly {
   @@index([symbol, year_month], map: "idx_etf_prices_monthly_symbol_year_month")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model portfolio_assets {
   id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   portfolio_id String     @db.Uuid
@@ -84,7 +81,7 @@ model portfolio_assets {
   shares       Decimal?   @default(0) @db.Decimal(15, 6)
   created      DateTime   @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
   updated      DateTime   @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  portfolios   portfolios @relation(fields: [portfolio_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  portfolios   portfolios @relation(fields: [portfolio_id], references: [id], onDelete: Cascade)
   etf_infos    etf_infos  @relation(fields: [symbol], references: [symbol], onUpdate: NoAction)
 
   @@unique([portfolio_id, symbol], map: "portfolio_assets_symbol_unique_check")
@@ -92,35 +89,160 @@ model portfolio_assets {
   @@index([symbol], map: "idx_portfolio_assets_symbol")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model portfolio_settings {
   id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  portfolio_id        String              @db.Uuid
+  portfolio_id        String              @unique @db.Uuid
   start_date          DateTime            @db.Date
   end_date            DateTime            @db.Date
   rebalance_frequency rebalance_frequency @default(quarterly)
   created             DateTime            @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
   updated             DateTime            @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  portfolios          portfolios          @relation(fields: [portfolio_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  portfolios          portfolios          @relation(fields: [portfolio_id], references: [id], onDelete: Cascade)
 
   @@index([portfolio_id], map: "idx_portfolio_settings_portfolio_id")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model portfolios {
-  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  created            DateTime             @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  updated            DateTime             @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  id                 String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created            DateTime            @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated            DateTime            @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
   name               String
   description        String?
-  initial_amount     Decimal              @default(10000) @db.Decimal(15, 2)
-  user_id            String?              @db.Uuid
+  initial_amount     Decimal             @default(10000) @db.Decimal(15, 2)
+  user_id            String?
   portfolio_assets   portfolio_assets[]
-  portfolio_settings portfolio_settings[]
+  portfolio_metrics  portfolio_metrics?
+  portfolio_settings portfolio_settings?
+  user               User?               @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id], map: "idx_portfolios_user_id")
+}
+
+model etf_holdings {
+  id          BigInt    @id @default(autoincrement())
+  inserted_at DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at  DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  etf_info_id BigInt
+  symbol      String
+  name        String    @db.VarChar(255)
+  weight      Decimal   @db.Decimal(8, 6)
+  etf_infos   etf_infos @relation(fields: [etf_info_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([etf_info_id, name])
+  @@index([etf_info_id], map: "idx_etf_holdings_etf_info_id")
+  @@index([etf_info_id, weight(sort: Desc)], map: "idx_etf_holdings_etf_weight")
+  @@index([symbol], map: "idx_etf_holdings_symbol")
+  @@index([symbol, weight(sort: Desc)], map: "idx_etf_holdings_symbol_weight")
+}
+
+model etf_sector_weights {
+  id          BigInt    @id(map: "etf_sector_weight_pkey") @default(autoincrement())
+  inserted_at DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at  DateTime  @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  etf_info_id BigInt
+  symbol      String    @db.VarChar(10)
+  sector      String    @db.VarChar(50)
+  weight      Decimal   @db.Decimal(8, 6)
+  etf_infos   etf_infos @relation(fields: [etf_info_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "etf_sector_weight_etf_info_id_fkey")
+
+  @@unique([symbol, sector], map: "etf_sector_weight_symbol_sector_key")
+  @@index([symbol], map: "idx_etf_sector_weight_etf_id")
+  @@index([symbol, weight(sort: Desc)], map: "idx_etf_sector_weight_etf_weight")
+  @@index([sector], map: "idx_etf_sector_weight_sector")
+}
+
+model benchmark_data {
+  id               BigInt   @id @default(autoincrement())
+  symbol           String
+  year_month       String
+  monthly_return   Decimal  @db.Decimal
+  cumulative_value Decimal  @db.Decimal
+  close            Decimal? @db.Decimal
+  created_at       DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at       DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+
+  @@unique([symbol, year_month], map: "benchmark_data_symbol_year_month_unique")
+  @@index([symbol], map: "idx_benchmark_data_monthly_data_symbol")
+  @@index([symbol, year_month], map: "idx_benchmark_data_symbol_year_month")
+  @@index([symbol, year_month(sort: Desc)], map: "idx_benchmark_data_symbol_year_month_desc")
+  @@index([year_month], map: "idx_benchmark_data_year_month")
+}
+
+model User {
+  id             String       @id
+  name           String
+  email          String       @unique
+  emailVerified  Boolean
+  image          String?
+  createdAt      DateTime
+  updatedAt      DateTime
+  guestExpiresAt DateTime?
+  isGuest        Boolean      @default(false)
+  accounts       Account[]
+  portfolios     portfolios[]
+  sessions       Session[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
+
+model portfolio_metrics {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  portfolio_id String     @unique @db.Uuid
+  created_at   DateTime   @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at   DateTime   @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  total_return Decimal?   @db.Decimal
+  cagr         Decimal?   @db.Decimal
+  mdd          Decimal?   @db.Decimal
+  volatility   Decimal?   @db.Decimal
+  sharp_ratio  Decimal?   @db.Decimal
+  final_amount Decimal?   @db.Decimal
+  portfolios   portfolios @relation(fields: [portfolio_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([portfolio_id], map: "idx_portfolio_metrics_portfolio_id")
 }
 
 enum rebalance_frequency {

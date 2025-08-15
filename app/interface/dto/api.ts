@@ -5,7 +5,7 @@ export interface ApiResponse<T> {
   statusCode: number;
 }
 
-export const createApiResponse = (data: any, success: boolean, message: string, statusCode: number): ApiResponse<any> => {
+export const createApiResponse = (data: unknown, success: boolean, message: string, statusCode: number): ApiResponse<unknown> => {
     return {
         success,
         data,

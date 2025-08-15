@@ -1,18 +1,17 @@
-import { useState } from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { format } from "date-fns";
-import { Button } from "../ui/button";
-import { twMerge } from "tailwind-merge";
 import { ko } from "date-fns/locale";
-import { DayPicker } from "react-day-picker";
 import { CalendarIcon } from "lucide-react";
+import { useState } from "react";
+import { DayPicker } from "react-day-picker";
+import { twMerge } from "tailwind-merge";
+import { Button } from "../ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 interface SingleCalendarProps {
   selected?: Date;
   onSelect?: (date: Date | undefined) => void;
   placeholder?: string;
   disabled?: boolean;
-  className?: string;
 }
 
 const SingleCalendar: React.FC<SingleCalendarProps> = ({
@@ -20,7 +19,6 @@ const SingleCalendar: React.FC<SingleCalendarProps> = ({
   onSelect,
   placeholder = "날짜를 선택하세요",
   disabled = false,
-  className,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -43,7 +41,7 @@ const SingleCalendar: React.FC<SingleCalendarProps> = ({
             ) : (
               <>
                 <CalendarIcon className="h-4 w-4" />
-                <span>날짜를 선택해주세요</span>
+                <span>{placeholder}</span>
               </>
             )}
           </Button>

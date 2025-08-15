@@ -1,5 +1,4 @@
 import { CheckIcon, InfoIcon } from "lucide-react";
-import React from "react";
 import { toast } from "sonner";
 
 const ToastIcon = ({ type }: { type: string }) => {
@@ -7,11 +6,11 @@ const ToastIcon = ({ type }: { type: string }) => {
     case "success":
       return <CheckIcon className="size-4 text-pbaa-system-green" />;
     case "error":
-      return <div>error</div>;
+      return <InfoIcon className="size-4 " />;
     case "warning":
-      return <div>warning</div>;
+      return <InfoIcon className="size-4 " />;
     case "info":
-      return <div>info</div>;
+      return <InfoIcon className="size-4 " />;
     default:
       return <></>;
   }
@@ -21,8 +20,11 @@ export const showToast = {
   success: (title: string, description?: string) => {
     toast.custom(() => (
       <div className="flex min-w-80 items-center gap-2.5 bg-primary text-white shadow px-3 py-4  rounded-[10px]">
-        <CheckIcon className="size-4 text-pbaa-system-green" />
+        <ToastIcon type="success" />
         <span className="text-sm font-medium">{title}</span>
+        {description && (
+          <span className="text-sm font-medium">{description}</span>
+        )}
       </div>
     ));
   },
@@ -30,8 +32,11 @@ export const showToast = {
   error: (title: string, description?: string) => {
     toast.custom(() => (
       <div className="flex min-w-80 items-center gap-2.5 bg-destructive text-white shadow px-3 py-4 rounded-[10px]">
-        <InfoIcon className="size-4 " />
+        <ToastIcon type="error" />
         <span className="text-sm font-medium">{title}</span>
+        {description && (
+          <span className="text-sm font-medium">{description}</span>
+        )}
       </div>
     ));
   },
