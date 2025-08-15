@@ -36,7 +36,7 @@ export async function middleware(request: NextRequest) {
   const isLoggedIn = !!sessionCookie?.value;
 
   const isAuthPage =
-    pathname.startsWith("/auth") || pathname.startsWith("/login");
+    pathname.startsWith("/auth") || pathname.includes("/login");
 
   console.log(" Session cookie exists:", isLoggedIn, pathname);
   console.log(" Is auth page:", isAuthPage);
