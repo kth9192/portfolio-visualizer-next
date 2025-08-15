@@ -2,7 +2,7 @@ import { ApiResponse } from "@/app/interface/dto/api";
 import { ETFPriceMonthlyDTO } from "@/app/interface/dto/etf";
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { queryKeys } from "./keys";
-import { getBacktestDataMonthly } from "@/api/backtesting";
+import { getBacktestDataMonthly } from "@/lib/api/backtesting";
 import { BacktestingReq } from "@/app/interface/dto/backtesting";
 
 interface useGetBacktestingMonthlyDataProps {

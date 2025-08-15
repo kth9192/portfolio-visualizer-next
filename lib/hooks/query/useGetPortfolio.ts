@@ -1,6 +1,6 @@
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { queryKeys } from "./keys";
-import { getPortfolioById } from "@/api/portfolio";
+import { getPortfolioById } from "@/lib/api/portfolio";
 import { ApiResponse } from "@/app/interface/dto/api";
 import { PortfolioDTO } from "@/app/interface/dto/portfolio";
 

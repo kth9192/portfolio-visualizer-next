@@ -1,4 +1,4 @@
-import { getBenchMarks } from "@/api/etf";
+import { getBenchMarks } from "@/lib/api/etf";
 import { ApiResponse } from "@/app/interface/dto/api";
 import {
   useQuery,

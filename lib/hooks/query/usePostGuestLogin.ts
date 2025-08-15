@@ -1,6 +1,6 @@
 import { useMutation, UseMutationOptions, useQueryClient } from "@tanstack/react-query"
 import { queryKeys } from "./keys"
-import { postGuestLogin } from "@/api/auth"
+import { postGuestLogin } from "@/lib/api/auth"
 import { GuestLoginRes } from "@/app/interface/dto/auth"
 import { ApiResponse } from "@/app/interface/dto/api"
 

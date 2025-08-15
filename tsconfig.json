@@ -27,7 +27,7 @@
       "@/*": ["./*"],
       "@/components/*": ["./components/*"],
       "@/lib/*": ["./lib/*"],
-      "@/api/*": ["./api/*"],
+      "@/api/*": ["lib/api/*"],
       "@/types/*": ["./types/*"]
     }
   },

@@ -1,10 +1,9 @@
-import { AxiosResponse } from "axios";
-import apiInstance from "./apiInstance";
 import { ApiResponse } from "@/app/interface/dto/api";
 import {
   PortfolioCreateDTO,
   PortfolioDTO,
 } from "@/app/interface/dto/portfolio";
+import apiInstance from "./apiInstance";
 
 export const getPortfolios = async (): Promise<ApiResponse<PortfolioDTO[]>> => {
   const res = await apiInstance.get<ApiResponse<PortfolioDTO[]>>("/portfolio");
