@@ -1,8 +1,8 @@
 "use client"
 
-import React from 'react'
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import React from 'react';
 import { Button } from '../ui/button';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 
 interface DeletePortfolioDialogProps {
     portfolioId: string;
@@ -10,7 +10,7 @@ interface DeletePortfolioDialogProps {
     onDelete: () => void;
 }
 
-function DeletePortfolioDialog({ portfolioId, children, onDelete }: DeletePortfolioDialogProps) {
+function DeletePortfolioDialog({ children, onDelete }: DeletePortfolioDialogProps) {
   return (
     <Dialog>
         <DialogTrigger asChild>

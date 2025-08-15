@@ -1,4 +1,3 @@
-import SideBar from "@/components/sideBar";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
 import localFont from "next/font/local";

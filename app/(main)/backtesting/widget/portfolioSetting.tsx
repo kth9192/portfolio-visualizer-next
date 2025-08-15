@@ -4,43 +4,24 @@ import {
   RebalanceFrequency,
   rebalanceOptions,
 } from "@/app/interface/enum/rebanalceFrequency";
-import { usePortfolioStore } from "@/lib/store/portfolioStore";
-import RangeCalendar from "@/components/calendar/rangeCalendar";
-import SingleCalendar from "@/components/calendar/singleCalendar";
-import CustomSelect from "@/components/select/customSelect";
-import React from "react";
-import { DateRange } from "react-day-picker";
 import { PortfolioCreateSchemaType } from "@/app/interface/schema/portfolio";
-import { Controller, useFormContext, useWatch } from "react-hook-form";
-import { Watch } from "lucide-react";
+import RangeCalendar from "@/components/calendar/rangeCalendar";
+import CustomSelect from "@/components/select/customSelect";
+import { DateRange } from "react-day-picker";
+import { Controller, useFormContext } from "react-hook-form";
 
 function PortfolioSetting() {
-  // const { setting, updateSetting } = usePortfolioStore();
 
-  const { register, control, watch, setValue } =
-    useFormContext<PortfolioCreateSchemaType>();
+  const { control } = useFormContext<PortfolioCreateSchemaType>();
 
-  const watchedVal = useWatch({
-    control,
-    name: [
-      "setting.startDate",
-      "setting.endDate",
-      "setting.rebalanceFrequency",
-    ],
-  });
-
-  const [startDate, endDate, rebalanceFrequency] = watchedVal;
-
-  const handleDateRange = (dateRange: DateRange | undefined) => {
-    if (!dateRange?.from || !dateRange?.to) return;
-
-    setValue("setting.startDate", dateRange.from, {
-      shouldValidate: true,
-    });
-    setValue("setting.endDate", dateRange.to, {
-      shouldValidate: true,
-    });
-  };
+  // const watchedVal = useWatch({
+  //   control,
+  //   name: [
+  //     "setting.startDate",
+  //     "setting.endDate",
+  //     "setting.rebalanceFrequency",
+  //   ],
+  // });
 
   return (
     <div className="flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -53,7 +34,10 @@ function PortfolioSetting() {
             <RangeCalendar
               selected={
                 field.value.startDate && field.value.endDate
-                  ? { from: new Date(field.value.startDate), to: new Date(field.value.endDate) }
+                  ? {
+                      from: new Date(field.value.startDate),
+                      to: new Date(field.value.endDate),
+                    }
                   : undefined
               }
               onSelect={(dateRange: DateRange | undefined) =>
@@ -84,8 +68,7 @@ function PortfolioSetting() {
           <Controller
             control={control}
             name="setting.rebalanceFrequency"
-            render={({ field, fieldState }) => {
-         
+            render={({ field }) => {
               return (
                 <CustomSelect<RebalanceFrequency>
                   items={rebalanceOptions}

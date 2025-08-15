@@ -1,10 +1,8 @@
 import { createApiResponse } from "@/app/interface/dto/api";
 import { createETFService } from "@/lib/server/database";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
-  const url = request.nextUrl;
-
+export async function GET() {
   const etfService = createETFService();
   const etfTrends = await etfService.getTrends();
 

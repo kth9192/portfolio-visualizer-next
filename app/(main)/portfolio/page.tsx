@@ -1,8 +1,6 @@
 "use client";
 
-import {
-  rebalanceFrequencyToKorean
-} from "@/app/interface/enum/rebanalceFrequency";
+import { rebalanceFrequencyToKorean } from "@/app/interface/enum/rebanalceFrequency";
 import DeletePortfolioDialog from "@/components/dialog/deletePortfolioDialog";
 import CustomSpinner from "@/components/spinner/customSpinner";
 import { Button } from "@/components/ui/button";
@@ -17,7 +15,7 @@ import {
   DollarSign,
   SquarePen,
   Trash,
-  Zap
+  Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -25,18 +23,10 @@ function PortfolioListPage() {
   const { data: portfolios, isLoading, error } = useGetPortfolios({});
   const router = useRouter();
 
-  const { mutate: deletePortfolio, isPending } = useDeletePortfolio();
+  const { mutate: deletePortfolio } = useDeletePortfolio();
 
   const handleCreatePortfolio = () => {
     router.push("/backtesting");
-  };
-
-  const handleViewPortfolio = (portfolioId: string) => {
-    router.push(`/portfolios/${portfolioId}`);
-  };
-
-  const handleEditPortfolio = (portfolioId: string) => {
-    router.push(`/backtesting?edit=${portfolioId}`);
   };
 
   const handleDeletePortfolio = (portfolioId: string) => {
@@ -125,7 +115,6 @@ function PortfolioListPage() {
                     </p>
                   )}
 
-        
                   <div className="flex items-center gap-6 text-sm text-gray-500">
                     <div className="flex items-center gap-1">
                       <DollarSign className="size-4" />
@@ -157,16 +146,12 @@ function PortfolioListPage() {
                       </li>
                     ))}
                   </ul>
-
                 </div>
 
                 <div className="flex gap-2 ml-4">
-            
                   <Button
                     size="sm"
-                    onClick={() =>
-                      router.push(`/backtesting?id=${portfolio.id}`)
-                    }
+                    onClick={() => router.push(`/backtesting/${portfolio.id}`)}
                     className="flex items-center gap-1"
                   >
                     <Zap />

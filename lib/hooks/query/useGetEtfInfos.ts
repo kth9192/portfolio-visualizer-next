@@ -1,12 +1,11 @@
+import { getETFList } from "@/api/etf";
+import { ApiResponse } from "@/app/interface/dto/api";
+import { ETFInfoDTO } from "@/app/interface/dto/etf";
 import {
   useQuery,
-  useQueryClient,
-  type UseQueryOptions,
+  type UseQueryOptions
 } from "@tanstack/react-query";
-import { getETFList } from "@/api/etf";
-import { ETFInfoDTO } from "@/app/interface/dto/etf";
 import { queryKeys } from "./keys";
-import { ApiResponse } from "@/app/interface/dto/api";
 
 interface useGetEtfInfosProps {
   options?: Omit<

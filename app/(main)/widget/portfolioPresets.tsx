@@ -1,5 +1,6 @@
 "use client";
 
+import { PortfolioPreset } from "@/app/interface/dto/portfolio";
 import { riskTypeToKorean } from "@/app/interface/enum/riskType";
 import CustomSpinner from "@/components/spinner/customSpinner";
 import CustomTag from "@/components/tag/customTag";
@@ -8,12 +9,19 @@ import { Button } from "@/components/ui/button";
 import { PORTFOLIO_PRESETS } from "@/lib/data/portfolioPreset";
 import useGetEtfInfos from "@/lib/hooks/query/useGetEtfInfos";
 import { ArrowRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useId } from "react";
 import { twMerge } from "tailwind-merge";
 
 function PortfolioPresets() {
-  const { data: etfInfos, isLoading, isError } = useGetEtfInfos({});
+  const { data: etfInfos, isLoading } = useGetEtfInfos({});
   const loadingKey = useId();
+  const router = useRouter();
+
+
+  const handlePresetClick = (preset: PortfolioPreset) => {
+    router.push(`/backtesting?presetId=${preset.id}`);
+  };
 
   return (
     <div className="flex flex-col w-full bg-white rounded-lg shadow-sm p-4">
@@ -26,6 +34,7 @@ function PortfolioPresets() {
           <li
             key={preset.name}
             className="flex items-center justify-between p-2 border-b last:border-b-0 border-gray-200"
+            
           >
             <div className="flex items-center">
               <div className="flex flex-col gap-1">
@@ -55,7 +64,7 @@ function PortfolioPresets() {
                     isLoading ? (
                       <CustomSpinner key={`${loadingKey}-${asset.symbol}`} />
                     ) : (
-                      <li key={asset.symbol} className="text-gray-400">
+                      <li key={asset.symbol} className="text-gray-400" >
                         <CustomTooltip
                           contentClass="bg-black text-white p-2 rounded-md"
                           content={
@@ -96,6 +105,7 @@ function PortfolioPresets() {
               variant="ghost"
               className="rounded-full hover:bg-blue-50 text-blue-600 hover:text-blue-700 w-10 h-10 group transition-all duration-200"
               aria-label="포트폴리오 분석 시작"
+              onClick={() => handlePresetClick(preset)}
             >
               <ArrowRight className="size-6 group-hover:translate-x-0.5 transition-transform" />
             </Button>

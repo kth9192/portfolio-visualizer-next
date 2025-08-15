@@ -258,6 +258,7 @@ export const createPortfolioAssetReqDTO = (data: PortfolioAssetReqDTO) => {
 };
 
 export interface PortfolioPreset {
+  id: string;
   name: string;
   description: string;
   riskType: RiskType;

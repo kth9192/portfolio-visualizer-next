@@ -10,8 +10,8 @@ import { useRouter } from "next/navigation";
 function LoginPage() {
   const router = useRouter();
 
-  const { mutateAsync, isPending, isError } = usePostGuestLogin({
-    onCreateSuccess: (data) => {
+  const { mutateAsync, isPending,  } = usePostGuestLogin({
+    onCreateSuccess: () => {
       showToast.success("로그인 성공");
       router.refresh();
     },

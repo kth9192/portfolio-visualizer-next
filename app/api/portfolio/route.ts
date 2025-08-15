@@ -1,12 +1,12 @@
 import { createApiResponse } from "@/app/interface/dto/api";
 import { createPortfolioAssetReqDTO, createPortfolioMetricsReqDTO, createPortfolioReqDTO, createPortfolioSettingReqDTO } from "@/app/interface/dto/portfolio";
 import { portfolioCreateSchema } from "@/app/interface/schema/portfolio";
+import { auth } from '@/lib/auth';
 import { createPortfolioService } from "@/lib/server/database";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from '@/lib/auth'
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const portfolioService = await createPortfolioService();
     const portfolios = await portfolioService.getPortfolios();

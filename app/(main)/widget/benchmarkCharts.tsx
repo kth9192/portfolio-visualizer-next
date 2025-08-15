@@ -1,21 +1,19 @@
 "use client";
 
+import {
+  createPortfolioAssetPackage
+} from "@/app/interface/dto/portfolio";
+import { RebalanceFrequency } from "@/app/interface/enum/rebanalceFrequency";
 import LineChart from "@/components/chart/lineChart";
 import CustomSpinner from "@/components/spinner/customSpinner";
+import { PORTFOLIO_PRESETS } from "@/lib/data/portfolioPreset";
+import useGetBenchmarkInfos from "@/lib/hooks/query/useGetBenchmarks";
+import { useMonthlySeries } from "@/lib/hooks/useMonthlySeries";
+import { BENCHMARK_TICKERS, twColor } from "@/lib/resource";
 import { ApexOptions } from "apexcharts";
 import { format, subYears } from "date-fns";
 import { ko } from "date-fns/locale";
 import { useMemo } from "react";
-import useGetBenchmarkInfos from "@/lib/hooks/query/useGetBenchmarks";
-import { BENCHMARK_TICKERS, twColor } from "@/lib/resource";
-import useGetBacktestingMonthlyData from "@/lib/hooks/query/useGetBacktestingMonthlyData";
-import { RebalanceFrequency } from "@/app/interface/enum/rebanalceFrequency";
-import { useMonthlySeries } from "@/lib/hooks/useMonthlySeries";
-import {
-  createPortfolioAssetPackage,
-  createPortfolioDTO,
-} from "@/app/interface/dto/portfolio";
-import { PORTFOLIO_PRESETS } from "@/lib/data/portfolioPreset";
 
 function BenchmarkCharts() {
   const {
@@ -119,6 +117,9 @@ function BenchmarkCharts() {
                   "green-500",
                   "purple-500",
                   "orange-500",
+                  "indigo-500",
+                  "pink-500",
+                  "teal-500"
                 ];
                 return twColor(colors[index % colors.length]);
               }),
@@ -158,7 +159,7 @@ function BenchmarkCharts() {
                   );
 
                   const seriesData = series.map(
-                    (seriesItem: any, idx: number) => ({
+                    (seriesItem: number[], idx: number) => ({
                       name: w.config.series[idx].name,
                       value: Number(seriesItem[dataPointIndex]).toFixed(2),
                     })
@@ -173,7 +174,7 @@ function BenchmarkCharts() {
                                     item: { name: string; value: number },
                                     idx: number
                                   ) =>
-                                    `<li class="flex flex-row justify-between items-center gap-3" style="${item.value > 0 ? "" : "display: none;"}">
+                                    `<li class="flex flex-row justify-between items-center gap-3" style="${item.value !== undefined  || item.value !== null ? "" : "display: none;"}">
                                       <div class="flex flex-row items-center gap-1">
                                         <div class="size-2 rounded-full" style="background-color:${w.config.colors[idx]};">
                                         </div>

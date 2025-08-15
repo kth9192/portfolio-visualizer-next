@@ -1,18 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
-import { twMerge } from "tailwind-merge";
-import { Button } from "./ui/button";
+import { logoutAction } from "@/app/action/auth";
 import {
   FlaskConical,
   Home,
-  LogOut,
   LogOutIcon,
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
+import { useState } from "react";
+import { twMerge } from "tailwind-merge";
 import CustomTooltip from "./tooltip/customTooltip";
-import { logoutAction } from "@/app/action/auth";
+import { Button } from "./ui/button";
+import Link from "next/link";
 
 function SideBar() {
   const [isOpen, setIsOpen] = useState(true);
@@ -32,33 +32,41 @@ function SideBar() {
       <div className="flex h-fit justify-between items-center mb-10 px-4 py-2">
         {isOpen && <p className="text-xl font-bold ">Portfolio Visualizer</p>}
 
-        <Button onClick={handleToggleSidebar} variant={"ghost"} className={twMerge("my-auto size-8 p-0 has-[>svg]:px-0 cursor-pointer hover:text-black" , !isOpen &&"mx-auto")}>
-          {isOpen ? <PanelLeftClose className="size-6" /> : <PanelLeftOpen className="size-6" />}
+        <Button
+          onClick={handleToggleSidebar}
+          variant={"ghost"}
+          className={twMerge(
+            "my-auto size-8 p-0 has-[>svg]:px-0 cursor-pointer hover:text-black",
+            !isOpen && "mx-auto"
+          )}
+        >
+          {isOpen ? (
+            <PanelLeftClose className="size-6" />
+          ) : (
+            <PanelLeftOpen className="size-6" />
+          )}
         </Button>
       </div>
 
       <nav className={"flex flex-col gap-2 font-semibold px-2"}>
-        <a
+        <Link
           href="/"
           className={twMerge(
             "flex w-full h-fit items-center gap-2 p-2 rounded-lg hover:bg-gray-800 cursor-pointer",
             !isOpen && "justify-center"
           )}
         >
-          <CustomTooltip
-            children={
-              <div className="flex items-center gap-2 cursor-pointer">
-                <Home />
-                <div
-                  className={twMerge("text-white", !isOpen && "sr-only")}
-                >Home</div>
+          <CustomTooltip content={<p>Home</p>}>
+            <div className="flex items-center gap-2 cursor-pointer">
+              <Home />
+              <div className={twMerge("text-white", !isOpen && "sr-only")}>
+                Home
               </div>
-            }
-            content={<p>Home</p>}
-          />
-        </a>
+            </div>
+          </CustomTooltip>
+        </Link>
 
-        <a
+        <Link
           href="/portfolio"
           className={twMerge(
             "flex w-full h-fit items-center gap-2 px-2 py-2 rounded-lg hover:bg-gray-800 cursor-pointer",
@@ -66,21 +74,27 @@ function SideBar() {
           )}
         >
           <CustomTooltip
-            children={
-              <div className="flex items-center gap-2 cursor-pointer">
-                <FlaskConical />
-                <div
-                  className={twMerge("text-white", !isOpen && "sr-only")}
-                >포트폴리오</div>
-              </div>
-            }
             content={<p>포트폴리오</p>}
-          />
-        </a>
+          >
+            <div className="flex items-center gap-2 cursor-pointer">
+              <FlaskConical />
+              <div className={twMerge("text-white", !isOpen && "sr-only")}>
+                포트폴리오
+              </div>
+            </div>
+          </CustomTooltip>
+        </Link>
       </nav>
       <form action={logoutAction} className="mt-auto ml-auto px-4">
-        <Button type="submit" variant={"ghost"} className={twMerge("my-auto size-8 p-0 has-[>svg]:px-0 cursor-pointer hover:text-black" , !isOpen &&"mx-auto")}>
-          <LogOutIcon/>
+        <Button
+          type="submit"
+          variant={"ghost"}
+          className={twMerge(
+            "my-auto size-8 p-0 has-[>svg]:px-0 cursor-pointer hover:text-black",
+            !isOpen && "mx-auto"
+          )}
+        >
+          <LogOutIcon />
         </Button>
       </form>
     </div>

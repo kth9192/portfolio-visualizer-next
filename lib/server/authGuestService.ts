@@ -1,9 +1,8 @@
+import { AuthUser } from "@/app/interface/dto/auth";
 import { createRandomStringGenerator } from "@better-auth/utils/random";
-import { auth } from "../auth";
-import { prisma } from "./database";
 import { PrismaClient } from "@prisma/client";
 import { addHours } from "date-fns";
-import { AuthUser } from "@/app/interface/dto/auth";
+import { auth } from "../auth";
 
 export class AuthGuestService {
   private prisma: PrismaClient;

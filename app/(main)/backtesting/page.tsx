@@ -1,44 +1,45 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { format, isSameDay } from "date-fns";
-import { useCallback, useEffect, useMemo } from "react";
+import { Suspense, useCallback, useEffect, useMemo } from "react";
 
 import {
-  createPortfolioReqDTO,
-  PortfolioSimulationData,
+  PortfolioAssetReqDTO,
+  PortfolioSettingReqDTO,
 } from "@/app/interface/dto/portfolio";
-import { showToast } from "@/components/toast/customToast";
-import { getCommonDates, getRebalanceDates } from "@/lib/calculator";
-import useCreatePortfolio from "@/lib/hooks/mutation/useCreatePortfolio";
-import useGetBacktestingData from "@/lib/hooks/query/useGetBacktestingData";
-import useGetPortfolio from "@/lib/hooks/query/useGetPortfolio";
-import { usePortfolioStore } from "@/lib/store/portfolioStore";
-import { useRouter, useSearchParams } from "next/navigation";
-import PortfolioBuilder from "./widget/portfolioBuilder";
-import PortfolioMetrics from "./widget/portfolioMetrics";
-import PortfolioSetting from "./widget/portfolioSetting";
-import { FormProvider, useForm } from "react-hook-form";
+import { RebalanceFrequency } from "@/app/interface/enum/rebanalceFrequency";
 import {
   portfolioCreateSchema,
   PortfolioCreateSchemaType,
 } from "@/app/interface/schema/portfolio";
+import { showToast } from "@/components/toast/customToast";
+import { INITIAL_AMOUNT, PORTFOLIO_PRESETS } from "@/lib/data/portfolioPreset";
+import useCreatePortfolio from "@/lib/hooks/mutation/useCreatePortfolio";
+import useGetBacktestingData from "@/lib/hooks/query/useGetBacktestingData";
+import useGetPortfolio from "@/lib/hooks/query/useGetPortfolio";
+import { usePortfolioSimulation } from "@/lib/hooks/usePortfolioSimulation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Form } from "@/components/ui/form";
-import { RebalanceFrequency } from "@/app/interface/enum/rebanalceFrequency";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
+import PortfolioBuilder from "./widget/portfolioBuilder";
+import PortfolioMetrics from "./widget/portfolioMetrics";
+import PortfolioSetting from "./widget/portfolioSetting";
 
-function BacktestingPage() {
+function BacktestingPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const param = useParams<{ id?: string; presetId?: string }>();
 
-  const portfolioId = searchParams.get("id") || "";
+  const portfolioId = param.id || "";
+
+  const presetId = searchParams.get("presetId") || "";
 
   const createPortfolioMutation = useCreatePortfolio();
 
   const defaultValues = useMemo(
     () => ({
       name: "",
-      initialAmount: 10000,
+      initialAmount: INITIAL_AMOUNT,
       assets: [],
       setting: {
         startDate: new Date(),
@@ -50,38 +51,58 @@ function BacktestingPage() {
     []
   );
 
-  const methods = useForm<PortfolioCreateSchemaType>({
+  const method = useForm<PortfolioCreateSchemaType>({
     mode: "onChange",
     resolver: zodResolver(portfolioCreateSchema),
     defaultValues,
   });
 
-  const defaultReq = {
-    ticker: [],
-    startDate: new Date(),
-    endDate: new Date(),
-    rebalanceFrequency: RebalanceFrequency.MONTHLY,
-  };
+  const { control, formState, watch, setValue, handleSubmit } = method;
+
+  const assetsWatch = useWatch({
+    control,
+    name: "assets",
+  });
+
+  const startDate = useWatch({
+    control,
+    name: "setting.startDate",
+  });
+
+  const endDateWatch = useWatch({
+    control,
+    name: "setting.endDate",
+  });
+
+  const rebalanceFrequencyWatch = useWatch({
+    control,
+    name: "setting.rebalanceFrequency",
+  });
+
+  const initialAmountWatch = useWatch({
+    control,
+    name: "initialAmount",
+  });
+
+  const settingWatch = useWatch({
+    control,
+    name: "setting",
+  });
 
   const backtestingReq = useMemo(() => {
     return {
-      ticker: methods.watch("assets").map((asset) => asset.symbol),
-      startDate: methods.watch("setting.startDate"),
-      endDate: methods.watch("setting.endDate"),
-      rebalanceFrequency: methods.watch("setting.rebalanceFrequency"),
+      // ticker: methods.watch("assets").map((asset) => asset.symbol),
+      ticker: assetsWatch.map((asset) => asset.symbol),
+      startDate: startDate,
+      endDate: endDateWatch,
+      rebalanceFrequency: rebalanceFrequencyWatch,
     };
-  }, [
-    methods.watch("assets"),
-    methods.watch("setting.startDate"),
-    methods.watch("setting.endDate"),
-    methods.watch("setting.rebalanceFrequency"),
-    defaultReq,
-  ]);
+  }, [assetsWatch, startDate, endDateWatch, rebalanceFrequencyWatch]);
 
   const {
     data: portfolioData,
-    isLoading: portfolioLoading,
-    isError: portfolioError,
+    // isLoading: portfolioLoading,
+    // isError: portfolioError,
   } = useGetPortfolio({ id: portfolioId });
 
   const {
@@ -97,169 +118,51 @@ function BacktestingPage() {
     },
   });
 
-  const portfolioSimulationData = useMemo(() => {
-    // 폼에서 현재 데이터 가져오기
-    const currentAssets = methods.watch("assets");
-    const currentInitialAmount = methods.watch("initialAmount");
-    const currentSetting = methods.watch("setting");
-  
-    if (
-      !backtestingData?.priceInfos?.length ||
-      !currentAssets?.length ||
-      currentAssets.every(asset => asset.weight === 0)
-    ) {
-      return [];
-    }
-  
-    const priceInfos = backtestingData.priceInfos;
-    const result: PortfolioSimulationData[] = [];
-  
-    // 공통 날짜 계산
-    const commonDates = getCommonDates(priceInfos);
-    const commonDatesSet = new Set(commonDates);
-    const timeSeries = commonDates.map((item) => new Date(item));
-  
-    // 가격 맵 구성
-    const priceMap = new Map<string, number[]>();
-    priceInfos.forEach((priceInfo) => {
-      priceMap.set(
-        priceInfo.ticker,
-        priceInfo.prices
-          .filter((price) =>
-            commonDatesSet.has(format(price.date, "yyyy-MM-dd"))
-          )
-          .map((item) => item.adj_close)
-      );
-    });
-  
-    if (!timeSeries?.length) return [];
-  
-    // 초기 포트폴리오 구성
-    const currentShares = new Map<string, number>();
-    let remainingCash = 0;
-  
-    // currentAssets 사용 (portfolioData 대신)
-    currentAssets.forEach((asset) => {
-      const initialPrice = priceMap.get(asset.symbol)?.[0] ?? 0;
-      if (initialPrice === 0) {
-        console.error(`${asset.symbol}의 초기 가격 데이터가 없습니다.`);
-        return;
-      }
-  
-      const targetAmount = asset.weight * currentInitialAmount;
-      const shares = Math.floor(targetAmount / initialPrice);
-      currentShares.set(asset.symbol, shares);
-    });
-  
-    // 초기 현금 계산
-    const initialUsedAmount = currentAssets.reduce((sum, asset) => {
-      const shares = currentShares.get(asset.symbol) ?? 0;
-      const price = priceMap.get(asset.symbol)?.[0] ?? 0;
-      return sum + shares * price;
-    }, 0);
-  
-    remainingCash = currentInitialAmount - initialUsedAmount;
-  
-    // 리밸런싱 날짜 계산
-    const rebalanceDates = getRebalanceDates(
-      timeSeries,
-      new Date(currentSetting.startDate),
-      new Date(currentSetting.endDate),
-      currentSetting.rebalanceFrequency
-    );
-  
-    // 일별 시뮬레이션
-    timeSeries.forEach((date, dayIdx) => {
-      const isRebalanceDay = rebalanceDates.some((rebalanceDate) =>
-        isSameDay(date, rebalanceDate)
-      );
-  
-      // 리밸런싱 로직
-      if (isRebalanceDay && dayIdx > 0 && currentAssets.length > 1) {
-        let totalPortfolioValue = remainingCash;
-  
-        currentAssets.forEach((asset) => {
-          const shares = currentShares.get(asset.symbol) ?? 0;
-          const currentPrice = priceMap.get(asset.symbol)?.[dayIdx] ?? 0;
-          totalPortfolioValue += shares * currentPrice;
-        });
-  
-        let totalUsedForRebalancing = 0;
-  
-        currentAssets.forEach((asset) => {
-          const currentPrice = priceMap.get(asset.symbol)?.[dayIdx] ?? 0;
-          const targetValue = totalPortfolioValue * asset.weight;
-          const newShares = Math.floor(targetValue / currentPrice);
-  
-          currentShares.set(asset.symbol, newShares);
-          totalUsedForRebalancing += newShares * currentPrice;
-        });
-  
-        remainingCash = totalPortfolioValue - totalUsedForRebalancing;
-      }
-  
-      // 현재 포트폴리오 가치 계산
-      let currentPortfolioValue = remainingCash;
-  
-      currentAssets.forEach((asset) => {
-        const shares = currentShares.get(asset.symbol) ?? 0;
-        const currentPrice = priceMap.get(asset.symbol)?.[dayIdx] ?? 0;
-        currentPortfolioValue += shares * currentPrice;
-      });
-  
-      // 수익률 계산
-      let dailyReturn = 0;
-      let cumulativeReturn = 0;
-      let cumulativeMultiplier = 1;
-  
-      if (dayIdx === 0) {
-        cumulativeReturn = 0;
-        cumulativeMultiplier = 1;
-      } else {
-        const previousValue = result[dayIdx - 1].portfolioValue ?? currentInitialAmount;
-        dailyReturn = (currentPortfolioValue - previousValue) / previousValue;
-        cumulativeReturn = (currentPortfolioValue - currentInitialAmount) / currentInitialAmount;
-        cumulativeMultiplier = currentPortfolioValue / currentInitialAmount;
-      }
-  
-      result.push({
-        date,
-        portfolioValue: currentPortfolioValue,
-        cumulativeReturn,
-        cumulativeReturnsPercent: cumulativeReturn * 100,
-        cumulativeMultiplier,
-        dailyReturn,
-        shares: Object.fromEntries(currentShares),
-      });
-    });
-  
-    return result;
-  }, [
-    backtestingData,
-    methods.watch("assets"),
-    methods.watch("initialAmount"), 
-    methods.watch("setting")
-  ]);
+  const portfolioSimulationData = usePortfolioSimulation({
+    data: backtestingData,
+    initialAmount: initialAmountWatch,
+    setting: settingWatch as PortfolioSettingReqDTO,
+    assets: assetsWatch as PortfolioAssetReqDTO[],
+  });
 
   useEffect(() => {
     if (portfolioId && portfolioData) {
-      methods.reset({
-        name: portfolioData?.name,
-        description: portfolioData?.description,
-        assets: portfolioData?.assets,
-        setting: portfolioData?.setting,
-        initialAmount: portfolioData?.initialAmount,
-      });
+      setValue("name", portfolioData?.name);
+      setValue("description", portfolioData?.description);
+      setValue("assets", portfolioData?.assets);
+      setValue("setting", portfolioData?.setting);
+      setValue("initialAmount", portfolioData?.initialAmount);
+
+      return;
     }
-  }, [portfolioId, portfolioData]);
+
+    const preset = PORTFOLIO_PRESETS.find((preset) => preset.id === presetId);
+
+    if (presetId) {
+      setValue("name", preset.name);
+      setValue("description", preset.description);
+      setValue("assets", preset.assets);
+      setValue("setting", {
+        startDate: new Date(),
+        endDate: new Date(),
+        rebalanceFrequency: preset.rebalanceFrequency,
+      });
+      setValue("initialAmount", INITIAL_AMOUNT);
+      return;
+    }
+  }, [portfolioId, portfolioData, presetId, setValue]);
 
   useEffect(() => {
-    methods.trigger();
-  }, [portfolioData]);
+    setValue("setting", {
+      startDate: new Date(),
+      endDate: new Date(),
+      rebalanceFrequency: RebalanceFrequency.MONTHLY,
+    });
+  }, [portfolioData, setValue]);
 
   useEffect(() => {
-    console.warn(methods.formState.errors);
-  }, [methods.formState.errors]);
+    console.warn(formState.errors);
+  }, [formState.errors]);
 
   const chartSeries = useMemo(() => {
     if (portfolioSimulationData.length > 0 && !backtestingData)
@@ -288,42 +191,46 @@ function BacktestingPage() {
   }, [portfolioSimulationData, backtestingData]);
 
   const handleBacktesting = useCallback(() => {
-    if (!methods.formState.isValid) {
+    if (!formState.isValid) {
       showToast.error("포트폴리오가 유효하지 않습니다");
       return;
     }
 
     executeBacktesting();
-  }, [executeBacktesting, methods.formState.isValid]);
+  }, [executeBacktesting, formState.isValid]);
 
   const handleSave = async () => {
-    if (!methods.formState.isValid) {
+    if (!formState.isValid) {
       showToast.error("포트폴리오가 유효하지 않습니다");
       return;
     }
 
     await createPortfolioMutation.mutateAsync({
-      name: methods.watch("name"),
-      initialAmount: methods.watch("initialAmount"),
-      description: methods.watch("description"),
-      assets: methods.watch("assets").map((asset) => ({
+      name: watch("name"),
+      initialAmount: watch("initialAmount"),
+      description: watch("description"),
+      assets: watch("assets").map((asset) => ({
         symbol: asset.symbol,
         weight: asset.weight,
         shares: asset.shares,
       })),
       setting: {
-        startDate: methods.watch("setting.startDate"),
-        endDate: methods.watch("setting.endDate"),
-        rebalanceFrequency: methods.watch("setting.rebalanceFrequency"),
+        startDate: watch("setting.startDate"),
+        endDate: watch("setting.endDate"),
+        rebalanceFrequency: watch("setting.rebalanceFrequency"),
       },
-      metrics:{
-        totalReturn: portfolioSimulationData[portfolioSimulationData.length - 1].cumulativeReturn,
+      metrics: {
+        totalReturn:
+          portfolioSimulationData[portfolioSimulationData.length - 1]
+            .cumulativeReturn,
         cagr: 0,
         mdd: 0,
         volatility: 0,
         sharpRatio: 0,
-        finalAmount: portfolioSimulationData[portfolioSimulationData.length - 1].portfolioValue,
-      }
+        finalAmount:
+          portfolioSimulationData[portfolioSimulationData.length - 1]
+            .portfolioValue,
+      },
     });
 
     showToast.success("포트폴리오가 저장되었습니다");
@@ -332,82 +239,92 @@ function BacktestingPage() {
   };
 
   return (
-    <section className="flex flex-col w-full 2xl:w-4/5 gap-10 p-6 ">
-      <div className="flex flex-col">
-        <h1 className="text-3xl font-bold text-gray-900 ">
-          ETF 포트폴리오 백테스팅
-        </h1>
-        <p className="text-gray-600">
-          포트폴리오를 구성하고 과거 성과를 분석해보세요
-        </p>
-      </div>
-      <FormProvider {...methods}>
-        <form
-          onSubmit={methods.handleSubmit(handleSave)}
-          className="flex flex-col gap-6"
-        >
-          <PortfolioBuilder />
-          <div className="grid grid-cols-[1fr_2fr] gap-6">
-            <PortfolioSetting />
-            <div className="flex flex-col w-full gap-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h4 className="text-lg font-semibold ">검증 상태</h4>
-              <ul className="flex flex-col gap-2">
-                {methods.formState.errors.name && (
-                  <li className="text-destructive text-sm">
-                    {methods.formState.errors.name.message}
-                  </li>
-                )}
-                {methods.formState.errors.initialAmount && (
-                  <li className="text-destructive text-sm">
-                    {methods.formState.errors.initialAmount.message}
-                  </li>
-                )}
-                {methods.formState.errors.description && (
-                  <li className="text-destructive text-sm">
-                    {methods.formState.errors.description.message}
-                  </li>
-                )}
+    <Suspense fallback={<div>Loading...</div>}>
+      <section className="flex flex-col w-full 2xl:w-4/5 gap-10 p-6 ">
+        <div className="flex flex-col">
+          <h1 className="text-3xl font-bold text-gray-900 ">
+            ETF 포트폴리오 백테스팅
+          </h1>
+          <p className="text-gray-600">
+            포트폴리오를 구성하고 과거 성과를 분석해보세요
+          </p>
+        </div>
+        <FormProvider {...method}>
+          <form
+            onSubmit={handleSubmit(handleSave)}
+            className="flex flex-col gap-6"
+          >
+            <PortfolioBuilder />
+            <div className="grid grid-cols-[1fr_2fr] gap-6">
+              <PortfolioSetting />
+              <div className="flex flex-col w-full gap-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h4 className="text-lg font-semibold ">검증 상태</h4>
+                <ul className="flex flex-col gap-2">
+                  {formState.errors.name && (
+                    <li className="text-destructive text-sm">
+                      {formState.errors.name.message}
+                    </li>
+                  )}
+                  {formState.errors.initialAmount && (
+                    <li className="text-destructive text-sm">
+                      {formState.errors.initialAmount.message}
+                    </li>
+                  )}
+                  {formState.errors.description && (
+                    <li className="text-destructive text-sm">
+                      {formState.errors.description.message}
+                    </li>
+                  )}
 
-                {methods.formState.errors.assets && (
-                  <li className="text-destructive text-sm">
-                    {methods.formState.errors.assets.message}
-                  </li>
-                )}
-                {methods.formState.errors.setting && (
-                  <li className="text-destructive text-sm">
-                    {methods.formState.errors.setting.message}
-                  </li>
-                )}
-              </ul>
+                  {formState.errors.assets && (
+                    <li className="text-destructive text-sm">
+                      {formState.errors.assets.message}
+                    </li>
+                  )}
+                  {formState.errors.setting && (
+                    <li className="text-destructive text-sm">
+                      {formState.errors.setting.message}
+                    </li>
+                  )}
+                </ul>
+                <Button
+                  type="button"
+                  onClick={handleBacktesting}
+                  className="w-full"
+                  disabled={!formState.isValid}
+                >
+                  백테스트 실행
+                </Button>
+              </div>
+            </div>
+
+            <PortfolioMetrics
+              portfolioSimulationData={portfolioSimulationData}
+              chartSeries={chartSeries}
+              backtestingLoading={backtestingLoading}
+              backtestingError={backtestingError}
+            />
+            <div className="flex justify-center items-center">
               <Button
-                type="button"
-                onClick={handleBacktesting}
+                type="submit"
                 className="w-full"
-                disabled={!methods.formState.isValid}
+                disabled={portfolioSimulationData.length === 0}
               >
-                백테스트 실행
+                저장하기
               </Button>
             </div>
-          </div>
+          </form>
+        </FormProvider>
+      </section>
+    </Suspense>
+  );
+}
 
-          <PortfolioMetrics
-            portfolioSimulationData={portfolioSimulationData}
-            chartSeries={chartSeries}
-            backtestingLoading={backtestingLoading}
-            backtestingError={backtestingError}
-          />
-          <div className="flex justify-center items-center">
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={portfolioSimulationData.length === 0}
-            >
-              저장하기
-            </Button>
-          </div>
-        </form>
-      </FormProvider>
-    </section>
+function BacktestingPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <BacktestingPageContent />
+    </Suspense>
   );
 }
 

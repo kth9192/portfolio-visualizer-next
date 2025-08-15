@@ -1,23 +1,23 @@
 'use client';
 
 import { Button } from "@/components/ui/button";
-import React, { useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
-import { differenceInDays } from "date-fns";
-import { ChevronLeft, ChevronRight, Info } from "lucide-react";
 import CustomSpinner from "@/components/spinner/customSpinner";
-import { twMerge } from "tailwind-merge";
 import CustomTooltip from "@/components/tooltip/customTooltip";
 import useGetEtfInfos from "@/lib/hooks/query/useGetEtfInfos";
 import useGetTrends from "@/lib/hooks/query/useGetTrends";
 import { useHorizontalScroll } from "@/lib/hooks/useHorizontalScroll";
 import { DEFAULT_TICKERS } from "@/lib/resource";
+import { differenceInDays } from "date-fns";
+import { ChevronLeft, ChevronRight, Info } from "lucide-react";
+import { twMerge } from "tailwind-merge";
 
 function TrendList() {
   const {
     data: etfList,
-    isLoading: etfLoading,
-    error: etfError,
+    // isLoading: etfLoading,
+    // error: etfError,
   } = useGetEtfInfos({});
 
   const {

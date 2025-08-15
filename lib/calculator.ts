@@ -1,16 +1,5 @@
-import {
-  closestIndexTo,
-  closestTo,
-  differenceInYears,
-  format,
-  parseISO,
-  startOfDay,
-} from "date-fns";
-import { ko } from "date-fns/locale";
-import { RebalanceFrequency } from "../app/interface/enum/rebanalceFrequency";
-import { Portfolio, PortfolioSimulationData } from "../app/interface/dto/portfolio";
-import { BacktestingRes } from "../app/interface/dto/backtesting";
 import { ETFTimeSeriesDTO } from "../app/interface/dto/etf";
+import { RebalanceFrequency } from "../app/interface/enum/rebanalceFrequency";
 
 /**
  * 주가의 일간 수익률을 계산
@@ -182,51 +171,6 @@ export const getRebalanceDates = (
   );
 };
 
-export const calculateRebalancing = (
-  portfolio: Portfolio,
-  data: BacktestingRes,
-  portfolioSimulationData: PortfolioSimulationData[],
-  rebanalceDate: Date
-) => {
-  const getCurrentPrice = (ticker: string) => {
-    return (
-      data.priceInfos
-        .find((price) => price.ticker === ticker)
-        ?.prices?.find(
-          (data) => data.date.getTime() === rebanalceDate.getTime()
-        )?.close ?? 0
-    );
-  };
-
-  const tmpPosition = portfolio.assets.map((asset) => {
-    const currentValue = asset.shares * getCurrentPrice(asset.symbol);
-
-    return {
-      symbol: asset.symbol,
-      shares: asset.shares,
-      currenValue: currentValue,
-      currentWeight: 0,
-      targetWeight: asset.weight,
-      targetValue: 0,
-    };
-  });
-
-  const totalCurrentValue = tmpPosition.reduce(
-    (total, asset) => total + asset.currenValue,
-    0
-  );
-
-  const assetPosition = tmpPosition.map((asset) => {
-    return {
-      ...asset,
-      currentWeight: asset.currenValue / totalCurrentValue,
-      targetValue: asset.targetWeight * totalCurrentValue,
-    };
-  });
-
-  return;
-};
-
 export const getCommonDates = (pricesInfo: ETFTimeSeriesDTO[]): string[] => {
   const tmpMap = new Map<string, number>();
   const count = pricesInfo.length;
@@ -234,19 +178,15 @@ export const getCommonDates = (pricesInfo: ETFTimeSeriesDTO[]): string[] => {
   pricesInfo.forEach((priceInfo) => {
     priceInfo.prices.forEach((price) => {
       const indexDate = new Date(price.date).toISOString().split("T")[0];
-      // const indexDate = format(price.date, "yyyy-MM-dd");
       tmpMap.set(indexDate, (tmpMap.get(indexDate) ?? 0) + 1);
     });
   });
 
-  const dateResult = Array.from(tmpMap.entries())
-    .filter(([key, val]) => {
-      return val === count;
-    })
-    .map(([key]) => key)
-    .sort((pre, post) => new Date(pre).getTime() - new Date(post).getTime());
-
-
-  return dateResult;
+  // reduce로 한 번에 처리
+  return Array.from(tmpMap.entries())
+    .reduce<string[]>((acc, [date, val]) => {
+      if (val === count) acc.push(date);
+      return acc;
+    }, [])
+    .sort();
 };
-

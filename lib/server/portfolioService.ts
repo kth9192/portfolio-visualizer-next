@@ -1,19 +1,16 @@
-import type { ETFPriceDTO } from "@/app/interface/dto/etf";
 import {
   createPortfolioAssetDTO,
-  createPortfolioReqDTO,
   createPortfolioDTO,
   createPortfolioMetricsDTO,
+  createPortfolioReqDTO,
   createPortfolioSettingDTO,
-  PortfolioAssetDTO,
   type PortfolioCreateDTO,
-  type PortfolioDTO,
+  type PortfolioDTO
 } from "@/app/interface/dto/portfolio";
-import { PrismaClient } from "@prisma/client";
-import { format } from "date-fns";
 import { RebalanceFrequency } from "@/app/interface/enum/rebanalceFrequency";
-import { auth } from "../auth";
+import { PrismaClient } from "@prisma/client";
 import { headers } from "next/headers";
+import { auth } from "../auth";
 
 export class PortfolioService {
   private prisma: PrismaClient;
@@ -96,7 +93,7 @@ export class PortfolioService {
     portfolioData: PortfolioCreateDTO
   ): Promise<PortfolioCreateDTO | null> {
     try {
-      const result = await this.prisma.$transaction(async (tx) => {
+     await this.prisma.$transaction(async (tx) => {
         const portfolio = await tx.portfolios.create({
           data: {
             name: portfolioData.name,

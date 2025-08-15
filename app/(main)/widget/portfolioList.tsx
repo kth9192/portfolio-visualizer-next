@@ -7,16 +7,12 @@ import { Button } from "@/components/ui/button";
 import useGetEtfInfos from "@/lib/hooks/query/useGetEtfInfos";
 import useGetPortfolios from "@/lib/hooks/query/useGetPortfolios";
 import useGetTrends from "@/lib/hooks/query/useGetTrends";
-import { DEFAULT_TICKERS } from "@/lib/resource";
 import { formatWithCommas } from "@/lib/utils";
-import { differenceInDays } from "date-fns";
 import { Link } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
-
 
 function PortfolioList() {
-  const router= useRouter();
+  const router = useRouter();
   const {
     data: portfolios,
     isLoading,
@@ -27,27 +23,15 @@ function PortfolioList() {
 
   const {
     data: etfInfos,
-    isLoading: etfInfosLoading,
-    error: etfInfosError,
+    // isLoading: etfInfosLoading,
+    // error: etfInfosError,
   } = useGetEtfInfos({});
 
   const {
     data: trends,
-    isLoading: trendsLoading,
-    error: trendsError,
+    // isLoading: trendsLoading,
+    // error: trendsError,
   } = useGetTrends({});
-
-  const dataSource = useMemo(() => {
-    return DEFAULT_TICKERS.map((ticker) => {
-      return {
-        symbol: ticker,
-        prices:
-          trends
-            ?.filter((item) => item.symbol === ticker)
-            .sort((pre, post) => differenceInDays(post.date, pre.date)) ?? [],
-      };
-    });
-  }, [trends]);
 
   const getCurrentAmount = (portfolio: PortfolioDTO) => {
     return formatWithCommas(
@@ -156,7 +140,9 @@ function PortfolioList() {
         과거 데이터를 기반으로 포트폴리오 성과를 미리 확인하고, 데이터 기반의
         투자 결정을 내려보세요!
       </p>
-      <Button className="w-full mx-auto" onClick={handleMoveToCreatePortfolio}>포트폴리오 추가하기</Button>
+      <Button className="w-full mx-auto" onClick={handleMoveToCreatePortfolio}>
+        포트폴리오 추가하기
+      </Button>
     </div>
   );
 }

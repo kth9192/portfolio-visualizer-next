@@ -1,6 +1,5 @@
 import { createApiResponse } from "@/app/interface/dto/api";
-import { createBenchmarkService, createETFService } from "@/lib/server/database";
-import { startOfDay, subYears } from "date-fns";
+import { createBenchmarkService } from "@/lib/server/database";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -31,6 +30,9 @@ export async function GET(request: NextRequest) {
     const res = createApiResponse(benchmarkInfos, true, "success", 200);
     return NextResponse.json(res, { status: 200 });
   } catch (error) {
+
+    console.log("get benchmark error", error);
+    
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

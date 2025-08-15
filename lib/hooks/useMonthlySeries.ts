@@ -1,7 +1,7 @@
 import { ETFPriceMonthlyDTO } from "@/app/interface/dto/etf";
 import { PortfolioAssetPackage } from "@/app/interface/dto/portfolio";
 import { RebalanceFrequency } from "@/app/interface/enum/rebanalceFrequency";
-import { format, startOfDay, subYears } from "date-fns";
+import { startOfDay, subYears } from "date-fns";
 import useGetBacktestingMonthlyData from "./query/useGetBacktestingMonthlyData";
 
 interface useMonthlySeriesProps {

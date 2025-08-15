@@ -1,21 +1,15 @@
 import {
-  createETFDetail,
   createETFHolding,
   createETFInfoDTO,
   createETFPriceMonthlyDTO,
   createETFSector,
-  ETFDetail,
-  ETFHolding,
   ETFPriceMonthlyDTO,
-  ETFSector,
-  ETFTrendDTO,
   type ETFInfoDTO,
   type ETFPriceDTO,
   type ETFTimeSeriesDTO,
 } from "@/app/interface/dto/etf";
-import { differenceInYears, format } from "date-fns";
-import { PrismaClient, type etf_infos } from "@prisma/client";
-import { create } from "domain";
+import { PrismaClient } from "@prisma/client";
+import { format } from "date-fns";
 
 export class ETFService {
   private static DEFAULT_TICKERS = ["VOO", "QQQ", "VTI", "BND", "VXUS"];
@@ -195,17 +189,12 @@ export class ETFService {
         },
         orderBy: [{ symbol: "asc" }, { date: "asc" }],
       });
-      
 
-      const groupedData = pricesData.reduce((acc, price) => {
-        if (!acc[price.symbol]) {
-          acc[price.symbol] = [];
-        }
-
-        acc[price.symbol].push({
+      return pricesData.map((price) =>
+        createETFPriceMonthlyDTO({
           id: Number(price.id),
           symbol: price.symbol,
-          date: price.date,
+          year_month: format(price.date, "yyyy-MM"),
           open: Number(price.open || 0),
           high: Number(price.high || 0),
           low: Number(price.low || 0),
@@ -213,26 +202,11 @@ export class ETFService {
           adj_close: Number(price.adj_close || price.close),
           volume: Number(price.volume || 0),
           dividend: Number(price.dividend || 0),
-        });
-
-        return acc;
-      }, {} as Record<string, ETFPriceDTO[]>);
-
-      return pricesData.map(price => createETFPriceMonthlyDTO({
-        id: Number(price.id),
-        symbol: price.symbol,
-        year_month: format(price.date, "yyyy-MM"),
-        open: Number(price.open || 0),
-        high: Number(price.high || 0),
-        low: Number(price.low || 0),
-        close: Number(price.close),
-        adj_close: Number(price.adj_close || price.close),
-        volume: Number(price.volume || 0),
-        dividend: Number(price.dividend || 0),
-      }));
+        })
+      );
     } catch (error) {
       console.error("ETF 히스토리 조회 실패:", error);
-       return [];
+      return [];
     }
   }
 }
