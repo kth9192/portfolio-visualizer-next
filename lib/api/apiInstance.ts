@@ -87,6 +87,8 @@ const postRefreshToken = async (refreshToken: string): Promise<{ data: RefreshTo
     });
     return response;
   } catch (error) {
+    console.log(error);
+    
     throw new Error('토큰 갱신에 실패했습니다.');
   }
 };
