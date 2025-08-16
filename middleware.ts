@@ -1,65 +1,60 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getSessionCookie } from "better-auth/cookies";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const response = NextResponse.next();
 
-  console.log("MIDDLEWARE START");
-
-  response.headers.set("Access-Control-Allow-Credentials", "true");
-  response.headers.set(
-    "Access-Control-Allow-Origin",
-    process.env.NEXT_PUBLIC_APP_URL!
-  );
-
-  // 쿠키 정책 헤더
-  if (process.env.NODE_ENV === "production") {
-    response.headers.set(
-      "Set-Cookie",
-      `Path=/; SameSite=Lax; Secure; HttpOnly`
-    );
-  }
-
+  // 정적 파일과 Next.js 내부 경로는 미들웨어를 건너뜀
   if (pathname.startsWith("/_next") || pathname.includes(".")) {
     return NextResponse.next();
   }
 
+  // 세션 확인
+  const sessionCookie = getSessionCookie(request);
+  const isLoggedIn = !!sessionCookie;
+
+  // API 경로 처리
   if (pathname.startsWith("/api")) {
-    if (pathname.startsWith("/api/guest") || pathname.startsWith("/api/auth")) {
-      return NextResponse.next();
-    }
-
-    const sessionCookie = request.cookies.get("better-auth.session_token");
-    const isLoggedIn = !!sessionCookie?.value;
-
-    console.log("API Session cookie exists:", isLoggedIn, pathname);
-    if (isLoggedIn) {
-      return NextResponse.next();
-    }
-
-    return NextResponse.redirect(new URL("/login", request.url));
+    return handleApiRoutes(pathname, isLoggedIn, request);
   }
 
-  console.log(`Auth middleware: ${request.nextUrl.pathname}`);
+  // 페이지 경로 처리
+  return handlePageRoutes(pathname, isLoggedIn, request);
+}
 
-  const sessionCookie = request.cookies.get("better-auth.session_token");
-  const isLoggedIn = !!sessionCookie?.value;
+function handleApiRoutes(
+  pathname: string,
+  isLoggedIn: boolean,
+  request: NextRequest
+) {
+  // 인증이 필요하지 않은 API 경로
+  const publicApiRoutes = ["/api/guest", "/api/auth"];
+  const isPublicApi = publicApiRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
 
+  if (isPublicApi || isLoggedIn) {
+    return NextResponse.next();
+  }
+
+  return NextResponse.redirect(new URL("/login", request.url));
+}
+
+function handlePageRoutes(
+  pathname: string,
+  isLoggedIn: boolean,
+  request: NextRequest
+) {
   const isAuthPage =
     pathname.startsWith("/auth") || pathname.includes("/login");
 
-  console.log(" Session cookie exists:", isLoggedIn, pathname);
-  console.log(" Is auth page:", isAuthPage);
-
-  // 로그인된 사용자가 인증 페이지에 접근
+  // 로그인된 사용자가 인증 페이지 접근 시 대시보드로 리다이렉트
   if (isLoggedIn && isAuthPage) {
-    console.log("Redirecting logged user to dashboard");
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  // 로그인하지 않은 사용자가 보호된 페이지에 접근
+  // 미인증 사용자가 보호된 페이지 접근 시 로그인으로 리다이렉트
   if (!isLoggedIn && !isAuthPage) {
-    console.log("Redirecting to login");
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
@@ -67,8 +62,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    //해당 경로를 제외하고 미들웨어 실횅
-    "/((?!_next/static|_next/image|favicon.ico).*)",
-  ],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

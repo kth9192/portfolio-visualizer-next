@@ -10,6 +10,9 @@ export const auth = betterAuth({
     enabled: true,
     requireEmailVerification: false,
   },
+  trustedOrigins: process.env.NEXT_PUBLIC_APP_URL
+    ? [process.env.NEXT_PUBLIC_APP_URL]
+    : ["http://localhost:3000"],
   plugins: [nextCookies()],
   user: {
     additionalFields: {
