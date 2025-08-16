@@ -2,28 +2,38 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const response = NextResponse.next();
+
   console.log("MIDDLEWARE START");
 
-  if (
-    pathname.startsWith("/_next") ||
+  response.headers.set("Access-Control-Allow-Credentials", "true");
+  response.headers.set(
+    "Access-Control-Allow-Origin",
+    process.env.NEXT_PUBLIC_APP_URL!
+  );
 
-    pathname.includes(".")
-  ) {
+  // 쿠키 정책 헤더
+  if (process.env.NODE_ENV === "production") {
+    response.headers.set(
+      "Set-Cookie",
+      `Path=/; SameSite=Lax; Secure; HttpOnly`
+    );
+  }
+
+  if (pathname.startsWith("/_next") || pathname.includes(".")) {
     return NextResponse.next();
   }
 
-
-  if(pathname.startsWith("/api")){
-
-    if(pathname.startsWith("/api/guest") || pathname.startsWith("/api/auth")){
+  if (pathname.startsWith("/api")) {
+    if (pathname.startsWith("/api/guest") || pathname.startsWith("/api/auth")) {
       return NextResponse.next();
     }
 
     const sessionCookie = request.cookies.get("better-auth.session_token");
     const isLoggedIn = !!sessionCookie?.value;
 
-    console.log("API Session cookie exists:", isLoggedIn  , pathname);
-    if(isLoggedIn){
+    console.log("API Session cookie exists:", isLoggedIn, pathname);
+    if (isLoggedIn) {
       return NextResponse.next();
     }
 
