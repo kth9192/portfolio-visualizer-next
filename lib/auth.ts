@@ -22,6 +22,10 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 7,
   },
+  onAPIError: {
+    throw: true,
+    errorURL: "/api/auth/error",
+  },
   trustedOrigins: process.env.NEXT_PUBLIC_APP_URL
     ? [process.env.NEXT_PUBLIC_APP_URL]
     : ["http://localhost:3000"],
