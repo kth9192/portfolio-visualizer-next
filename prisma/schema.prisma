@@ -178,7 +178,7 @@ model User {
   updatedAt      DateTime
   guestExpiresAt DateTime?
   isGuest        Boolean      @default(false)
-  accounts       Account[]
+  account        account[]
   portfolios     portfolios[]
   sessions       Session[]
 
@@ -197,25 +197,6 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("session")
-}
-
-model Account {
-  id                    String    @id
-  accountId             String
-  providerId            String
-  userId                String
-  accessToken           String?
-  refreshToken          String?
-  idToken               String?
-  accessTokenExpiresAt  DateTime?
-  refreshTokenExpiresAt DateTime?
-  scope                 String?
-  password              String?
-  createdAt             DateTime
-  updatedAt             DateTime
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("account")
 }
 
 model Verification {
@@ -243,6 +224,23 @@ model portfolio_metrics {
   portfolios   portfolios @relation(fields: [portfolio_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([portfolio_id], map: "idx_portfolio_metrics_portfolio_id")
+}
+
+model account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum rebalance_frequency {
