@@ -12,7 +12,12 @@ export class AuthGuestService {
   }
 
   async createGuestAccount(): Promise<AuthUser> {
-    const generateRandomString = createRandomStringGenerator("A-Z", "0-9", "a-z");
+    //인증용 무작위 문자열
+    const generateRandomString = createRandomStringGenerator(
+      "A-Z",
+      "0-9",
+      "a-z"
+    );
 
     const guestId = `guest_${generateRandomString(10)}`;
     const guestEmail = `${guestId}@guest.tmp`;

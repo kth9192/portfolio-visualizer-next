@@ -7,9 +7,19 @@ export const authClient = createAuthClient({
   baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   fetchOptions: {
     credentials: "include",
-    headers: {
-      "content-type": "application/json",
-    },
+
+    // onResponse: async (context) => {
+    //   const contentType = context.response.headers.get("content-type");
+    //   // if (!contentType.includes("application/json")) {
+    //   //   console.error("response is not json", await context.response.text());
+    //   //   throw new Error("Invalid response format");
+    //   // }
+
+    //   console.log(context.response);
+
+    //   return context.response.json();
+    // },
+    // onError: (context) => console.error("Error", context.error),
   },
   plugins: [
     inferAdditionalFields<typeof auth>({

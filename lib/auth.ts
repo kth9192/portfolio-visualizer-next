@@ -4,11 +4,23 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 
 const prisma = new PrismaClient();
+
 export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
+  },
+  socialProviders: {
+    google: {
+      prompt: "select_account",
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      enabled: process.env.NODE_ENV !== "production",
+    },
+  },
+  session: {
+    expiresIn: 60 * 60 * 24 * 7,
   },
   trustedOrigins: process.env.NEXT_PUBLIC_APP_URL
     ? [process.env.NEXT_PUBLIC_APP_URL]
@@ -24,14 +36,6 @@ export const auth = betterAuth({
         type: "date",
         input: false,
       },
-    },
-  },
-
-  socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      enabled: process.env.NODE_ENV !== "production",
     },
   },
 } as BetterAuthOptions);
