@@ -186,7 +186,7 @@ function PortfolioBuilder() {
                       : "text-red-500"
                   )}
                 >
-                  {totalWeight * 100}%
+                  {Math.round(totalWeight * 100 * 100) / 100}%
                 </span>
               </div>
               {watch("assets")?.length > 0 && (
