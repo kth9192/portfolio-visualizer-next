@@ -70,7 +70,7 @@ function LoginPage() {
           //     </button>
           //   </div>
           // </form>
-          <GoogleSignInButton />
+          <GoogleSignInButton size="sm" />
         )}
 
         {/* 임시 계정 발급 및 로그인 */}
@@ -81,10 +81,9 @@ function LoginPage() {
             <Button
               type="button"
               variant="ghost"
-              className="w-full underline rounded-none py-3 hover:bg-gray-100 hover:text-black transition-colors "
+              className="w-full h-10 underline py-5 shadow bg-white hover:text-white hover:bg-black  transition-colors"
               onClick={handleGuestLogin}
             >
-              {" "}
               게스트 계정으로 시작하기
             </Button>
           )}

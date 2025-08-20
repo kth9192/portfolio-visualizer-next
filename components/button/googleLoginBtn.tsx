@@ -45,8 +45,8 @@ export default function GoogleSignInButton({
   // Style variants
   const variantClasses = {
     default: `
-      bg-white border border-gray-300 text-gray-700 
-      hover:bg-gray-50 hover:border-gray-400 
+      bg-white text-gray-700 
+      hover:bg-gray-50
       focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
       shadow-sm
     `,
@@ -65,7 +65,7 @@ export default function GoogleSignInButton({
         ${sizeClasses[size]}
         ${variantClasses[variant]}
         flex items-center justify-center gap-3
-        min-w-[200px] rounded-lg font-medium
+        min-w-[200px] font-medium
         transition-all duration-200
         disabled:opacity-50 disabled:cursor-not-allowed
         ${className}
