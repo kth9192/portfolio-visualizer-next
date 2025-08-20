@@ -25,7 +25,7 @@ function SideBar() {
     <div
       id="sidebar"
       className={twMerge(
-        "flex flex-col h-screen bg-gray-950 text-white py-4 transition-all",
+        "flex flex-col min-h-screen bg-gray-950 text-white py-4 transition-all",
         isOpen ? "w-80" : "w-20"
       )}
     >
@@ -73,9 +73,7 @@ function SideBar() {
             !isOpen && "justify-center"
           )}
         >
-          <CustomTooltip
-            content={<p>포트폴리오</p>}
-          >
+          <CustomTooltip content={<p>포트폴리오</p>}>
             <div className="flex items-center gap-2 cursor-pointer">
               <FlaskConical />
               <div className={twMerge("text-white", !isOpen && "sr-only")}>
