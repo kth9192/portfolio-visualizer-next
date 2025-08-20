@@ -25,7 +25,7 @@ function SideBar() {
     <div
       id="sidebar"
       className={twMerge(
-        "flex flex-col min-h-screen bg-gray-950 text-white py-4 transition-all",
+        "flex flex-col h-full bg-gray-950 text-white py-4 transition-all",
         isOpen ? "w-80" : "w-20"
       )}
     >
