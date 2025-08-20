@@ -4,6 +4,8 @@ import { PortfolioSimulationData } from "@/app/interface/dto/portfolio";
 import { PortfolioCreateSchemaType } from "@/app/interface/schema/portfolio";
 import LineChart from "@/components/chart/lineChart";
 import CustomSpinner from "@/components/spinner/customSpinner";
+import CustomTooltip from "@/components/tooltip/customTooltip";
+import { Tooltip } from "@/components/ui/tooltip";
 import {
   calculateCAGR,
   calculateDailyReturns,
@@ -17,6 +19,7 @@ import { formatWithCommas } from "@/lib/utils";
 import { ApexOptions } from "apexcharts";
 import { differenceInYears, format } from "date-fns";
 import { ko } from "date-fns/locale";
+import { InfoIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { twMerge } from "tailwind-merge";
@@ -393,9 +396,24 @@ function PortfolioMetrics({
             </li>
 
             <li className="p-3 bg-gray-50 rounded-lg">
-              <h3 className="text-sm font-medium text-gray-600">
-                CAGR (연평균 수익률)
-              </h3>
+              <div className="flex items-center gap-1">
+                <h3 className="text-sm font-medium text-gray-600">CAGR</h3>
+                <CustomTooltip
+                  content={
+                    <div className="flex gap-2 flex-col">
+                      <span>
+                        연평균 복합 성장률 (Compound Annual Growth Rate).
+                      </span>
+                      <span>
+                        투자의 연간 성장률을 복리 효과를 고려하여 계산한 지표.
+                      </span>
+                    </div>
+                  }
+                  contentClass="bg-black py-2"
+                >
+                  <InfoIcon className="size-3 " />
+                </CustomTooltip>
+              </div>
               <p
                 className={twMerge(
                   "text-lg font-medium",
@@ -407,25 +425,72 @@ function PortfolioMetrics({
             </li>
 
             <li className="p-3 bg-gray-50 rounded-lg">
-              <h3 className="text-sm font-medium text-gray-600">
-                MDD (최대 낙폭)
-              </h3>
+              <div className="flex items-center gap-1">
+                <h3 className="text-sm font-medium text-gray-600">MDD</h3>
+                <CustomTooltip
+                  content={
+                    <div className="flex gap-2 flex-col">
+                      <span>최대낙폭 (Maximum Drawdown).</span>
+                      <span>고점 대비 최대 손실률을 의미한다.</span>
+                    </div>
+                  }
+                  contentClass="bg-black py-2"
+                >
+                  <InfoIcon className="size-3 " />
+                </CustomTooltip>
+              </div>
+
               <p className="text-lg font-medium text-red-600">
                 {(metrics.mdd * 100).toFixed(2)}%
               </p>
             </li>
 
             <li className="p-3 bg-gray-50 rounded-lg">
-              <h3 className="text-sm font-medium text-gray-600">
-                변동성 (연간)
-              </h3>
+              <div className="flex items-center gap-1">
+                <h3 className="text-sm font-medium text-gray-600">
+                  변동성 (연간)
+                </h3>
+                <CustomTooltip
+                  content={
+                    <div className="flex flex-col gap-1">
+                      <span>변동성 (Volatility).</span>
+                      <span>투자 수익률의 변동 정도를 의미.</span>
+                      <span>
+                        높은 변동성이라면 리스크가 높지만 높은 수익기회가 존재.
+                        낮은 변동성이라면 안정적인 패턴
+                      </span>
+                    </div>
+                  }
+                  contentClass="bg-black"
+                >
+                  <InfoIcon className="size-3 " />
+                </CustomTooltip>
+              </div>
               <p className="text-lg font-medium text-gray-900">
                 {(metrics.volatility * 100).toFixed(2)}%
               </p>
             </li>
 
             <li className="p-3 bg-gray-50 rounded-lg">
-              <h3 className="text-sm font-medium text-gray-600">샤프 비율</h3>
+              <div className="flex items-center gap-1">
+                <h3 className="text-sm font-medium text-gray-600">샤프 비율</h3>
+                <CustomTooltip
+                  content={
+                    <div className="flex flex-col gap-1">
+                      <span>샤프 비율 (Sharpe Ratio). 위험 대비 수익률.</span>
+                      <span>
+                        무위험 수익률에 대한 포트폴리오 수익률을 변동성으로 나눈
+                        것.
+                      </span>
+                      <span>높을 수록 단위 위험당 더 많을 수익을 의미</span>
+                    </div>
+                  }
+                  contentClass="bg-black"
+                >
+                  <InfoIcon className="size-3 " />
+                </CustomTooltip>
+              </div>
+
               <p
                 className={twMerge(
                   "text-lg font-medium",
@@ -451,27 +516,6 @@ function PortfolioMetrics({
               </p>
             </li>
           </ul>
-
-          {/* 성과지표 설명 */}
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">
-              지표 설명
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-gray-600">
-              <div>
-                <strong>CAGR:</strong> 연평균 복합 성장률
-              </div>
-              <div>
-                <strong>MDD:</strong> 고점 대비 최대 손실률
-              </div>
-              <div>
-                <strong>변동성:</strong> 수익률의 표준편차 (연간)
-              </div>
-              <div>
-                <strong>샤프 비율:</strong> 위험 대비 수익률 (1.0 이상 우수)
-              </div>
-            </div>
-          </div>
         </div>
       )}
     </div>
