@@ -1,5 +1,4 @@
 import SideBar from "@/components/sideBar";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function MainLayout({
   children,
@@ -7,12 +6,11 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen">
+    <div className="flex w-full overflow-hidden">
       <SideBar />
-      <main className="flex-1 w-0 overflow-x-hidden overflow-y-auto">
-        <ScrollArea className="min-h-screen">{children}</ScrollArea>
+      <main className="flex-1 overflow-hidden">
+        <div className="w-full h-full overflow-auto">{children}</div>
       </main>
-      ;
     </div>
   );
 }
