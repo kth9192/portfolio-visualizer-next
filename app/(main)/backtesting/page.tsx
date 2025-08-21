@@ -24,6 +24,7 @@ import { FormProvider, useForm, useWatch } from "react-hook-form";
 import PortfolioBuilder from "./widget/portfolioBuilder";
 import PortfolioMetrics from "./widget/portfolioMetrics";
 import PortfolioSetting from "./widget/portfolioSetting";
+import useGetBacktestingMonthlyData from "@/lib/hooks/query/useGetBacktestingMonthlyData";
 
 function BacktestingPageContent() {
   const router = useRouter();
@@ -64,7 +65,7 @@ function BacktestingPageContent() {
     name: "assets",
   });
 
-  const startDate = useWatch({
+  const startDateWatch = useWatch({
     control,
     name: "setting.startDate",
   });
@@ -91,13 +92,12 @@ function BacktestingPageContent() {
 
   const backtestingReq = useMemo(() => {
     return {
-      // ticker: methods.watch("assets").map((asset) => asset.symbol),
       ticker: assetsWatch.map((asset) => asset.symbol),
-      startDate: startDate,
+      startDate: startDateWatch,
       endDate: endDateWatch,
       rebalanceFrequency: rebalanceFrequencyWatch,
     };
-  }, [assetsWatch, startDate, endDateWatch, rebalanceFrequencyWatch]);
+  }, [assetsWatch, startDateWatch, endDateWatch, rebalanceFrequencyWatch]);
 
   const {
     data: portfolioData,
@@ -115,6 +115,15 @@ function BacktestingPageContent() {
     options: {
       enabled: false,
       retry: false,
+    },
+  });
+
+  const monthlyPortfolioData = useGetBacktestingMonthlyData({
+    req: {
+      ticker: assetsWatch.map((asset) => asset.symbol),
+      startDate: startDateWatch,
+      endDate: endDateWatch,
+      rebalanceFrequency: rebalanceFrequencyWatch,
     },
   });
 

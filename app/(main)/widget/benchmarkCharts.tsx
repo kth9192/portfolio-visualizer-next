@@ -1,8 +1,6 @@
 "use client";
 
-import {
-  createPortfolioAssetPackage
-} from "@/app/interface/dto/portfolio";
+import { createPortfolioAssetPackage } from "@/app/interface/dto/portfolio";
 import { RebalanceFrequency } from "@/app/interface/enum/rebanalceFrequency";
 import LineChart from "@/components/chart/lineChart";
 import CustomSpinner from "@/components/spinner/customSpinner";
@@ -25,7 +23,7 @@ function BenchmarkCharts() {
     endDate: new Date(),
   });
 
-  const testSeries = useMonthlySeries({
+  const monthlySeries = useMonthlySeries({
     portfolio: PORTFOLIO_PRESETS.map((preset) =>
       createPortfolioAssetPackage({
         name: preset.name,
@@ -45,14 +43,19 @@ function BenchmarkCharts() {
     const validSeries: { name: string; data: { x: string; y: number }[] }[] =
       [];
 
+    //벤치마크 디커당
     BENCHMARK_TICKERS.forEach((ticker) => {
+      //벤치마크가 없으면 안됨
       if (benchmarks === null || benchmarks === undefined) return null;
+
+      //벤치마크 데이터에서 티커랑 매칭
       const tickerData = benchmarks.filter(
         (benchmark) => benchmark.symbol === ticker
       );
 
       if (tickerData.length === 0) return null;
 
+      //첫 값은 누적수익률에서 의미가 없음
       const baseVal = tickerData[0].close;
 
       if (!baseVal || baseVal <= 0) {
@@ -60,6 +63,7 @@ function BenchmarkCharts() {
         return;
       }
 
+      //누적 수익률을 구하고 월별로 표기
       const calculateCumulativeSeriesData = tickerData.map((data) => {
         const accumulateValue = (data.close - baseVal) / baseVal;
 
@@ -69,14 +73,18 @@ function BenchmarkCharts() {
         };
       });
 
+      //벤치마크 데이터를 정리해서 리턴
       validSeries.push({
         name: ticker,
         data: calculateCumulativeSeriesData,
       });
     });
 
-    if (testSeries.length === 0) return validSeries;
-    testSeries.map((series) =>
+    //표기할 월별 데이터가 없다면, 벤치마크만 내보냄
+    if (monthlySeries.length === 0) return validSeries;
+
+    //벤치마크와의 비교를 위해 월별 데이터를 벤치마크 배열에 같은 형식으로 추가함
+    monthlySeries.map((series) =>
       validSeries.push({
         name: series[0]?.name,
         data: series.map((data) => ({
@@ -87,7 +95,7 @@ function BenchmarkCharts() {
     );
 
     return validSeries;
-  }, [benchmarks, testSeries]);
+  }, [benchmarks, monthlySeries]);
 
   if (benchmarkError) {
     return <p>error</p>;
@@ -119,7 +127,7 @@ function BenchmarkCharts() {
                   "orange-500",
                   "indigo-500",
                   "pink-500",
-                  "teal-500"
+                  "teal-500",
                 ];
                 return twColor(colors[index % colors.length]);
               }),
@@ -154,7 +162,7 @@ function BenchmarkCharts() {
                 custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                   const date = format(
                     new Date(w.globals.seriesX[seriesIndex][dataPointIndex]),
-                    "yyyy-MM-dd",
+                    "yyyy-MM",
                     { locale: ko }
                   );
 
@@ -174,13 +182,22 @@ function BenchmarkCharts() {
                                     item: { name: string; value: number },
                                     idx: number
                                   ) =>
-                                    `<li class="flex flex-row justify-between items-center gap-3" style="${item.value !== undefined  || item.value !== null ? "" : "display: none;"}">
+                                    `<li class="flex flex-row justify-between items-center gap-3" style="${
+                                      item.value !== undefined ||
+                                      item.value !== null
+                                        ? ""
+                                        : "display: none;"
+                                    }">
                                       <div class="flex flex-row items-center gap-1">
-                                        <div class="size-2 rounded-full" style="background-color:${w.config.colors[idx]};">
+                                        <div class="size-2 rounded-full" style="background-color:${
+                                          w.config.colors[idx]
+                                        };">
                                         </div>
                                         <span>${item.name}</span>
                                       </div>
-                                      <span class="ml-1 font-bold" style="color:${w.config.colors[idx]};">${item.value}%</span>
+                                      <span class="ml-1 font-bold" style="color:${
+                                        w.config.colors[idx]
+                                      };">${item.value}%</span>
                                     </li>`
                                 )
                                 .join("")}

@@ -1,5 +1,6 @@
 "use client";
 
+import { BacktestingReq } from "@/app/interface/dto/backtesting";
 import { PortfolioSimulationData } from "@/app/interface/dto/portfolio";
 import { PortfolioCreateSchemaType } from "@/app/interface/schema/portfolio";
 import LineChart from "@/components/chart/lineChart";
@@ -12,8 +13,9 @@ import {
   calculateVariance,
   calculatMaximumDrawdown,
 } from "@/lib/calculator";
+import useGetBacktestingMonthlyData from "@/lib/hooks/query/useGetBacktestingMonthlyData";
 import useGetBenchmarkInfos from "@/lib/hooks/query/useGetBenchmarks";
-import { useMonthlyPortfolioData } from "@/lib/hooks/useExtractMonthlyFromPortfolio";
+import { useExtractMonthlyFromPortfolio } from "@/lib/hooks/useExtractMonthlyFromPortfolio";
 import { twColor } from "@/lib/resource";
 import { formatWithCommas } from "@/lib/utils";
 import { ApexOptions } from "apexcharts";
@@ -46,7 +48,7 @@ function PortfolioMetrics({
     useFormContext<PortfolioCreateSchemaType>();
 
   const metricsRef = useRef<HTMLDivElement>(null);
-  const monthlyPortfolioData = useMonthlyPortfolioData(portfolioSimulationData);
+  // const monthlyPortfolioData = useExtractMonthlyFromPortfolio(portfolioSimulationData);
 
   const startDateWatch = useWatch({
     control: control,
@@ -79,9 +81,11 @@ function PortfolioMetrics({
     });
   }, []);
 
+  // 시뮬레이션 데이터와 벤치마크 데이터 통합
   const reworkChartSeries = useMemo<
     ApexAxisChartSeries | ApexNonAxisChartSeries | undefined
   >(() => {
+    // 벤치마크가 없다면 필요없음
     if (!benchmarks?.length) {
       return chartSeries;
     }
@@ -92,6 +96,7 @@ function PortfolioMetrics({
     // 벤치마크 데이터 필터링 및 정제
     const filteredBenchmarks = benchmarks.filter((benchmark) => {
       const benchmarkDate = new Date(`${benchmark.year_month}-01`);
+
       const portfolioStart = new Date(
         startDate.getFullYear(),
         startDate.getMonth(),
@@ -106,10 +111,11 @@ function PortfolioMetrics({
       return benchmarkDate >= portfolioStart && benchmarkDate <= portfolioEnd;
     });
 
+    //포트폴리오 월 차트 데이터
     const portfolioMonthlySeries = {
       name: "Portfolio",
-      data: monthlyPortfolioData.map((data) => ({
-        x: new Date(`${data.yearMonth}-01`).getTime(),
+      data: portfolioSimulationData.map((data) => ({
+        x: format(data.date, "yyyy-MM"),
         y: data.cumulativeReturnsPercent,
       })),
     };
@@ -118,7 +124,9 @@ function PortfolioMetrics({
       new Set(filteredBenchmarks.map((benchmark) => benchmark.symbol))
     );
 
+    // 벤치마크 월 차트 데이터
     const benchmarkSeries = symbols.map((symbol) => {
+      //시간순으로 벤치마크 심볼과 일치하는 데이터만 필터링
       const symbolData = filteredBenchmarks
         .filter((benchmark) => benchmark.symbol === symbol)
         .sort((a, b) => a.year_month.localeCompare(b.year_month));
@@ -148,7 +156,7 @@ function PortfolioMetrics({
     benchmarks,
     startDateWatch,
     endDateWatch,
-    monthlyPortfolioData,
+    portfolioSimulationData,
   ]);
 
   // 성과지표 계산
