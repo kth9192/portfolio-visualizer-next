@@ -25,6 +25,7 @@ function BenchmarkCharts() {
 
   const monthlySeries = useMonthlySeries({
     portfolio: PORTFOLIO_PRESETS.map((preset) =>
+      //프리셋 정보중 필요한 것만
       createPortfolioAssetPackage({
         name: preset.name,
         assets: preset.assets,
