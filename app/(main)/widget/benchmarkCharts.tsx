@@ -11,7 +11,7 @@ import { BENCHMARK_TICKERS, twColor } from "@/lib/resource";
 import { ApexOptions } from "apexcharts";
 import { format, subYears } from "date-fns";
 import { ko } from "date-fns/locale";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 function BenchmarkCharts() {
   const {
@@ -41,7 +41,7 @@ function BenchmarkCharts() {
   const chartSeries = useMemo<
     ApexAxisChartSeries | ApexNonAxisChartSeries | undefined
   >(() => {
-    const validSeries: { name: string; data: { x: string; y: number }[] }[] =
+    const validSeries: { name: string; data: { x: number; y: number }[] }[] =
       [];
 
     //벤치마크 디커당
@@ -50,9 +50,9 @@ function BenchmarkCharts() {
       if (benchmarks === null || benchmarks === undefined) return null;
 
       //벤치마크 데이터에서 티커랑 매칭
-      const tickerData = benchmarks.filter(
-        (benchmark) => benchmark.symbol === ticker
-      );
+      const tickerData = benchmarks
+        .filter((benchmark) => benchmark.symbol === ticker)
+        .sort((a, b) => a.year_month.localeCompare(b.year_month));
 
       if (tickerData.length === 0) return null;
 
@@ -69,7 +69,7 @@ function BenchmarkCharts() {
         const accumulateValue = (data.close - baseVal) / baseVal;
 
         return {
-          x: data.year_month,
+          x: new Date(data.year_month + "-01").getTime(),
           y: accumulateValue * 100,
         };
       });
@@ -89,7 +89,7 @@ function BenchmarkCharts() {
       validSeries.push({
         name: series[0]?.name,
         data: series.map((data) => ({
-          x: data.year_month,
+          x: new Date(data.year_month + "-01").getTime(),
           y: data.cumulativeReturnsPercent,
         })),
       })
@@ -101,6 +101,10 @@ function BenchmarkCharts() {
   if (benchmarkError) {
     return <p>error</p>;
   }
+
+  useEffect(() => {
+    console.log("chartSeries", chartSeries);
+  }, [chartSeries]);
 
   return (
     <div className="flex flex-col">

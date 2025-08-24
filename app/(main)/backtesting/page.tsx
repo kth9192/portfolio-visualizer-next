@@ -25,6 +25,7 @@ import PortfolioBuilder from "./widget/portfolioBuilder";
 import PortfolioMetrics from "./widget/portfolioMetrics";
 import PortfolioSetting from "./widget/portfolioSetting";
 import useGetBacktestingMonthlyData from "@/lib/hooks/query/useGetBacktestingMonthlyData";
+import { usePortfolioSimulationMonthly } from "@/lib/hooks/usePortfolioSimulationMonthly";
 
 function BacktestingPageContent() {
   const router = useRouter();
@@ -118,17 +119,29 @@ function BacktestingPageContent() {
     },
   });
 
-  const monthlyPortfolioData = useGetBacktestingMonthlyData({
-    req: {
-      ticker: assetsWatch.map((asset) => asset.symbol),
-      startDate: startDateWatch,
-      endDate: endDateWatch,
-      rebalanceFrequency: rebalanceFrequencyWatch,
-    },
-  });
+  const { data: monthlyPortfolioData, refetch: executeMonthlyBacktest } =
+    useGetBacktestingMonthlyData({
+      req: {
+        ticker: assetsWatch.map((asset) => asset.symbol),
+        startDate: startDateWatch,
+        endDate: endDateWatch,
+        rebalanceFrequency: rebalanceFrequencyWatch,
+      },
+      options: {
+        enabled: false,
+        retry: false,
+      },
+    });
 
-  const portfolioSimulationData = usePortfolioSimulation({
-    data: backtestingData,
+  // const portfolioSimulationData = usePortfolioSimulation({
+  //   data: backtestingData,
+  //   initialAmount: initialAmountWatch,
+  //   setting: settingWatch as PortfolioSettingReqDTO,
+  //   assets: assetsWatch as PortfolioAssetReqDTO[],
+  // });
+
+  const portfolioSimulationMonthlyData = usePortfolioSimulationMonthly({
+    data: monthlyPortfolioData,
     initialAmount: initialAmountWatch,
     setting: settingWatch as PortfolioSettingReqDTO,
     assets: assetsWatch as PortfolioAssetReqDTO[],
@@ -174,7 +187,7 @@ function BacktestingPageContent() {
   }, [formState.errors]);
 
   const chartSeries = useMemo(() => {
-    if (portfolioSimulationData.length > 0 && !backtestingData)
+    if (portfolioSimulationMonthlyData.length > 0 && !backtestingData)
       return [
         {
           name: "Portfolio",
@@ -190,14 +203,14 @@ function BacktestingPageContent() {
     const result = [
       {
         name: "Portfolio",
-        data: portfolioSimulationData.map((item) => ({
-          x: item.date.getTime(),
+        data: portfolioSimulationMonthlyData.map((item) => ({
+          x: new Date(item.yearMonth).getTime(),
           y: item.cumulativeReturnsPercent,
         })),
       },
     ];
     return result;
-  }, [portfolioSimulationData, backtestingData]);
+  }, [portfolioSimulationMonthlyData, backtestingData]);
 
   const handleBacktesting = useCallback(() => {
     if (!formState.isValid) {
@@ -205,6 +218,7 @@ function BacktestingPageContent() {
       return;
     }
 
+    executeMonthlyBacktest();
     executeBacktesting();
   }, [executeBacktesting, formState.isValid]);
 
@@ -230,15 +244,17 @@ function BacktestingPageContent() {
       },
       metrics: {
         totalReturn:
-          portfolioSimulationData[portfolioSimulationData.length - 1]
-            .cumulativeReturn,
+          portfolioSimulationMonthlyData[
+            portfolioSimulationMonthlyData.length - 1
+          ].cumulativeReturn,
         cagr: 0,
         mdd: 0,
         volatility: 0,
         sharpRatio: 0,
         finalAmount:
-          portfolioSimulationData[portfolioSimulationData.length - 1]
-            .portfolioValue,
+          portfolioSimulationMonthlyData[
+            portfolioSimulationMonthlyData.length - 1
+          ].portfolioValue,
       },
     });
 
@@ -307,7 +323,7 @@ function BacktestingPageContent() {
           </div>
 
           <PortfolioMetrics
-            portfolioSimulationData={portfolioSimulationData}
+            portfolioSimulationData={portfolioSimulationMonthlyData}
             chartSeries={chartSeries}
             backtestingLoading={backtestingLoading}
             backtestingError={backtestingError}
@@ -316,7 +332,7 @@ function BacktestingPageContent() {
             <Button
               type="submit"
               className="w-full"
-              disabled={portfolioSimulationData.length === 0}
+              disabled={portfolioSimulationMonthlyData.length === 0}
             >
               저장하기
             </Button>
