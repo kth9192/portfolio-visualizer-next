@@ -6,7 +6,12 @@ import {
 } from "@/app/interface/dto/portfolio";
 import { isSameDay } from "date-fns";
 import { useMemo } from "react";
-import { calculatePortfolioValue, calculateRebalancing, createInitialPortfolio, createPriceMap } from "../backtestCalculator";
+import {
+  calculatePortfolioValue,
+  calculateRebalancing,
+  createInitialPortfolio,
+  createPriceMap,
+} from "../backtestCalculator";
 import { getCommonDates, getRebalanceDates } from "../calculator";
 
 interface usePortfolioSimulationProps {
@@ -16,16 +21,14 @@ interface usePortfolioSimulationProps {
   assets: PortfolioAssetReqDTO[];
 }
 
-
-
 export function usePortfolioSimulation({
   data,
   initialAmount,
   setting,
   assets,
 }: usePortfolioSimulationProps) {
+  //값을 메모
   return useMemo(() => {
-
     if (
       !data?.priceInfos?.length ||
       !assets?.length ||
@@ -34,21 +37,23 @@ export function usePortfolioSimulation({
       return [];
     }
 
+    //etf 시계열 가격 데이터를 가져옴
     const priceInfos = data.priceInfos;
     const result: PortfolioSimulationData[] = [];
 
-    // 공통 날짜 계산
+    // 자산끼리의 공통 날짜 계산
     const commonDates = getCommonDates(priceInfos);
-    const commonDatesSet = new Set(commonDates);
     const timeSeries = commonDates.map((item) => new Date(item));
 
     // 가격 맵 구성
+    const commonDatesSet = new Set(commonDates);
     const priceMap = createPriceMap(priceInfos, commonDatesSet);
 
     if (!timeSeries?.length) return [];
 
     // 초기 포트폴리오 구성
-    let {initialShares:currentShares, remainingCash} = createInitialPortfolio(assets, initialAmount, priceMap);
+    let { initialShares: currentShares, remainingCash } =
+      createInitialPortfolio(assets, initialAmount, priceMap);
 
     // 리밸런싱 날짜 계산
     const rebalanceDates = getRebalanceDates(
@@ -85,7 +90,7 @@ export function usePortfolioSimulation({
         remainingCash,
         dayIdx
       );
-      
+
       // 수익률 계산
       let dailyReturn = 0;
       let cumulativeReturn = 0;

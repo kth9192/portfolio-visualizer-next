@@ -1,6 +1,10 @@
 "use client";
 
-import { PortfolioSimulationData } from "@/app/interface/dto/portfolio";
+import { BacktestingReq } from "@/app/interface/dto/backtesting";
+import {
+  PortfolioSimulationData,
+  PortfolioSimulationMonthData,
+} from "@/app/interface/dto/portfolio";
 import { PortfolioCreateSchemaType } from "@/app/interface/schema/portfolio";
 import LineChart from "@/components/chart/lineChart";
 import CustomSpinner from "@/components/spinner/customSpinner";
@@ -12,8 +16,9 @@ import {
   calculateVariance,
   calculatMaximumDrawdown,
 } from "@/lib/calculator";
+import useGetBacktestingMonthlyData from "@/lib/hooks/query/useGetBacktestingMonthlyData";
 import useGetBenchmarkInfos from "@/lib/hooks/query/useGetBenchmarks";
-import { useMonthlyPortfolioData } from "@/lib/hooks/useExtractMonthlyFromPortfolio";
+import { useExtractMonthlyFromPortfolio } from "@/lib/hooks/useExtractMonthlyFromPortfolio";
 import { twColor } from "@/lib/resource";
 import { formatWithCommas } from "@/lib/utils";
 import { ApexOptions } from "apexcharts";
@@ -25,7 +30,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 import { twMerge } from "tailwind-merge";
 
 interface PortfolioMetricsProps {
-  portfolioSimulationData: PortfolioSimulationData[];
+  portfolioSimulationData: PortfolioSimulationMonthData[];
   chartSeries: Array<{
     name: string;
     data: Array<{ x: number; y: number }>;
@@ -46,7 +51,7 @@ function PortfolioMetrics({
     useFormContext<PortfolioCreateSchemaType>();
 
   const metricsRef = useRef<HTMLDivElement>(null);
-  const monthlyPortfolioData = useMonthlyPortfolioData(portfolioSimulationData);
+  // const monthlyPortfolioData = useExtractMonthlyFromPortfolio(portfolioSimulationData);
 
   const startDateWatch = useWatch({
     control: control,
@@ -79,9 +84,11 @@ function PortfolioMetrics({
     });
   }, []);
 
+  // 시뮬레이션 데이터와 벤치마크 데이터 통합
   const reworkChartSeries = useMemo<
     ApexAxisChartSeries | ApexNonAxisChartSeries | undefined
   >(() => {
+    // 벤치마크가 없다면 필요없음
     if (!benchmarks?.length) {
       return chartSeries;
     }
@@ -91,25 +98,28 @@ function PortfolioMetrics({
 
     // 벤치마크 데이터 필터링 및 정제
     const filteredBenchmarks = benchmarks.filter((benchmark) => {
-      const benchmarkDate = new Date(`${benchmark.year_month}-01`);
-      const portfolioStart = new Date(
-        startDate.getFullYear(),
-        startDate.getMonth(),
-        1
-      );
-      const portfolioEnd = new Date(
-        endDate.getFullYear(),
-        endDate.getMonth(),
-        1
-      );
+      const [year, month] = benchmark.year_month.split("-").map(Number);
 
-      return benchmarkDate >= portfolioStart && benchmarkDate <= portfolioEnd;
+      const startYear = startDate.getFullYear();
+      const startMonth = startDate.getMonth() + 1;
+      const endYear = endDate.getFullYear();
+      const endMonth = endDate.getMonth() + 1;
+
+      // 년월 숫자로 비교 (예: 202112)
+      const dataYearMonth = year * 100 + month;
+      const startYearMonth = startYear * 100 + startMonth;
+      const endYearMonth = endYear * 100 + endMonth;
+
+      return dataYearMonth >= startYearMonth && dataYearMonth <= endYearMonth;
     });
 
+    console.log(" filteredBenchmarks", filteredBenchmarks);
+
+    //포트폴리오 월 차트 데이터
     const portfolioMonthlySeries = {
       name: "Portfolio",
-      data: monthlyPortfolioData.map((data) => ({
-        x: new Date(`${data.yearMonth}-01`).getTime(),
+      data: portfolioSimulationData.map((data) => ({
+        x: new Date(data.yearMonth).getTime(),
         y: data.cumulativeReturnsPercent,
       })),
     };
@@ -118,7 +128,9 @@ function PortfolioMetrics({
       new Set(filteredBenchmarks.map((benchmark) => benchmark.symbol))
     );
 
+    // 벤치마크 월 차트 데이터
     const benchmarkSeries = symbols.map((symbol) => {
+      //시간순으로 벤치마크 심볼과 일치하는 데이터만 필터링
       const symbolData = filteredBenchmarks
         .filter((benchmark) => benchmark.symbol === symbol)
         .sort((a, b) => a.year_month.localeCompare(b.year_month));
@@ -131,10 +143,9 @@ function PortfolioMetrics({
         data: symbolData.map((data) => {
           // 월의 마지막 날짜로 설정 (더 정확한 비교를 위해)
           const [year, month] = data.year_month.split("-").map(Number);
-          const lastDayOfMonth = new Date(year, month, 0); // 해당 월의 마지막 날
 
           return {
-            x: lastDayOfMonth.getTime(),
+            x: new Date(data.year_month).getTime(),
             // 첫 번째 값을 0%로 정규화
             y: ((data.cumulative_value - baseValue) / baseValue) * 100,
           };
@@ -148,8 +159,12 @@ function PortfolioMetrics({
     benchmarks,
     startDateWatch,
     endDateWatch,
-    monthlyPortfolioData,
+    portfolioSimulationData,
   ]);
+
+  useEffect(() => {
+    console.log("reworkChartSeries", reworkChartSeries);
+  }, [reworkChartSeries]);
 
   // 성과지표 계산
   const metrics = useMemo(() => {
@@ -299,13 +314,14 @@ function PortfolioMetrics({
                   enabled: true,
                   shared: true,
                   intersect: false,
+                  followCursor: true,
                   x: {
-                    format: "yyyy-MM-dd",
+                    format: "yyyy-MM",
                   },
                   custom: function ({ series, dataPointIndex, w }) {
                     const date = format(
                       new Date(w.globals.seriesX[0][dataPointIndex]),
-                      "yyyy-MM-dd",
+                      "yyyy-MM",
                       { locale: ko }
                     );
 

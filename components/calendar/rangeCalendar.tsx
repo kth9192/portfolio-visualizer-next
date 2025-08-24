@@ -113,6 +113,7 @@ const RangeCalendar: React.FC<RangeCalendarProps> = ({
         <PopoverTrigger asChild>
           <Button
             id="date"
+            type="button"
             variant="outline"
             className={cn(
               "w-full justify-start text-left font-normal h-10",

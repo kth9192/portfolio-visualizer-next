@@ -10,7 +10,7 @@ export interface BacktestingReq {
 
 export interface BacktestingRes {
   priceInfos: ETFTimeSeriesDTO[];
-  metrics: unknown;
+  metrics?: unknown;
 }
 
 export const createBacktestingRes = ({
@@ -26,4 +26,11 @@ export interface BacktestingSetting {
   endDate: Date;
   rebalanceFrequency: RebalanceFrequency;
   tradingCost: number;
+}
+
+export type MonthlyPriceData = Record<string, Record<string, number>>;
+
+export interface MonthlyBacktestAsset {
+  symbol: string;
+  weight: number;
 }

@@ -3,6 +3,13 @@ import { PortfolioAssetPackage } from "@/app/interface/dto/portfolio";
 import { RebalanceFrequency } from "@/app/interface/enum/rebanalceFrequency";
 import { startOfDay, subYears } from "date-fns";
 import useGetBacktestingMonthlyData from "./query/useGetBacktestingMonthlyData";
+import {
+  getCommonMonths,
+  createMonthPriceMap,
+  rebalancePortfolioForChart,
+  checkRebalanceCondition,
+} from "../backtestCalculator";
+import { MonthlyPriceData } from "@/app/interface/dto/backtesting";
 
 interface useMonthlySeriesProps {
   portfolio: PortfolioAssetPackage[];
@@ -12,48 +19,9 @@ interface useMonthlySeriesProps {
   initialAmount: number;
 }
 
-const makePriceMap = (etfPriceInfo: ETFPriceMonthlyDTO[]) => {
-  const monthlyPriceMap = new Map<string, Map<string, number>>();
-
-  etfPriceInfo.forEach((data) => {
-    if (!monthlyPriceMap.has(data.year_month)) {
-      monthlyPriceMap.set(data.year_month, new Map());
-    }
-    monthlyPriceMap.get(data.year_month)?.set(data.symbol, data.close);
-  });
-
-  return monthlyPriceMap;
-};
-
-const getCommonMonths = (
-  priceMap: Map<string, Map<string, number>>,
-  assets: { symbol: string }[]
-): string[] => {
-  const symbols = assets.map((asset) => asset.symbol);
-  const commonMonths: string[] = [];
-
-  // 날짜 순서로 정렬
-  const sortedKeys = Array.from(priceMap.keys()).sort();
-
-  for (const yearMonth of sortedKeys) {
-    const monthPrices = priceMap.get(yearMonth);
-    if (!monthPrices) continue;
-
-    const hasAllSymbols = symbols.every(
-      (symbol) => monthPrices.has(symbol) && monthPrices.get(symbol)! > 0
-    );
-
-    if (hasAllSymbols) {
-      commonMonths.push(yearMonth);
-    }
-  }
-
-  return commonMonths;
-};
-
 const calculateCumulative = (
   portfolio: PortfolioAssetPackage,
-  priceMap: Map<string, Map<string, number>>,
+  priceMap: MonthlyPriceData,
   commonMonths: string[],
   initialAmount: number,
   rebalanceFrequency: RebalanceFrequency
@@ -72,10 +40,11 @@ const calculateCumulative = (
     return result;
   }
 
-  const currentShares = new Map<string, number>();
+  //주식 수량
+  let currentShares = new Map<string, number>();
 
-  // 초기 주식 수량 계산
-  const firstMonthPrices = priceMap.get(commonMonths[0]);
+  //첫 달의 가격맵
+  const firstMonthPrices = priceMap[commonMonths[0]];
   if (!firstMonthPrices) {
     console.error("First month prices not found");
     return result;
@@ -83,20 +52,22 @@ const calculateCumulative = (
 
   // 초기 포트폴리오 구성
   portfolio.assets.forEach((asset) => {
-    const price = firstMonthPrices.get(asset.symbol);
+    const price = firstMonthPrices[asset.symbol];
     if (!price || price <= 0) {
       console.error(`Invalid price for ${asset.symbol}: ${price}`);
       return;
     }
 
+    //자산이 초기 자금에 대해 할당 받는 금액 정도
     const targetAmount = asset.weight * initialAmount;
+    // 주식 수량
     const shares = targetAmount / price;
     currentShares.set(asset.symbol, shares);
   });
 
   // 각 월별 계산
   commonMonths.forEach((yearMonth, idx) => {
-    const monthPrices = priceMap.get(yearMonth);
+    const monthPrices = priceMap[yearMonth];
     if (!monthPrices) return;
 
     // 리밸런싱 체크
@@ -106,39 +77,46 @@ const calculateCumulative = (
       rebalanceFrequency
     );
 
-    if (isRebalanceMonth && idx > 0) {
-      // 현재 포트폴리오 가치 계산
-      let currentPortfolioValue = 0;
-      portfolio.assets.forEach((asset) => {
-        const shares = currentShares.get(asset.symbol) || 0;
-        const price = monthPrices.get(asset.symbol) || 0;
-        currentPortfolioValue += shares * price;
-      });
-
-      // 리밸런싱 실행
-      rebalancePortfolio(
-        portfolio,
-        currentShares,
-        currentPortfolioValue,
-        monthPrices
-      );
-    }
-
     // 포트폴리오 가치 계산
     let portfolioValue = 0;
     portfolio.assets.forEach((asset) => {
       const shares = currentShares.get(asset.symbol) || 0;
-      const price = monthPrices.get(asset.symbol) || 0;
+      const price = monthPrices[asset.symbol] || 0;
       portfolioValue += shares * price;
     });
+
+    // 첫번쨰 달이 아니면서 리밸런싱에 해당하는 월이라면
+    if (isRebalanceMonth && idx > 0) {
+      // 리밸런싱 실행
+
+      //데이터 문제로 가격이 없는 구간이 있다면
+      const allPriceValide = portfolio.assets.every((asset) => {
+        const price = monthPrices[asset.symbol] || 0;
+        return price > 0;
+      });
+
+      //리밸런싱 하지 않음
+      if (!allPriceValide) {
+        console.error("Invalid price data for rebalance month");
+        return;
+      }
+
+      currentShares = rebalancePortfolioForChart(
+        portfolio,
+        portfolioValue,
+        monthPrices
+      );
+    }
 
     // 수익률 계산
     const cumulativeReturn = (portfolioValue - initialAmount) / initialAmount;
     const cumulativeReturnsPercent = cumulativeReturn * 100;
 
     let monthlyReturn = 0;
+    //첫번쨰 달이 아니면서 이전 결과가 존한다면
     if (idx > 0 && result[idx - 1]) {
       const prevValue = result[idx - 1].portfolio_value;
+      //이전 달의 포트폴리오 가치로 이전 달의 수익률 계산
       monthlyReturn =
         prevValue > 0 ? (portfolioValue - prevValue) / prevValue : 0;
     }
@@ -156,54 +134,6 @@ const calculateCumulative = (
   return result;
 };
 
-const checkRebalanceCondition = (
-  yearMonth: string,
-  index: number,
-  rebalanceFrequency: RebalanceFrequency
-): boolean => {
-  if (index === 0) return false; // 첫 번째 월은 리밸런싱 하지 않음
-
-  const [year, month] = yearMonth.split("-").map(Number);
-
-  if (isNaN(year) || isNaN(month)) {
-    console.error(`Invalid year_month format: ${yearMonth}`);
-    return false;
-  }
-
-  switch (rebalanceFrequency) {
-    case RebalanceFrequency.MONTHLY:
-      return true;
-    case RebalanceFrequency.QUARTERLY:
-      return month % 3 === 0; // 3, 6, 9, 12월
-    case RebalanceFrequency.SEMIANNUALLY:
-      return month % 6 === 0; // 6, 12월
-    case RebalanceFrequency.ANNUALLY:
-      return month === 1; // 1월 (연 초)
-    default:
-      return false;
-  }
-};
-
-const rebalancePortfolio = (
-  portfolio: PortfolioAssetPackage,
-  currentShares: Map<string, number>,
-  currentPortfolioValue: number,
-  monthPrices: Map<string, number>
-) => {
-  portfolio.assets.forEach((asset) => {
-    const targetAmount = asset.weight * currentPortfolioValue;
-    const price = monthPrices.get(asset.symbol);
-
-    if (!price || price <= 0) {
-      console.error(`Invalid price for rebalancing ${asset.symbol}: ${price}`);
-      return;
-    }
-
-    const newShares = targetAmount / price;
-    currentShares.set(asset.symbol, newShares);
-  });
-};
-
 export const useMonthlySeries = ({
   portfolio,
   startDate,
@@ -211,6 +141,7 @@ export const useMonthlySeries = ({
   rebalanceFrequency,
   initialAmount,
 }: useMonthlySeriesProps) => {
+  // 자산당 기간내 월별 데이터를 가져옴
   const { data: backtestingMonthlyData } = useGetBacktestingMonthlyData({
     req: {
       ticker: portfolio.flatMap((portfolioInfo) =>
@@ -227,29 +158,43 @@ export const useMonthlySeries = ({
     return [];
   }
 
-  // 날짜 필터링 개선
+  // 날짜 필터링
   const filteredData = backtestingMonthlyData.filter((data) => {
-    const [year, month] = data.year_month.split("-").map(Number);
-    const dataDate = new Date(year, month - 1, 1); // month는 0-based
-    return dataDate >= startDate && dataDate <= endDate;
+    // 1. 데이터의 년월을 숫자로 분리
+    // 예: "2021-12" → [2021, 12]
+
+    const [dataYear, dataMonth] = data.year_month.split("-").map(Number);
+
+    // 시작/종료 날짜를 년월로 변환
+    // 시작 날짜: 2021-12-15 → 년: 2021, 월: 12
+    const startYear = startDate.getFullYear();
+    const startMonth = startDate.getMonth() + 1;
+    const endYear = endDate.getFullYear();
+    const endMonth = endDate.getMonth() + 1;
+
+    // 년월 숫자로 비교 (예: 202112)
+    const dataYearMonth = dataYear * 100 + dataMonth;
+    const startYearMonth = startYear * 100 + startMonth;
+    const endYearMonth = endYear * 100 + endMonth;
+
+    return dataYearMonth >= startYearMonth && dataYearMonth <= endYearMonth;
   });
 
-  if (filteredData.length === 0) {
-    console.warn("No data after filtering by date range");
-    return [];
-  }
+  console.log("filteredData", filteredData);
 
-  const priceMap = makePriceMap(filteredData);
+  //탐색 효율을 위해 가격을 맵으로 만듦
+  const priceMap = createMonthPriceMap(filteredData);
 
   const result = portfolio.map((portfolioInfo) => {
+    //유효 날짜 계산
     const commonMonths = getCommonMonths(priceMap, portfolioInfo.assets);
-
 
     if (commonMonths.length === 0) {
       console.warn("No common months found for portfolio");
       return [];
     }
 
+    //기간내 월당 누적 수익률 등에 대해 계산
     return calculateCumulative(
       portfolioInfo,
       priceMap,

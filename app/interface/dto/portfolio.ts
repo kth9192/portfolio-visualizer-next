@@ -57,6 +57,14 @@ export interface PortfolioSimulationData {
   cumulativeMultiplier: number;
 }
 
+export interface PortfolioSimulationMonthData {
+  yearMonth: string;
+  cumulativeReturn: number;
+  cumulativeReturnsPercent: number;
+  portfolioValue: number;
+  monthlyReturn: number;
+}
+
 export interface PortfolioDTO {
   id: string;
   name: string;
@@ -151,7 +159,6 @@ export const createPortfolioSettingDTO = (
   };
 };
 
-
 export interface PortfolioSettingReqDTO {
   startDate: Date;
   endDate: Date;
@@ -206,7 +213,6 @@ export interface PortfolioMetricsReqDTO {
   sharpRatio: number;
   finalAmount: number;
 }
-
 
 export const createPortfolioMetricsReqDTO = (
   portfolioMetricsData: PortfolioMetricsReqDTO
@@ -267,7 +273,7 @@ export interface PortfolioPreset {
 }
 
 export interface PortfolioAssetPackage {
-  name:string;
+  name: string;
   assets: PortfolioAssetReqDTO[];
   rebalanceFrequency: RebalanceFrequency;
 }

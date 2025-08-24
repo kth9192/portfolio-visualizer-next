@@ -1,8 +1,6 @@
 "use client";
 
-import {
-  createPortfolioAssetPackage
-} from "@/app/interface/dto/portfolio";
+import { createPortfolioAssetPackage } from "@/app/interface/dto/portfolio";
 import { RebalanceFrequency } from "@/app/interface/enum/rebanalceFrequency";
 import LineChart from "@/components/chart/lineChart";
 import CustomSpinner from "@/components/spinner/customSpinner";
@@ -13,7 +11,7 @@ import { BENCHMARK_TICKERS, twColor } from "@/lib/resource";
 import { ApexOptions } from "apexcharts";
 import { format, subYears } from "date-fns";
 import { ko } from "date-fns/locale";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 function BenchmarkCharts() {
   const {
@@ -25,8 +23,9 @@ function BenchmarkCharts() {
     endDate: new Date(),
   });
 
-  const testSeries = useMonthlySeries({
+  const monthlySeries = useMonthlySeries({
     portfolio: PORTFOLIO_PRESETS.map((preset) =>
+      //프리셋 정보중 필요한 것만
       createPortfolioAssetPackage({
         name: preset.name,
         assets: preset.assets,
@@ -42,17 +41,22 @@ function BenchmarkCharts() {
   const chartSeries = useMemo<
     ApexAxisChartSeries | ApexNonAxisChartSeries | undefined
   >(() => {
-    const validSeries: { name: string; data: { x: string; y: number }[] }[] =
+    const validSeries: { name: string; data: { x: number; y: number }[] }[] =
       [];
 
+    //벤치마크 디커당
     BENCHMARK_TICKERS.forEach((ticker) => {
+      //벤치마크가 없으면 안됨
       if (benchmarks === null || benchmarks === undefined) return null;
-      const tickerData = benchmarks.filter(
-        (benchmark) => benchmark.symbol === ticker
-      );
+
+      //벤치마크 데이터에서 티커랑 매칭
+      const tickerData = benchmarks
+        .filter((benchmark) => benchmark.symbol === ticker)
+        .sort((a, b) => a.year_month.localeCompare(b.year_month));
 
       if (tickerData.length === 0) return null;
 
+      //첫 값은 누적수익률에서 의미가 없음
       const baseVal = tickerData[0].close;
 
       if (!baseVal || baseVal <= 0) {
@@ -60,38 +64,47 @@ function BenchmarkCharts() {
         return;
       }
 
+      //누적 수익률을 구하고 월별로 표기
       const calculateCumulativeSeriesData = tickerData.map((data) => {
         const accumulateValue = (data.close - baseVal) / baseVal;
 
         return {
-          x: data.year_month,
+          x: new Date(data.year_month + "-01").getTime(),
           y: accumulateValue * 100,
         };
       });
 
+      //벤치마크 데이터를 정리해서 리턴
       validSeries.push({
         name: ticker,
         data: calculateCumulativeSeriesData,
       });
     });
 
-    if (testSeries.length === 0) return validSeries;
-    testSeries.map((series) =>
+    //표기할 월별 데이터가 없다면, 벤치마크만 내보냄
+    if (monthlySeries.length === 0) return validSeries;
+
+    //벤치마크와의 비교를 위해 월별 데이터를 벤치마크 배열에 같은 형식으로 추가함
+    monthlySeries.map((series) =>
       validSeries.push({
         name: series[0]?.name,
         data: series.map((data) => ({
-          x: data.year_month,
+          x: new Date(data.year_month + "-01").getTime(),
           y: data.cumulativeReturnsPercent,
         })),
       })
     );
 
     return validSeries;
-  }, [benchmarks, testSeries]);
+  }, [benchmarks, monthlySeries]);
 
   if (benchmarkError) {
     return <p>error</p>;
   }
+
+  useEffect(() => {
+    console.log("chartSeries", chartSeries);
+  }, [chartSeries]);
 
   return (
     <div className="flex flex-col">
@@ -119,7 +132,7 @@ function BenchmarkCharts() {
                   "orange-500",
                   "indigo-500",
                   "pink-500",
-                  "teal-500"
+                  "teal-500",
                 ];
                 return twColor(colors[index % colors.length]);
               }),
@@ -154,7 +167,7 @@ function BenchmarkCharts() {
                 custom: function ({ series, seriesIndex, dataPointIndex, w }) {
                   const date = format(
                     new Date(w.globals.seriesX[seriesIndex][dataPointIndex]),
-                    "yyyy-MM-dd",
+                    "yyyy-MM",
                     { locale: ko }
                   );
 
@@ -174,13 +187,22 @@ function BenchmarkCharts() {
                                     item: { name: string; value: number },
                                     idx: number
                                   ) =>
-                                    `<li class="flex flex-row justify-between items-center gap-3" style="${item.value !== undefined  || item.value !== null ? "" : "display: none;"}">
+                                    `<li class="flex flex-row justify-between items-center gap-3" style="${
+                                      item.value !== undefined ||
+                                      item.value !== null
+                                        ? ""
+                                        : "display: none;"
+                                    }">
                                       <div class="flex flex-row items-center gap-1">
-                                        <div class="size-2 rounded-full" style="background-color:${w.config.colors[idx]};">
+                                        <div class="size-2 rounded-full" style="background-color:${
+                                          w.config.colors[idx]
+                                        };">
                                         </div>
                                         <span>${item.name}</span>
                                       </div>
-                                      <span class="ml-1 font-bold" style="color:${w.config.colors[idx]};">${item.value}%</span>
+                                      <span class="ml-1 font-bold" style="color:${
+                                        w.config.colors[idx]
+                                      };">${item.value}%</span>
                                     </li>`
                                 )
                                 .join("")}

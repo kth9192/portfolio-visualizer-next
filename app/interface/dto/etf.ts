@@ -28,11 +28,8 @@ export const createETFInfoDTO = (data: ETFInfoDTO): ETFInfoDTO => {
   };
 };
 
-// 일일 가격 데이터 타입 정의
-export interface ETFPriceDTO {
-  id: number;
-  symbol: string; // 티커
-  date: Date;
+export interface ETFPriceDTOBase {
+  symbol: string;
   open: number;
   high: number;
   low: number;
@@ -42,22 +39,19 @@ export interface ETFPriceDTO {
   dividend?: number;
 }
 
-export interface ETFPriceMonthlyDTO{
-  id:number;
-  symbol:string;
-  year_month:string;
-  open:number;
-  high:number;
-  low:number;
-  close:number;
-  volume:number;
-  adj_close:number;
-  dividend?:number;
+// 일일 가격 데이터 타입 정의
+export interface ETFPriceDTO extends ETFPriceDTOBase {
+  date: Date;
 }
 
-export const createETFPriceMonthlyDTO = (data: ETFPriceMonthlyDTO): ETFPriceMonthlyDTO => {
+export interface ETFPriceMonthlyDTO extends ETFPriceDTOBase {
+  year_month: string;
+}
+
+export const createETFPriceMonthlyDTO = (
+  data: ETFPriceMonthlyDTO
+): ETFPriceMonthlyDTO => {
   return {
-    id: data.id,
     symbol: data.symbol,
     year_month: data.year_month,
     open: data.open,
@@ -68,7 +62,7 @@ export const createETFPriceMonthlyDTO = (data: ETFPriceMonthlyDTO): ETFPriceMont
     adj_close: data.adj_close,
     dividend: data.dividend,
   };
-}
+};
 
 // 시계열 가격 데이터 타입 정의
 export interface ETFTimeSeriesDTO {
