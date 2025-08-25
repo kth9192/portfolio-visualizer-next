@@ -7,12 +7,27 @@ import {
 import { PortfolioCreateSchemaType } from "@/app/interface/schema/portfolio";
 import RangeCalendar from "@/components/calendar/rangeCalendar";
 import CustomSelect from "@/components/select/customSelect";
+import DateSelect from "@/components/select/dateSelect";
+import MonthSelect from "@/components/select/monthSelect";
+import YearSelect from "@/components/select/yearSelect";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/components/ui/form";
+import { fi } from "date-fns/locale";
+import { useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { Controller, useFormContext } from "react-hook-form";
 
 function PortfolioSetting() {
-
   const { control } = useFormContext<PortfolioCreateSchemaType>();
+
+  const [date, setDate] = useState<Date | undefined>(undefined);
+
+  const [year, setYear] = useState<number | undefined>();
+  const [month, setMonth] = useState<number | undefined>();
 
   // const watchedVal = useWatch({
   //   control,
@@ -23,11 +38,54 @@ function PortfolioSetting() {
   //   ],
   // });
 
+  useEffect(() => {
+    if (year === undefined || month === undefined) return;
+    setDate(new Date(year, month - 1, 1));
+  }, [year, month]);
+
+  useEffect(() => {
+    console.log(date);
+  }, [date]);
+
   return (
     <div className="flex flex-col bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <h3 className="text-lg font-semibold mb-4">백테스팅 설정</h3>
       <div className="space-y-4">
-        <Controller
+        <FormField
+          control={control}
+          name="setting.startDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>시작일</FormLabel>
+
+              <FormControl>
+                <DateSelect
+                  value={field.value}
+                  onSelect={(value: Date) => field.onChange(value)}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={control}
+          name="setting.endDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>종료일</FormLabel>
+
+              <FormControl>
+                <DateSelect
+                  value={field.value}
+                  onSelect={(value: Date) => field.onChange(value)}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        {/* <Controller
           control={control}
           name="setting"
           render={({ field }) => (
@@ -49,7 +107,7 @@ function PortfolioSetting() {
               }
             />
           )}
-        />
+        /> */}
 
         {/* <RangeCalendar
           selected={

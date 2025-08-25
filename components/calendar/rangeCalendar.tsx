@@ -117,7 +117,7 @@ const RangeCalendar: React.FC<RangeCalendarProps> = ({
             variant="outline"
             className={cn(
               "w-full justify-start text-left font-normal h-10",
-              !selected && "text-pbaa-textlight-caption",
+              !selected && "text-gray-500",
               disabled && "opacity-50 cursor-not-allowed"
             )}
             disabled={disabled}
