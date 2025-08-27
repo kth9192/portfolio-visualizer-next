@@ -6,7 +6,6 @@ import {
   PortfolioSimulationMonthData,
 } from "@/app/interface/dto/portfolio";
 import { useMemo } from "react";
-import { getCommonDates } from "../calculator";
 import {
   createInitialPortfolio,
   createPriceMap,
