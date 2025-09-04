@@ -1,15 +1,10 @@
 "use client";
 
-import { BacktestingReq } from "@/app/interface/dto/backtesting";
-import {
-  PortfolioSimulationData,
-  PortfolioSimulationMonthData,
-} from "@/app/interface/dto/portfolio";
+import { PortfolioSimulationMonthData } from "@/app/interface/dto/portfolio";
 import { PortfolioCreateSchemaType } from "@/app/interface/schema/portfolio";
 import LineChart from "@/components/chart/lineChart";
 import CustomSpinner from "@/components/spinner/customSpinner";
 import CustomTooltip from "@/components/tooltip/customTooltip";
-import { Tooltip } from "@/components/ui/tooltip";
 import {
   calculateCAGR,
   calculateDailyReturns,
@@ -17,9 +12,7 @@ import {
   calculatMaximumDrawdown,
 } from "@/lib/backtestCalculator";
 
-import useGetBacktestingMonthlyData from "@/lib/hooks/query/useGetBacktestingMonthlyData";
 import useGetBenchmarkInfos from "@/lib/hooks/query/useGetBenchmarks";
-import { useExtractMonthlyFromPortfolio } from "@/lib/hooks/useExtractMonthlyFromPortfolio";
 import { twColor } from "@/lib/resource";
 import { formatWithCommas } from "@/lib/utils";
 import { ApexOptions } from "apexcharts";
@@ -142,9 +135,6 @@ function PortfolioMetrics({
       return {
         name: `${symbol} (벤치마크)`,
         data: symbolData.map((data) => {
-          // 월의 마지막 날짜로 설정 (더 정확한 비교를 위해)
-          const [year, month] = data.year_month.split("-").map(Number);
-
           return {
             x: new Date(data.year_month).getTime(),
             // 첫 번째 값을 0%로 정규화

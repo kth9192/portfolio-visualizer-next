@@ -107,7 +107,6 @@ export class ETFService {
           acc[price.symbol] = [];
         }
         acc[price.symbol].push({
-          id: Number(price.id),
           symbol: price.symbol,
           date: price.date,
           open: Number(price.open || 0),
@@ -192,7 +191,6 @@ export class ETFService {
 
       return pricesData.map((price) =>
         createETFPriceMonthlyDTO({
-          id: Number(price.id),
           symbol: price.symbol,
           year_month: format(price.date, "yyyy-MM"),
           open: Number(price.open || 0),

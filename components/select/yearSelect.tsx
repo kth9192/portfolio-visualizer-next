@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import { useMemo } from "react";
 import CustomSelect from "./customSelect";
 
 interface YearSelectProps {

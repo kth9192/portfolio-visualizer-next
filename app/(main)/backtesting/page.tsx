@@ -16,16 +16,15 @@ import { showToast } from "@/components/toast/customToast";
 import { INITIAL_AMOUNT, PORTFOLIO_PRESETS } from "@/lib/data/portfolioPreset";
 import useCreatePortfolio from "@/lib/hooks/mutation/useCreatePortfolio";
 import useGetBacktestingData from "@/lib/hooks/query/useGetBacktestingData";
+import useGetBacktestingMonthlyData from "@/lib/hooks/query/useGetBacktestingMonthlyData";
 import useGetPortfolio from "@/lib/hooks/query/useGetPortfolio";
-import { usePortfolioSimulation } from "@/lib/hooks/usePortfolioSimulation";
+import { usePortfolioSimulationMonthly } from "@/lib/hooks/usePortfolioSimulationMonthly";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import PortfolioBuilder from "./widget/portfolioBuilder";
 import PortfolioMetrics from "./widget/portfolioMetrics";
 import PortfolioSetting from "./widget/portfolioSetting";
-import useGetBacktestingMonthlyData from "@/lib/hooks/query/useGetBacktestingMonthlyData";
-import { usePortfolioSimulationMonthly } from "@/lib/hooks/usePortfolioSimulationMonthly";
 
 function BacktestingPageContent() {
   const router = useRouter();
@@ -220,7 +219,7 @@ function BacktestingPageContent() {
 
     executeMonthlyBacktest();
     executeBacktesting();
-  }, [executeBacktesting, formState.isValid]);
+  }, [executeBacktesting, formState.isValid, executeMonthlyBacktest]);
 
   const handleSave = async () => {
     if (!formState.isValid) {

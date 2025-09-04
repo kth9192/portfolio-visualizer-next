@@ -4,8 +4,6 @@ import GoogleSignInButton from "@/components/button/googleLoginBtn";
 import CustomSpinner from "@/components/spinner/customSpinner";
 import { showToast } from "@/components/toast/customToast";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-clinet";
 import { usePostGuestLogin } from "@/lib/hooks/query/usePostGuestLogin";
 import { useRouter } from "next/navigation";
 

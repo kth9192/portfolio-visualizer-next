@@ -232,7 +232,7 @@ export const rebalancePortfolio = (
   currentPortfolioValue: number,
   monthPrices: Record<string, number>
 ) => {
-  let currentShares = new Map<string, number>();
+  const currentShares = new Map<string, number>();
   //구성 자산에 대해
   assets.forEach((asset) => {
     //현재 포트폴리오 가치에 대해 비중만큼의 총액
@@ -253,7 +253,7 @@ export const rebalancePortfolioForChart = (
   currentPortfolioValue: number,
   monthPrices: Record<string, number>
 ) => {
-  let currentShares = new Map<string, number>();
+  const currentShares = new Map<string, number>();
   //구성 자산에 대해
   portfolio.assets.forEach((asset) => {
     //현재 포트폴리오 가치에 대해 비중만큼의 총액

@@ -5,20 +5,15 @@ import {
   rebalanceOptions,
 } from "@/app/interface/enum/rebanalceFrequency";
 import { PortfolioCreateSchemaType } from "@/app/interface/schema/portfolio";
-import RangeCalendar from "@/components/calendar/rangeCalendar";
 import CustomSelect from "@/components/select/customSelect";
 import DateSelect from "@/components/select/dateSelect";
-import MonthSelect from "@/components/select/monthSelect";
-import YearSelect from "@/components/select/yearSelect";
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
 } from "@/components/ui/form";
-import { fi } from "date-fns/locale";
 import { useEffect, useState } from "react";
-import { DateRange } from "react-day-picker";
 import { Controller, useFormContext } from "react-hook-form";
 
 function PortfolioSetting() {
@@ -26,8 +21,8 @@ function PortfolioSetting() {
 
   const [date, setDate] = useState<Date | undefined>(undefined);
 
-  const [year, setYear] = useState<number | undefined>();
-  const [month, setMonth] = useState<number | undefined>();
+  const [year] = useState<number | undefined>();
+  const [month] = useState<number | undefined>();
 
   // const watchedVal = useWatch({
   //   control,
