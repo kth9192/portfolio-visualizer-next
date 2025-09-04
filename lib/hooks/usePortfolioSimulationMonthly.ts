@@ -2,19 +2,15 @@ import { ETFPriceMonthlyDTO } from "@/app/interface/dto/etf";
 import {
   PortfolioAssetReqDTO,
   PortfolioSettingReqDTO,
-  PortfolioSimulationData,
   PortfolioSimulationMonthData,
 } from "@/app/interface/dto/portfolio";
 import { useMemo } from "react";
-import { getCommonDates } from "../calculator";
 import {
-  createInitialPortfolio,
-  createPriceMap,
-  getCommonMonths,
-  createMonthPriceMap,
-  createInitialMonthlyPortfolio,
-  checkRebalanceCondition,
   calculatePortfolioValueMonth,
+  checkRebalanceCondition,
+  createInitialMonthlyPortfolio,
+  createMonthPriceMap,
+  getCommonMonths,
   rebalancePortfolio,
 } from "../backtestCalculator";
 
@@ -53,15 +49,15 @@ export function usePortfolioSimulationMonthly({
 
     const commonMonths = getCommonMonths(priceMap, assets);
 
-    const firstMonthPrices = priceMap[commonMonths[0]];
+    const initialPortfolio = createInitialMonthlyPortfolio(
+      assets,
+      initialAmount,
+      priceMap,
+      commonMonths[0]
+    );
 
-    let { initialShares: currentShares, remainingCash } =
-      createInitialMonthlyPortfolio(
-        assets,
-        initialAmount,
-        priceMap,
-        commonMonths[0]
-      );
+    let currentShares = initialPortfolio.initialShares;
+    const remainingCash = initialPortfolio.remainingCash;
 
     commonMonths.forEach((yearMonth, idx) => {
       const monthPrices = priceMap[yearMonth];

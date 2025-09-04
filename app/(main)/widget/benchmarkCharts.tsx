@@ -102,10 +102,6 @@ function BenchmarkCharts() {
     return <p>error</p>;
   }
 
-  useEffect(() => {
-    console.log("chartSeries", chartSeries);
-  }, [chartSeries]);
-
   return (
     <div className="flex flex-col">
       {benchmarkLoading ? (
