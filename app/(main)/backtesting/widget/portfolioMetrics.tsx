@@ -15,7 +15,8 @@ import {
   calculateDailyReturns,
   calculateVariance,
   calculatMaximumDrawdown,
-} from "@/lib/calculator";
+} from "@/lib/backtestCalculator";
+
 import useGetBacktestingMonthlyData from "@/lib/hooks/query/useGetBacktestingMonthlyData";
 import useGetBenchmarkInfos from "@/lib/hooks/query/useGetBenchmarks";
 import { useExtractMonthlyFromPortfolio } from "@/lib/hooks/useExtractMonthlyFromPortfolio";
