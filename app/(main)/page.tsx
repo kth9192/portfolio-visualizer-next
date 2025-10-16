@@ -1,25 +1,13 @@
-"use client";
-
 import BenchmarkCharts from "./widget/benchmarkCharts";
 import PortfolioList from "./widget/portfolioList";
 import PortfolioPresets from "./widget/portfolioPresets";
+import TitleComponent from "./widget/titleComponent";
 import TrendList from "./widget/trendList";
-import { authClient } from "@/lib/auth-clinet";
 
 export default function Home() {
-  const { data: session } = authClient.useSession();
-
   return (
     <section className="flex flex-col w-full 2xl:w-6/7 gap-10 p-6">
-      <div className="flex flex-col">
-        <h1 className="text-3xl font-bold text-gray-900">
-          환영합니다!{" "}
-          {session?.user?.name.includes("guest")
-            ? "- guest"
-            : session?.user?.name}
-          님
-        </h1>
-      </div>
+      <TitleComponent />
 
       <PortfolioList />
       <PortfolioPresets />

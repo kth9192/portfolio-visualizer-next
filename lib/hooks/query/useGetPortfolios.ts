@@ -1,4 +1,3 @@
-
 import { ApiResponse } from "@/app/interface/dto/api";
 import { PortfolioDTO } from "@/app/interface/dto/portfolio";
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
@@ -13,7 +12,7 @@ interface useGetPortfoliosProps {
       PortfolioDTO[],
       readonly unknown[]
     >,
-    "queryKey" | "queryFn"
+    "queryKey" | "queryFn" | "initalData"
   >;
 }
 

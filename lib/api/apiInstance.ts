@@ -80,16 +80,21 @@ const processQueue = (error: unknown, token: string | null = null): void => {
 };
 
 // 토큰 갱신 API 호출
-const postRefreshToken = async (refreshToken: string): Promise<{ data: RefreshTokenResponse }> => {
+const postRefreshToken = async (
+  refreshToken: string
+): Promise<{ data: RefreshTokenResponse }> => {
   try {
-    const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE}/auth/refresh`, {
-      refreshToken,
-    });
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_BASE}/auth/refresh`,
+      {
+        refreshToken,
+      }
+    );
     return response;
   } catch (error) {
     console.log(error);
-    
-    throw new Error('토큰 갱신에 실패했습니다.');
+
+    throw new Error("토큰 갱신에 실패했습니다.");
   }
 };
 
@@ -190,14 +195,17 @@ apiInstance.interceptors.response.use(
 
 const handleApiError = (error: AxiosError): Promise<never> => {
   if (error.code === "ECONNABORTED") {
-    showToast.error("서버에서 응답 시간이 초과되었습니다.");
+    // showToast.error("서버에서 응답 시간이 초과되었습니다.");
+    console.error("서버에서 응답 시간이 초과되었습니다.");
   }
 
   if (error.response?.data) {
     const errorData = error.response.data as ApiError;
-    showToast.error(errorData.message || "알 수 없는 오류가 발생했습니다.");
+    console.error(errorData.message || "알 수 없는 오류가 발생했습니다.");
+    // showToast.error(errorData.message || "알 수 없는 오류가 발생했습니다.");
   } else {
-    showToast.error("네트워크 오류가 발생했습니다.");
+    console.error("네트워크 오류가 발생했습니다.");
+    // showToast.error("네트워크 오류가 발생했습니다.");
   }
 
   return Promise.reject(error);

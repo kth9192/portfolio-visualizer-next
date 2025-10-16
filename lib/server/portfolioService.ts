@@ -5,7 +5,7 @@ import {
   createPortfolioReqDTO,
   createPortfolioSettingDTO,
   type PortfolioCreateDTO,
-  type PortfolioDTO
+  type PortfolioDTO,
 } from "@/app/interface/dto/portfolio";
 import { RebalanceFrequency } from "@/app/interface/enum/rebanalceFrequency";
 import { PrismaClient } from "@prisma/client";
@@ -93,7 +93,7 @@ export class PortfolioService {
     portfolioData: PortfolioCreateDTO
   ): Promise<PortfolioCreateDTO | null> {
     try {
-     await this.prisma.$transaction(async (tx) => {
+      await this.prisma.$transaction(async (tx) => {
         const portfolio = await tx.portfolios.create({
           data: {
             name: portfolioData.name,
@@ -155,10 +155,8 @@ export class PortfolioService {
     }
   }
 
-  async getPortfolioById(id:string){
-
+  async getPortfolioById(id: string) {
     try {
-
       const portfolio = await this.prisma.portfolios.findUnique({
         where: { id },
         include: {
@@ -194,8 +192,8 @@ export class PortfolioService {
           portfolio_id: portfolio.portfolio_settings.portfolio_id,
           startDate: portfolio.portfolio_settings.start_date,
           endDate: portfolio.portfolio_settings.end_date,
-          rebalanceFrequency:
-            portfolio.portfolio_settings.rebalance_frequency as RebalanceFrequency,
+          rebalanceFrequency: portfolio.portfolio_settings
+            .rebalance_frequency as RebalanceFrequency,
           created: portfolio.portfolio_settings.created,
           updated: portfolio.portfolio_settings.updated,
         }),
@@ -212,14 +210,11 @@ export class PortfolioService {
           updated: portfolio.portfolio_metrics.updated_at,
         }),
       });
-      
     } catch (error) {
-      
       console.error("portfolio service get error", error);
 
       return null;
     }
-
   }
 
   async deletePortfolio(portfolioId: string): Promise<PortfolioDTO | null> {
@@ -275,12 +270,16 @@ export class PortfolioService {
         metrics: createPortfolioMetricsDTO({
           id: portfolioWithRelations.portfolio_metrics.id,
           portfolio_id: portfolioWithRelations.portfolio_metrics.portfolio_id,
-          totalReturn: portfolioWithRelations.portfolio_metrics.total_return.toNumber(),
+          totalReturn:
+            portfolioWithRelations.portfolio_metrics.total_return.toNumber(),
           cagr: portfolioWithRelations.portfolio_metrics.cagr.toNumber(),
           mdd: portfolioWithRelations.portfolio_metrics.mdd.toNumber(),
-          volatility: portfolioWithRelations.portfolio_metrics.volatility.toNumber(),
-          sharpRatio: portfolioWithRelations.portfolio_metrics.sharp_ratio.toNumber(),
-          finalAmount: portfolioWithRelations.portfolio_metrics.final_amount.toNumber(),
+          volatility:
+            portfolioWithRelations.portfolio_metrics.volatility.toNumber(),
+          sharpRatio:
+            portfolioWithRelations.portfolio_metrics.sharp_ratio.toNumber(),
+          finalAmount:
+            portfolioWithRelations.portfolio_metrics.final_amount.toNumber(),
           created: portfolioWithRelations.portfolio_metrics.created_at,
           updated: portfolioWithRelations.portfolio_metrics.updated_at,
         }),
