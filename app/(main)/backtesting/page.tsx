@@ -25,13 +25,14 @@ import { FormProvider, useForm, useWatch } from "react-hook-form";
 import PortfolioBuilder from "./widget/portfolioBuilder";
 import PortfolioMetrics from "./widget/portfolioMetrics";
 import PortfolioSetting from "./widget/portfolioSetting";
+import { twMerge } from "tailwind-merge";
 
-function BacktestingPageContent() {
+function BacktestingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const param = useParams<{ id?: string; presetId?: string }>();
 
-  const portfolioId = param.id || "";
+  const portfolioId = searchParams.get("id") || "";
 
   const presetId = searchParams.get("presetId") || "";
 
@@ -157,6 +158,8 @@ function BacktestingPageContent() {
       return;
     }
 
+    console.log("portfolio test", portfolioId, portfolioData);
+
     const preset = PORTFOLIO_PRESETS.find((preset) => preset.id === presetId);
 
     if (presetId) {
@@ -222,6 +225,8 @@ function BacktestingPageContent() {
   }, [executeBacktesting, formState.isValid, executeMonthlyBacktest]);
 
   const handleSave = async () => {
+    //TODO:수정인 경우에 포트폴리오 저장이 아닌 데이터 수정으로 변경하기
+
     if (!formState.isValid) {
       showToast.error("포트폴리오가 유효하지 않습니다");
       return;
@@ -313,10 +318,15 @@ function BacktestingPageContent() {
               <Button
                 type="button"
                 onClick={handleBacktesting}
-                className="w-full"
+                className={twMerge(
+                  "w-full",
+                  !formState.isValid && "bg-red-600"
+                )}
                 disabled={!formState.isValid}
               >
-                백테스트 실행
+                {formState.isValid
+                  ? "백테스트 실행"
+                  : "날짜를 설정해 백테스트를 실행해보세요"}
               </Button>
             </div>
           </div>
@@ -330,23 +340,20 @@ function BacktestingPageContent() {
           <div className="flex justify-center items-center">
             <Button
               type="submit"
-              className="w-full"
+              className={twMerge(
+                "w-full",
+                portfolioSimulationMonthlyData.length === 0 && "bg-red-600"
+              )}
               disabled={portfolioSimulationMonthlyData.length === 0}
             >
-              저장하기
+              {portfolioSimulationMonthlyData.length === 0
+                ? "시뮬레이션 결과를 생성하고 저장 활성화"
+                : "저장하기"}
             </Button>
           </div>
         </form>
       </FormProvider>
     </section>
-  );
-}
-
-function BacktestingPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <BacktestingPageContent />
-    </Suspense>
   );
 }
 

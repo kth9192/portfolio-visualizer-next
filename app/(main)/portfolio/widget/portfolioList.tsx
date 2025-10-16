@@ -2,7 +2,6 @@
 
 import { rebalanceFrequencyToKorean } from "@/app/interface/enum/rebanalceFrequency";
 import DeletePortfolioDialog from "@/components/dialog/deletePortfolioDialog";
-import CustomSpinner from "@/components/spinner/customSpinner";
 import { Button } from "@/components/ui/button";
 import useDeletePortfolio from "@/lib/hooks/mutation/useDeleteProtfolio";
 import useGetPortfolios from "@/lib/hooks/query/useGetPortfolios";
@@ -18,13 +17,16 @@ import {
   Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 
 function PortfolioList() {
   const { data: portfolios, isLoading, error } = useGetPortfolios({});
   const router = useRouter();
 
-  const { mutate: deletePortfolio } = useDeletePortfolio();
+  const {
+    mutate: deletePortfolio,
+    isPending,
+    deletingId,
+  } = useDeletePortfolio();
 
   const handleCreatePortfolio = () => {
     router.push("/backtesting");
@@ -115,7 +117,10 @@ function PortfolioList() {
                 <div className="flex gap-2 ml-4">
                   <Button
                     size="sm"
-                    onClick={() => router.push(`/backtesting/${portfolio.id}`)}
+                    disabled={isPending}
+                    onClick={() =>
+                      router.push(`/backtesting?id=${portfolio.id}`)
+                    }
                     className="flex items-center gap-1"
                   >
                     <Zap />
@@ -130,10 +135,13 @@ function PortfolioList() {
                       type="button"
                       variant="destructive"
                       size="sm"
+                      disabled={isPending}
                       className="flex items-center gap-1"
                     >
                       <Trash />
-                      삭제
+                      {portfolio.id === deletingId && isPending
+                        ? " 삭제중..."
+                        : "삭제"}
                     </Button>
                   </DeletePortfolioDialog>
                 </div>

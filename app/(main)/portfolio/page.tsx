@@ -7,16 +7,25 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 import { Suspense } from "react";
-import { getPortfoliosAction } from "./actions/getPortfolioAction";
 import PortfolioList from "./widget/portfolioList";
 import PortfolioPageLoading from "./loading";
+import { createPortfolioService } from "@/lib/server/database";
+import { ApiResponse, createApiResponse } from "@/app/interface/dto/api";
+import { PortfolioDTO } from "@/app/interface/dto/portfolio";
 
 async function PortfolioListPage() {
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
     queryKey: queryKeys.portfolios,
-    queryFn: getPortfoliosAction,
+    queryFn: async () => {
+      const portfolioService = createPortfolioService();
+      const portfolios = await portfolioService.getPortfolios();
+
+      return createApiResponse(portfolios, true, "success", 200) as ApiResponse<
+        PortfolioDTO[]
+      >;
+    },
   });
 
   const data = queryClient.getQueryData(queryKeys.portfolios);
