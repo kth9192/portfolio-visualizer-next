@@ -12,6 +12,7 @@ import PortfolioPageLoading from "./loading";
 import { createPortfolioService } from "@/lib/server/database";
 import { ApiResponse, createApiResponse } from "@/app/interface/dto/api";
 import { PortfolioDTO } from "@/app/interface/dto/portfolio";
+import PageContainer from "@/components/container/pageContainer";
 
 async function PortfolioListPage() {
   const queryClient = new QueryClient();
@@ -33,10 +34,10 @@ async function PortfolioListPage() {
   const dehydratedState = dehydrate(queryClient);
 
   return (
-    <section className="flex flex-col w-full 2xl:w-4/5 gap-6 p-6">
+    <PageContainer>
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">내 포트폴리오</h1>
+          <h1>내 포트폴리오</h1>
           <p className="text-gray-600 mt-1">저장된 포트폴리오를 관리하세요</p>
         </div>
       </div>
@@ -44,7 +45,7 @@ async function PortfolioListPage() {
       <HydrationWapper state={dehydratedState}>
         <PortfolioList />
       </HydrationWapper>
-    </section>
+    </PageContainer>
   );
 }
 

@@ -1,7 +1,7 @@
 import CustomSpinner from "@/components/spinner/customSpinner";
 import React from "react";
 
-function PortfolioPageLoading() {
+function MarketPageLoading() {
   return (
     <div className="flex justify-center items-center w-full h-screen">
       <CustomSpinner size={60} />
@@ -9,4 +9,4 @@ function PortfolioPageLoading() {
   );
 }
 
-export default PortfolioPageLoading;
+export default MarketPageLoading;

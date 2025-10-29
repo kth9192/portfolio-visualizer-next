@@ -37,9 +37,7 @@ function PortfolioList() {
   };
 
   return (
-    <section className="flex flex-col w-full 2xl:w-4/5 gap-6 p-6">
-      {/* 헤더 */}
-
+    <>
       {/* 포트폴리오 목록 */}
       {!portfolios || portfolios.length === 0 ? (
         <div className="text-center py-16 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
@@ -156,7 +154,7 @@ function PortfolioList() {
           총 {portfolios.length}개의 포트폴리오
         </div>
       )}
-    </section>
+    </>
   );
 }
 

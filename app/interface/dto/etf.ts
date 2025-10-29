@@ -99,12 +99,14 @@ export const createETFDetail = (data: ETFDetail): ETFDetail => {
 
 export interface ETFHolding {
   name: string;
+  symbol: string;
   weight: number;
 }
 
 export const createETFHolding = (data: ETFHolding): ETFHolding => {
   return {
     name: data.name,
+    symbol: data.symbol,
     weight: data.weight,
   };
 };

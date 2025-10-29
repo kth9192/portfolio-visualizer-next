@@ -32,7 +32,7 @@ export const auth = betterAuth({
   },
   trustedOrigins: process.env.NEXT_PUBLIC_APP_URL
     ? [process.env.NEXT_PUBLIC_APP_URL]
-    : ["http://localhost:3000"],
+    : ["http://localhost:5173"],
   plugins: [nextCookies()],
   user: {
     additionalFields: {

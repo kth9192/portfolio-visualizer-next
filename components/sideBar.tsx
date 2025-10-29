@@ -7,6 +7,7 @@ import {
   LogOutIcon,
   PanelLeftClose,
   PanelLeftOpen,
+  BadgeDollarSign,
 } from "lucide-react";
 import { useState } from "react";
 import { twMerge } from "tailwind-merge";
@@ -78,6 +79,23 @@ function SideBar() {
               <FlaskConical />
               <div className={twMerge("text-white", !isOpen && "sr-only")}>
                 포트폴리오
+              </div>
+            </div>
+          </CustomTooltip>
+        </Link>
+
+        <Link
+          href={"/market"}
+          className={twMerge(
+            "flex w-full h-fit items-center gap-2 px-2 py-2 rounded-lg hover:bg-gray-800 cursor-pointer",
+            !isOpen && "justify-center"
+          )}
+        >
+          <CustomTooltip content={<p>시장분석</p>}>
+            <div className="flex items-center gap-2 cursor-pointer">
+              <BadgeDollarSign />
+              <div className={twMerge("text-white", !isOpen && "sr-only")}>
+                시장분석
               </div>
             </div>
           </CustomTooltip>

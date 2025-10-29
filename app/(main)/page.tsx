@@ -1,3 +1,4 @@
+import PageContainer from "@/components/container/pageContainer";
 import BenchmarkCharts from "./widget/benchmarkCharts";
 import PortfolioList from "./widget/portfolioList";
 import PortfolioPresets from "./widget/portfolioPresets";
@@ -6,7 +7,7 @@ import TrendList from "./widget/trendList";
 
 export default function Home() {
   return (
-    <section className="flex flex-col w-full 2xl:w-6/7 gap-10 p-6">
+    <PageContainer>
       <TitleComponent />
 
       <PortfolioList />
@@ -17,6 +18,6 @@ export default function Home() {
         <h2 className="text-xl font-bold text-gray-900">🎯 벤치마크</h2>
         <BenchmarkCharts />
       </div>
-    </section>
+    </PageContainer>
   );
 }
