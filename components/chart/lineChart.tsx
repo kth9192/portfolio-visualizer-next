@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { deepMerge } from "@/lib/utils";
 import { ApexOptions } from "apexcharts";
 import { useMemo } from "react";
+
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
   loading: () => (

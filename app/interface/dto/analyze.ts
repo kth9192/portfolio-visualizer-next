@@ -3,7 +3,7 @@ export interface AnalyzeRanking {
   symbol: string;
   shortName: string;
   marketCap: number;
-  regualrMarketPrice: number;
+  regularMarketPrice: number;
   regularMarketVolume: number;
   regularTradingValue: number;
   rank: number;
@@ -18,7 +18,7 @@ export const createAnalyzeRanking = (data: AnalyzeRanking) => {
     symbol: data.symbol,
     shortName: data.shortName,
     marketCap: data.marketCap,
-    regualrMarketPrice: data.regualrMarketPrice,
+    regularMarketPrice: data.regularMarketPrice,
     regularMarketVolume: data.regularMarketVolume,
     regularTradingValue: data.regularTradingValue,
     rank: data.rank,

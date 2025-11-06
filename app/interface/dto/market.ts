@@ -31,6 +31,7 @@ export const createMarketAnalyzeData = (
 
 export interface MarketTradingValueTrend {
   symbol: string;
+  shortName: string;
   totalReturn2Y: number;
   tradingValueGrowth2Y: number;
   returnValueRatio: number;
@@ -39,3 +40,12 @@ export interface MarketTradingValueTrend {
 export const createMarketTradingValueTrend = (
   data: MarketTradingValueTrend
 ): MarketTradingValueTrend => ({ ...data });
+
+export interface MarketTrending extends MarketTradingValueTrend {
+  logoUrl: string;
+  shortName: string;
+}
+
+export const createMarketTrending = (data: MarketTrending): MarketTrending => ({
+  ...data,
+});

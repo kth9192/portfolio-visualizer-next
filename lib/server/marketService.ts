@@ -17,13 +17,13 @@ export class MarketService {
     this.prisma = prismaClient || new PrismaClient();
   }
 
-  async getUsStockRanking(): Promise<MarketRanking[]> {
+  async getUsStockRanking(date = new Date()): Promise<MarketRanking[]> {
     const result = await this.prisma.analyze_ranking.findMany({
-      where: { snapshot_date: subDays(new Date(), 1) },
+      where: { snapshot_date: subDays(date, 1) },
     });
 
     const prevResult = await this.prisma.analyze_ranking.findMany({
-      where: { snapshot_date: subDays(new Date(), 1) },
+      where: { snapshot_date: subDays(date, 2) },
     });
 
     return result.map((item) =>
@@ -32,7 +32,7 @@ export class MarketService {
         symbol: item.symbol,
         shortName: item.short_name,
         marketCap: Number(item.market_cap),
-        regualrMarketPrice: Number(item.regular_market_price),
+        regularMarketPrice: Number(item.regular_market_price),
         regularMarketVolume: Number(item.regular_market_volume),
         regularTradingValue: Number(item.regular_trading_value),
         rank: Number(item.rank),
@@ -53,6 +53,19 @@ export class MarketService {
   ): Promise<MarketTradingValueTrend[]> {
     const startDate = format(subYears(new Date(), 2), "yyyy-MM-dd");
     const endDate = format(subDays(new Date(), 1), "yyyy-MM-dd");
+
+    const names = await this.prisma.analyze_ranking.findMany({
+      where: {
+        snapshot_date: {
+          gte: new Date(startDate),
+          lte: new Date(endDate),
+        },
+      },
+      select: {
+        short_name: true,
+        symbol: true,
+      },
+    });
 
     const rawData = await this.prisma.analyze_data.findMany({
       where: {
@@ -111,6 +124,8 @@ export class MarketService {
 
       return createMarketTradingValueTrend({
         symbol,
+        shortName: names.find((rawItem) => rawItem.symbol === symbol)
+          ?.short_name,
         totalReturn2Y: Number(totalReturn2Y.toFixed(2)),
         tradingValueGrowth2Y: Number(tradingValueGrowth2Y.toFixed(2)),
         returnValueRatio: Number(returnValueRatio.toFixed(2)),

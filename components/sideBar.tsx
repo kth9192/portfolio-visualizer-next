@@ -57,7 +57,7 @@ function SideBar() {
             !isOpen && "justify-center"
           )}
         >
-          <CustomTooltip content={<p>Home</p>}>
+          <CustomTooltip content={<p>Home</p>} disable={isOpen}>
             <div className="flex items-center gap-2 cursor-pointer">
               <Home />
               <div className={twMerge("text-white", !isOpen && "sr-only")}>
@@ -74,7 +74,7 @@ function SideBar() {
             !isOpen && "justify-center"
           )}
         >
-          <CustomTooltip content={<p>포트폴리오</p>}>
+          <CustomTooltip content={<p>포트폴리오</p>} disable={isOpen}>
             <div className="flex items-center gap-2 cursor-pointer">
               <FlaskConical />
               <div className={twMerge("text-white", !isOpen && "sr-only")}>
@@ -91,7 +91,7 @@ function SideBar() {
             !isOpen && "justify-center"
           )}
         >
-          <CustomTooltip content={<p>시장분석</p>}>
+          <CustomTooltip content={<p>시장분석</p>} disable={isOpen}>
             <div className="flex items-center gap-2 cursor-pointer">
               <BadgeDollarSign />
               <div className={twMerge("text-white", !isOpen && "sr-only")}>
