@@ -1,4 +1,8 @@
-import { User as PrismaUser } from "@prisma/client";
+// import { User as PrismaUser } from "@/app/generated/prisma";
+import { prisma } from "@/lib/prisma";
+import { Prisma, User } from "@/app/generated/prisma";
+
+type PrismaUser = User;
 
 export interface AuthUser {
   user: PrismaUser;
@@ -7,6 +11,6 @@ export interface AuthUser {
 }
 
 export interface GuestLoginRes {
-    user: PrismaUser;
-    loginResponse: Response;
+  user: PrismaUser;
+  loginResponse: Response;
 }

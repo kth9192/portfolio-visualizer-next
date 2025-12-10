@@ -2,14 +2,15 @@ import {
   BenchmarkData,
   createBenchmarkData,
 } from "@/app/interface/dto/benchmark";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@/app/generated/prisma";
+import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
 
 export class BenchmarkService {
   private prisma: PrismaClient;
 
-  constructor(prismaClient: PrismaClient) {
-    this.prisma = prismaClient || new PrismaClient();
+  constructor() {
+    this.prisma = prisma;
   }
 
   async getBenchmarkForPeriod(
@@ -26,13 +27,12 @@ export class BenchmarkService {
           symbol: {
             in: symbols,
           },
-            year_month: {
-              gte: startYearMonth,
-              lte: endYearMonth,
-            },
+          year_month: {
+            gte: startYearMonth,
+            lte: endYearMonth,
+          },
         },
       });
-
 
       return result.map((item) =>
         createBenchmarkData({

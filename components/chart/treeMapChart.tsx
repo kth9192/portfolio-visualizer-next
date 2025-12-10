@@ -55,12 +55,14 @@ function TreeMapChart({ series, options }: TreeMapChartProps) {
       },
       dataLabels: {
         enabled: true,
+        offsetX: 0,
+        offsetY: 0,
+        textAnchor: "middle",
         style: {
           fontSize: "14px",
-          fontWeight: "bold",
+
           colors: ["#fff"],
         },
-        // ✅ 타입 에러 수정: 명시적 타입 지정
         formatter: function (text: string | number, op: any): string[] {
           const dataPoint = op.w.config.series[0].data[op.dataPointIndex];
           const meta = dataPoint?.meta;

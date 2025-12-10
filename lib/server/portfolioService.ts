@@ -8,15 +8,16 @@ import {
   type PortfolioDTO,
 } from "@/app/interface/dto/portfolio";
 import { RebalanceFrequency } from "@/app/interface/enum/rebanalceFrequency";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@/app/generated/prisma";
+import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 import { auth } from "../auth";
 
 export class PortfolioService {
   private prisma: PrismaClient;
 
-  constructor(prismaClient: PrismaClient) {
-    this.prisma = prismaClient || new PrismaClient();
+  constructor() {
+    this.prisma = prisma;
   }
 
   async getPortfolios(): Promise<PortfolioDTO[]> {

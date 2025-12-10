@@ -5,7 +5,7 @@ import TreeMapChart from "@/components/chart/treeMapChart";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ApexOptions } from "apexcharts";
 import { Sparkles } from "lucide-react";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 
 interface UsTreeMapProps {
   stockRankings: MarketRanking[];
@@ -40,12 +40,13 @@ function UsTreeMap({ stockRankings, yesterdayRankings }: UsTreeMapProps) {
           100;
 
         const getColorByChange = (changePercent: number) => {
-          if (changePercent > 5) return "#2AB642";
-          if (changePercent > 2) return "#4CAF50";
-          if (changePercent > 0) return "#81C784";
+          if (changePercent > 5) return "#00B248";
+          if (changePercent > 2) return "#66BB6A";
+          if (changePercent > 0) return "#A5D6A7";
           if (changePercent === 0) return "#9E9E9E";
+          if (changePercent < 0) return "#EF9A9A";
           if (changePercent > -2) return "#EF5350";
-          if (changePercent > -5) return "#E53935";
+          if (changePercent > -5) return "#C62828";
           return "#AB3534";
         };
 

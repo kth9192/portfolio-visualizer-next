@@ -72,6 +72,7 @@ function CapSortedTable({ stockRankings }: CapSortedTableProps) {
                           alt={item.shortName}
                           fill
                           className="object-cover"
+                          sizes="100%"
                         />
                       </div>
                       <Badge

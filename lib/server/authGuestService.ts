@@ -1,14 +1,14 @@
 import { AuthUser } from "@/app/interface/dto/auth";
 import { createRandomStringGenerator } from "@better-auth/utils/random";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { addHours } from "date-fns";
 import { auth } from "../auth";
+import { PrismaClient } from "@/app/generated/prisma";
 
 export class AuthGuestService {
   private prisma: PrismaClient;
-
-  constructor(prismaClient: PrismaClient) {
-    this.prisma = prismaClient || new PrismaClient();
+  constructor() {
+    this.prisma = prisma;
   }
 
   async createGuestAccount(): Promise<AuthUser> {

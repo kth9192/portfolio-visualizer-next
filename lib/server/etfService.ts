@@ -8,7 +8,8 @@ import {
   type ETFPriceDTO,
   type ETFTimeSeriesDTO,
 } from "@/app/interface/dto/etf";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@/app/generated/prisma";
+import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
 
 export class ETFService {
@@ -16,8 +17,8 @@ export class ETFService {
 
   private prisma: PrismaClient;
 
-  constructor(prismaClient: PrismaClient) {
-    this.prisma = prismaClient || new PrismaClient();
+  constructor() {
+    this.prisma = prisma;
   }
 
   async getETFList(): Promise<ETFInfoDTO[]> {
@@ -64,6 +65,7 @@ export class ETFService {
           currency: item.currency || "",
           holdings: etfHoldings.map((holding) =>
             createETFHolding({
+              symbol: holding.symbol,
               name: holding.name,
               weight: holding.weight.toNumber(),
             })

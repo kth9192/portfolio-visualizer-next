@@ -1,48 +1,31 @@
 // lib/server/database.ts
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { ETFService } from "./etfService";
 import { PortfolioService } from "@/lib/server/portfolioService";
 import { BenchmarkService } from "./benchmarkService";
 import { AuthGuestService } from "./authGuestService";
 import { MarketService } from "./marketService";
 
-let prisma: PrismaClient;
-
-declare global {
-  var __prisma: PrismaClient | undefined;
-}
-
-if (process.env.NODE_ENV !== "production") {
-  if (!global.__prisma) {
-    global.__prisma = new PrismaClient({
-      log: ["query", "error", "warn"],
-    });
-  }
-  prisma = global.__prisma;
-} else {
-  prisma = new PrismaClient();
-}
-
 export { prisma };
 
 export function createETFService() {
-  return new ETFService(prisma);
+  return new ETFService();
 }
 
 export function createPortfolioService() {
-  return new PortfolioService(prisma);
+  return new PortfolioService();
 }
 
 export function createBenchmarkService() {
-  return new BenchmarkService(prisma);
+  return new BenchmarkService();
 }
 
 export function createAuthGuestService() {
-  return new AuthGuestService(prisma);
+  return new AuthGuestService();
 }
 
 export function createMarketService() {
-  return new MarketService(prisma);
+  return new MarketService();
 }
 
 export async function checkDatabaseConnection() {

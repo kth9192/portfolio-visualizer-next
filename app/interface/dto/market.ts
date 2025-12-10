@@ -1,5 +1,10 @@
 import { AnalyzeRanking } from "./analyze";
 
+export interface MarketRankingResponse {
+  current: MarketRanking[];
+  yesterday: MarketRanking[];
+}
+
 export interface MarketRanking extends AnalyzeRanking {
   change: number;
   isNew?: boolean;

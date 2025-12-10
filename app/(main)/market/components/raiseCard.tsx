@@ -1,9 +1,11 @@
 "use client";
 
 import { MarketRanking } from "@/app/interface/dto/market";
+import CustomTooltip from "@/components/tooltip/customTooltip";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp } from "lucide-react";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
+import CardTicker from "./cardTicker";
 
 interface RaiseCardProps {
   stockRankings: MarketRanking[];
@@ -11,23 +13,20 @@ interface RaiseCardProps {
 
 function RaiseCard({ stockRankings }: RaiseCardProps) {
   const raisedStocks = useMemo(() => {
-    return stockRankings.filter((item) => {
-      item.change > 0;
-    });
+    return stockRankings.filter((item) => item.change > 0);
   }, [stockRankings]);
+
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <CardHeader className="flex flex-row items-center justify-between h-full pb-2">
         <CardTitle className="text-sm font-medium">상승 종목</CardTitle>
         <TrendingUp className="h-4 w-4 text-green-600" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl  ">
+        <div className="flex  gap-2 ">
           {raisedStocks.length > 0
             ? raisedStocks.map((item) => (
-                <span className="text-green-600 font-bold">
-                  {item.shortName}
-                </span>
+                <CardTicker key={`raised-${item.symbol}`} item={item} />
               ))
             : "-"}
         </div>

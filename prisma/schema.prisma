@@ -1,11 +1,10 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
 }
 
 model etf_infos {
@@ -274,6 +273,7 @@ model analyze_data {
   volume        BigInt
   trading_value Decimal   @db.Decimal
   date          DateTime  @db.Date
+  adjclose      Decimal?  @db.Decimal
 
   @@id([symbol, date])
   @@index([symbol])

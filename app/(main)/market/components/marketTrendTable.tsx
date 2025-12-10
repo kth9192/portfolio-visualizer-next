@@ -56,6 +56,7 @@ function MarketTrendTable({ data }: MarketTrendTableProps) {
                           alt={item.shortName || item.symbol}
                           fill
                           className="object-cover"
+                          sizes="32px"
                         />
                       </div>
                       <div className="flex flex-col">
