@@ -187,8 +187,8 @@ export class MarketService {
       const recentData = data.slice(-30);
 
       //수익률
-      const startPrice = Number(data[0].close);
-      const endPrice = Number(data[data.length - 1].close);
+      const startPrice = Number(data[0].adjclose);
+      const endPrice = Number(data[data.length - 1].adjclose);
       const totalReturn2Y = ((endPrice - startPrice) / startPrice) * 100;
 
       //거래대금 증가율
