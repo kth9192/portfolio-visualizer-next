@@ -183,12 +183,16 @@ export class MarketService {
     });
 
     const results = Array.from(metricsMap.entries()).map(([symbol, data]) => {
-      const baseData = data.slice(0, 30);
-      const recentData = data.slice(-30);
+      const sortedData = data.sort(
+        (pre, post) =>
+          new Date(pre.date).getTime() - new Date(post.date).getTime()
+      );
+      const baseData = sortedData.slice(0, 30);
+      const recentData = sortedData.slice(-30);
 
       //수익률
-      const startPrice = Number(data[0].adjclose);
-      const endPrice = Number(data[data.length - 1].adjclose);
+      const startPrice = Number(sortedData[0].adjclose);
+      const endPrice = Number(sortedData[sortedData.length - 1].adjclose);
       const totalReturn2Y = ((endPrice - startPrice) / startPrice) * 100;
 
       //거래대금 증가율
