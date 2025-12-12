@@ -14,7 +14,7 @@ import { TrendingUp } from "lucide-react";
 import React from "react";
 import Image from "next/image";
 import { MarketTrending } from "@/app/interface/dto/market";
-import NullImage from "@/public/null.png";
+import NullImage from "@/public/null.svg";
 
 interface MarketTrendTableProps {
   data: MarketTrending[];

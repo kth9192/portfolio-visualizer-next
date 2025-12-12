@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import React from "react";
 import Image from "next/image";
-import NullImage from "@/public/null.png";
+import NullImage from "@/public/null.svg";
 
 interface CapSortedTableProps {
   stockRankings: MarketRanking[];

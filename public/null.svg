@@ -1,0 +1,25 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 원형 배경 -->
+  <circle cx="128" cy="128" r="120" fill="url(#gradient)" opacity="0.9"/>
+  
+  <!-- 그라데이션 정의 -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8B5CF6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 이미지 아이콘 -->
+  <path d="M85 95C85 89.4772 89.4772 85 95 85H161C166.523 85 171 89.4772 171 95V161C171 166.523 166.523 171 161 171H95C89.4772 171 85 166.523 85 161V95Z" fill="white" opacity="0.3"/>
+  
+  <!-- 산 모양 -->
+  <path d="M100 145L115 125L130 140L145 120L160 145" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+  
+  <!-- 태양 -->
+  <circle cx="110" cy="110" r="8" fill="white" opacity="0.6"/>
+  
+  <!-- 물음표 -->
+  <circle cx="170" cy="170" r="24" fill="#1F2937"/>
+  <text x="170" y="180" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white" text-anchor="middle">?</text>
+</svg>
