@@ -31,7 +31,7 @@ function LowerCard({ stockRankings }: LowerCardProps) {
             : "-"}
         </div>
         <p className="text-xs text-muted-foreground mt-1">
-          전체 {stockRankings.length}개 중
+          전체 {loweredStocks.length}개 중
         </p>
       </CardContent>
     </Card>

@@ -91,7 +91,13 @@ function PortfolioList() {
               </span>
             </div>
             <div className="flex flex-col items-end gap-2">
-              <div className="font-medium">{getCurrentAmount(portfolio)} $</div>
+              {/* <div className="font-medium">{getCurrentAmount(portfolio)} $</div> */}
+              <div className="font-medium">
+                {formatWithCommas(
+                  Number(portfolio.metrics.finalAmount).toFixed(2)
+                )}{" "}
+                $
+              </div>
 
               <span className="text-sm">
                 {portfolio.assets?.length}개의 자산
