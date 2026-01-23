@@ -8,7 +8,7 @@ import useGetEtfInfos from "@/lib/hooks/query/useGetEtfInfos";
 import useGetPortfolios from "@/lib/hooks/query/useGetPortfolios";
 import useGetTrends from "@/lib/hooks/query/useGetTrends";
 import { formatWithCommas } from "@/lib/utils";
-import { Link } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 function PortfolioList() {
@@ -44,7 +44,7 @@ function PortfolioList() {
                 ?.adj_close ?? 0)
           );
         }, 0)
-        .toFixed(2)
+        .toFixed(2),
     );
   };
 
@@ -82,19 +82,19 @@ function PortfolioList() {
             <div className="flex flex-col">
               <Link
                 href={`/portfolio/${portfolio.id}`}
-                className="underline text-lg font-semibold"
+                className="underline text-lg  "
               >
                 <span className="font-medium">{portfolio.name}</span>
               </Link>
               <span className="text-gray-500 text-sm">
-                {portfolio.description || "ipsum rorem"}
+                {portfolio.description || "설명 없음"}
               </span>
             </div>
             <div className="flex flex-col items-end gap-2">
               {/* <div className="font-medium">{getCurrentAmount(portfolio)} $</div> */}
               <div className="font-medium">
                 {formatWithCommas(
-                  Number(portfolio.metrics.finalAmount).toFixed(2)
+                  Number(portfolio.metrics.finalAmount).toFixed(2),
                 )}{" "}
                 $
               </div>
@@ -113,7 +113,7 @@ function PortfolioList() {
                           <div>
                             {
                               etfInfos?.find(
-                                (item) => item.symbol === asset.symbol
+                                (item) => item.symbol === asset.symbol,
                               )?.longName
                             }
                           </div>

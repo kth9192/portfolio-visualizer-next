@@ -19,15 +19,19 @@ import {
   TrendingDown,
   Minus,
 } from "lucide-react";
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import NullImage from "@/public/null.svg";
+import { twMerge } from "tailwind-merge";
 
 interface CapSortedTableProps {
   stockRankings: MarketRanking[];
 }
 
 function CapSortedTable({ stockRankings }: CapSortedTableProps) {
+  useEffect(() => {
+    console.log("stockRankings", stockRankings);
+  }, [stockRankings]);
   return (
     <Card>
       <CardHeader>
@@ -41,19 +45,22 @@ function CapSortedTable({ stockRankings }: CapSortedTableProps) {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50">
-                <TableHead className="w-16">순위</TableHead>
+                <TableHead className="w-8">순위</TableHead>
+                <TableHead className="w-16"></TableHead>
                 <TableHead className="w-32">티커</TableHead>
                 <TableHead>종목명</TableHead>
                 <TableHead className="text-right">현재가</TableHead>
                 <TableHead className="text-right">거래량</TableHead>
-                <TableHead className="text-right w-28">변동</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {stockRankings.map((item, index) => (
                 <TableRow
                   key={item.id}
-                  className="hover:bg-muted/50 transition-colors"
+                  className={twMerge(
+                    "hover:bg-muted/50 transition-colors",
+                    index === 19 ? "border-b-red-500" : "",
+                  )}
                 >
                   <TableCell>
                     <Badge
@@ -64,9 +71,32 @@ function CapSortedTable({ stockRankings }: CapSortedTableProps) {
                     </Badge>
                   </TableCell>
 
+                  <TableCell className="text-right">
+                    {item.change > 0 ? (
+                      <Badge
+                        variant="default"
+                        className="bg-green-100 text-green-700 hover:bg-green-200"
+                      >
+                        <TrendingUp className="h-3 w-3 mr-1" />+{item.change}
+                      </Badge>
+                    ) : item.change < 0 ? (
+                      <Badge
+                        variant="default"
+                        className="bg-red-100 text-red-700 hover:bg-red-200"
+                      >
+                        <TrendingDown className="h-3 w-3 mr-1" />
+                        {item.change}
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="bg-gray-100">
+                        <Minus className="h-3 w-3 " />
+                      </Badge>
+                    )}
+                  </TableCell>
+
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <div className="relative h-8 w-8 rounded-full overflow-hidden border-2 border-gray-100">
+                      <div className="relative h-8 w-8 rounded-full overflow-hidden border-1 border-gray-100">
                         <Image
                           src={item.logoUrl || NullImage}
                           alt={item.shortName}
@@ -97,31 +127,6 @@ function CapSortedTable({ stockRankings }: CapSortedTableProps) {
 
                   <TableCell className="text-right font-mono text-sm">
                     {formatWithCommas(item.regularMarketVolume)}
-                  </TableCell>
-
-                  <TableCell className="text-right">
-                    {item.change > 0 ? (
-                      <Badge
-                        variant="default"
-                        className="bg-green-100 text-green-700 hover:bg-green-200"
-                      >
-                        <TrendingUp className="h-3 w-3 mr-1" />+
-                        {item.change.toFixed(2)}%
-                      </Badge>
-                    ) : item.change < 0 ? (
-                      <Badge
-                        variant="default"
-                        className="bg-red-100 text-red-700 hover:bg-red-200"
-                      >
-                        <TrendingDown className="h-3 w-3 mr-1" />
-                        {item.change.toFixed(2)}%
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary" className="bg-gray-100">
-                        <Minus className="h-3 w-3 mr-1" />
-                        0.00%
-                      </Badge>
-                    )}
                   </TableCell>
                 </TableRow>
               ))}

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { useEffect, useMemo } from "react";
@@ -27,8 +27,6 @@ function TrendList() {
   } = useGetTrends({});
 
   const dataSource = useMemo(() => {
-
-    
     return DEFAULT_TICKERS.map((ticker) => {
       return {
         symbol: ticker,
@@ -38,17 +36,14 @@ function TrendList() {
             .sort((pre, post) => differenceInDays(post.date, pre.date)) ?? [],
       };
     });
-    
   }, [trends]);
-
-
 
   const getChangeColor = (changePercent: number) => {
     return changePercent > 0
       ? "text-green-600"
       : changePercent < 0
-      ? "text-red-600"
-      : "text-gray-600";
+        ? "text-red-600"
+        : "text-gray-600";
   };
 
   const {
@@ -114,7 +109,7 @@ function TrendList() {
                 key={trend.symbol}
                 className={twMerge(
                   "flex w-[320px] flex-col gap-4 bg-white rounded-lg shadow-sm p-4 border border-gray-200 flex-shrink-0 flex-grow-0",
-                  "hover:bg-gray-100 hover:shadow-lg hover:border-gray-300 transition-all duration-300 ease-in-out "
+                  "hover:bg-gray-100 hover:shadow-lg hover:border-gray-300 transition-all duration-300 ease-in-out ",
                 )}
                 onMouseDown={(e) => e.stopPropagation()}
               >
@@ -130,7 +125,7 @@ function TrendList() {
                         }
                       </div>
                     }
-                    triggerClass="text-gray-500  text-sm "
+                    triggerClass="text-gray-500  text-sm cursor-help"
                     contentClass="bg-black fill-black"
                   >
                     <span>
@@ -148,25 +143,26 @@ function TrendList() {
                       content={"가장 가까운 미국 시장 마감 후 가격입니다."}
                       contentClass="bg-black fill-black"
                     >
-                      <Info className="size-4" />
+                      <span className=" cursor-help">
+                        {trend.prices[1]?.adj_close?.toFixed(2)} ${" "}
+                      </span>
                     </CustomTooltip>
-                    {trend.prices[1]?.adj_close?.toFixed(2)} $
                   </div>
                   {trendsLoading ? (
                     <CustomSpinner className="size-5" />
                   ) : trend?.prices[1].adj_close - trend?.prices[0].adj_close >
-                  0 ? (
+                    0 ? (
                     <div
                       className={twMerge(
                         "flex ml-auto gap-2 font-medium text-lg",
                         getChangeColor(
                           trend?.prices[1].adj_close -
-                            trend?.prices[0].adj_close
-                        )
+                            trend?.prices[0].adj_close,
+                        ),
                       )}
                     >
                       <span>
-                        <span>📈</span>
+                        <span>📈</span>+
                         {(
                           trend?.prices[1].adj_close -
                           trend?.prices[0].adj_close

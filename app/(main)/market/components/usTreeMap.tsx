@@ -21,7 +21,7 @@ function UsTreeMap({ stockRankings, yesterdayRankings }: UsTreeMapProps) {
     }
 
     const yesterdayMap = new Map(
-      yesterdayRankings.map((item) => [item.symbol, item])
+      yesterdayRankings.map((item) => [item.symbol, item]),
     );
 
     const data = stockRankings
@@ -44,10 +44,11 @@ function UsTreeMap({ stockRankings, yesterdayRankings }: UsTreeMapProps) {
           if (changePercent > 2) return "#66BB6A";
           if (changePercent > 0) return "#A5D6A7";
           if (changePercent === 0) return "#9E9E9E";
+          if (changePercent < -5) return "#db2a2a";
+          if (changePercent < -2) return "#de5454";
           if (changePercent < 0) return "#EF9A9A";
-          if (changePercent > -2) return "#EF5350";
-          if (changePercent > -5) return "#C62828";
-          return "#AB3534";
+
+          return "#d40808";
         };
 
         return {

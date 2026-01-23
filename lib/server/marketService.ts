@@ -11,6 +11,7 @@ import { PrismaClient } from "@/app/generated/prisma";
 import { prisma } from "@/lib/prisma";
 import { format, isWeekend, subDays, subYears } from "date-fns";
 import { tr } from "date-fns/locale";
+import { Decimal } from "@prisma/client-runtime-utils";
 
 export class MarketService {
   private prisma: PrismaClient;
@@ -68,8 +69,8 @@ export class MarketService {
     throw new Error(
       `No market data found within ${MAX_ATTEMPTS} days from ${format(
         targetDate,
-        "yyyy-MM-dd"
-      )}`
+        "yyyy-MM-dd",
+      )}`,
     );
   }
 
@@ -81,7 +82,7 @@ export class MarketService {
     const prevResult = await this.prisma.analyze_ranking.findMany({
       where: {
         snapshot_date: await this.getAvailableDate(
-          subDays(await this.getAvailableDate(date), 1)
+          subDays(await this.getAvailableDate(date), 1),
         ),
       },
     });
@@ -105,11 +106,11 @@ export class MarketService {
           change: prevResult.find((prev) => prev.symbol === item.symbol)
             ? Number(item.rank) -
               Number(
-                prevResult.find((prev) => prev.symbol === item.symbol).rank
+                prevResult.find((prev) => prev.symbol === item.symbol).rank,
               )
             : 0,
           isNew: !prevResult.find((prev) => prev.symbol === item.symbol),
-        })
+        }),
       ),
       yesterday: prevResult.map((item) =>
         createMarketRanking({
@@ -127,17 +128,17 @@ export class MarketService {
           change: prevResult.find((prev) => prev.symbol === item.symbol)
             ? Number(item.rank) -
               Number(
-                prevResult.find((prev) => prev.symbol === item.symbol).rank
+                prevResult.find((prev) => prev.symbol === item.symbol).rank,
               )
             : 0,
           isNew: !prevResult.find((prev) => prev.symbol === item.symbol),
-        })
+        }),
       ),
     };
   }
 
   async getTradingVolumeTrending(
-    symbols: string[]
+    symbols: string[],
   ): Promise<MarketTradingValueTrend[]> {
     const startDate = format(subYears(new Date(), 2), "yyyy-MM-dd");
     const endDate = format(subDays(new Date(), 1), "yyyy-MM-dd");
@@ -173,7 +174,15 @@ export class MarketService {
       orderBy: [{ symbol: "asc" }, { date: "asc" }],
     });
 
-    const metricsMap = new Map<string, any[]>();
+    type MarketDataPoint = {
+      symbol: string;
+      date: Date;
+      close: Decimal;
+      adjclose: Decimal;
+      trading_value: Decimal;
+    };
+
+    const metricsMap = new Map<string, MarketDataPoint[]>();
 
     rawData.forEach((item) => {
       if (!metricsMap.has(item.symbol)) {
@@ -185,7 +194,7 @@ export class MarketService {
     const results = Array.from(metricsMap.entries()).map(([symbol, data]) => {
       const sortedData = data.sort(
         (pre, post) =>
-          new Date(pre.date).getTime() - new Date(post.date).getTime()
+          new Date(pre.date).getTime() - new Date(post.date).getTime(),
       );
       const baseData = sortedData.slice(0, 30);
       const recentData = sortedData.slice(-30);
