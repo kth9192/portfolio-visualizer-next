@@ -14,12 +14,12 @@ function HotCard({ marketTradingValueTrends }: HotCardProps) {
         <CardTitle className="text-sm font-medium">HOT 종목</CardTitle>
         <span className="size-4">🔥</span>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col justify-between h-full">
         <div className="text-2xl font-bold">
           {marketTradingValueTrends
             .sort(
               (pre, post) =>
-                post.tradingValueGrowth2Y - pre.tradingValueGrowth2Y
+                post.tradingValueGrowth2Y - pre.tradingValueGrowth2Y,
             )
             .slice(0, 3)
             .map((item, idx) => (

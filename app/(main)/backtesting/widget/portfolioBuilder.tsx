@@ -55,11 +55,11 @@ function PortfolioBuilder() {
     setValue(
       "assets",
       assetsWatch?.map((asset) =>
-        asset.symbol === symbol ? { ...asset, weight: weight / 100 } : asset
+        asset.symbol === symbol ? { ...asset, weight: weight / 100 } : asset,
       ),
       {
         shouldValidate: true,
-      }
+      },
     );
   };
 
@@ -69,7 +69,7 @@ function PortfolioBuilder() {
       assetsWatch?.filter((asset) => asset.symbol !== symbol),
       {
         shouldValidate: true,
-      }
+      },
     );
   };
 
@@ -79,7 +79,7 @@ function PortfolioBuilder() {
       assetsWatch?.map((asset) => ({ ...asset, weight: 0 })),
       {
         shouldValidate: true,
-      }
+      },
     );
   };
 
@@ -153,8 +153,8 @@ function PortfolioBuilder() {
                 ?.filter(
                   (etf) =>
                     !watch("assets")?.some(
-                      (asset) => asset.symbol === etf.symbol
-                    )
+                      (asset) => asset.symbol === etf.symbol,
+                    ),
                 )
                 ?.map((etf) => ({
                   value: etf.symbol,
@@ -183,7 +183,7 @@ function PortfolioBuilder() {
 
                     Math.abs(totalWeight * 100 - 100) < 0.0001
                       ? "text-green-500"
-                      : "text-red-500"
+                      : "text-red-500",
                   )}
                 >
                   {Math.round(totalWeight * 100 * 100) / 100}%
@@ -229,7 +229,7 @@ function PortfolioBuilder() {
                       e?.currentTarget.value &&
                       updateWeight(
                         asset.symbol,
-                        Number(e?.currentTarget?.value)
+                        Number(e?.currentTarget?.value),
                       )
                     }
                   />
@@ -279,11 +279,11 @@ function PortfolioBuilder() {
                   enabled: true,
                   custom: function ({ series, seriesIndex, w }) {
                     const ticker = w.config.labels[seriesIndex];
-                    return `<div class="p-3 shadow-lg rounded-lg ">
+                    return `<div class="p-3 shadow-lg rounded-lg bg-white">
                                             <div class="font-semibold text-gray-800">${ticker}</div>
                                             <div class="flex items-center mt-1">
                                               <span class="font-medium text-gray-600">비중 : </span>
-                                              <span class="ml-1 font-bold text-blue-600">${series}%</span>
+                                              <span class="ml-1 font-bold text-blue-600">${series[seriesIndex]}%</span>
                                             </div>
                                           </div>`;
                   },

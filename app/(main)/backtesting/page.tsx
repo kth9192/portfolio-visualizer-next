@@ -9,12 +9,12 @@ import {
 } from "@/app/interface/dto/portfolio";
 import { RebalanceFrequency } from "@/app/interface/enum/rebanalceFrequency";
 import {
-  portfolioCreateSchema,
+  portfolioSaveSchema,
   PortfolioCreateSchemaType,
 } from "@/app/interface/schema/portfolio";
 import { showToast } from "@/components/toast/customToast";
 import { INITIAL_AMOUNT, PORTFOLIO_PRESETS } from "@/lib/data/portfolioPreset";
-import useCreatePortfolio from "@/lib/hooks/mutation/useCreatePortfolio";
+import useSavePortfolio from "@/lib/hooks/mutation/useSavePortfolio";
 import useGetBacktestingData from "@/lib/hooks/query/useGetBacktestingData";
 import useGetBacktestingMonthlyData from "@/lib/hooks/query/useGetBacktestingMonthlyData";
 import useGetPortfolio from "@/lib/hooks/query/useGetPortfolio";
@@ -36,7 +36,7 @@ function BacktestingPage() {
 
   const presetId = searchParams.get("presetId") || "";
 
-  const createPortfolioMutation = useCreatePortfolio();
+  const savePortfolioMutation = useSavePortfolio();
 
   const defaultValues = useMemo(
     () => ({
@@ -50,12 +50,12 @@ function BacktestingPage() {
       },
       description: "",
     }),
-    []
+    [],
   );
 
   const method = useForm<PortfolioCreateSchemaType>({
     mode: "onChange",
-    resolver: zodResolver(portfolioCreateSchema),
+    resolver: zodResolver(portfolioSaveSchema),
     defaultValues,
   });
 
@@ -232,34 +232,37 @@ function BacktestingPage() {
       return;
     }
 
-    await createPortfolioMutation.mutateAsync({
-      name: watch("name"),
-      initialAmount: watch("initialAmount"),
-      description: watch("description"),
-      assets: watch("assets").map((asset) => ({
-        symbol: asset.symbol,
-        weight: asset.weight,
-        shares: asset.shares,
-      })),
-      setting: {
-        startDate: watch("setting.startDate"),
-        endDate: watch("setting.endDate"),
-        rebalanceFrequency: watch("setting.rebalanceFrequency"),
+    await savePortfolioMutation.mutateAsync({
+      ...{
+        name: watch("name"),
+        initialAmount: watch("initialAmount"),
+        description: watch("description"),
+        assets: watch("assets").map((asset) => ({
+          symbol: asset.symbol,
+          weight: asset.weight,
+          shares: asset.shares,
+        })),
+        setting: {
+          startDate: watch("setting.startDate"),
+          endDate: watch("setting.endDate"),
+          rebalanceFrequency: watch("setting.rebalanceFrequency"),
+        },
+        metrics: {
+          totalReturn:
+            portfolioSimulationMonthlyData[
+              portfolioSimulationMonthlyData.length - 1
+            ].cumulativeReturnsPercent,
+          cagr: 0,
+          mdd: 0,
+          volatility: 0,
+          sharpRatio: 0,
+          finalAmount:
+            portfolioSimulationMonthlyData[
+              portfolioSimulationMonthlyData.length - 1
+            ].portfolioValue,
+        },
       },
-      metrics: {
-        totalReturn:
-          portfolioSimulationMonthlyData[
-            portfolioSimulationMonthlyData.length - 1
-          ].cumulativeReturn,
-        cagr: 0,
-        mdd: 0,
-        volatility: 0,
-        sharpRatio: 0,
-        finalAmount:
-          portfolioSimulationMonthlyData[
-            portfolioSimulationMonthlyData.length - 1
-          ].portfolioValue,
-      },
+      ...(portfolioId ? { portfolioId } : {}),
     });
 
     showToast.success("포트폴리오가 저장되었습니다");
@@ -320,7 +323,7 @@ function BacktestingPage() {
                 onClick={handleBacktesting}
                 className={twMerge(
                   "w-full",
-                  !formState.isValid && "bg-red-600"
+                  !formState.isValid && "bg-red-600",
                 )}
                 disabled={!formState.isValid}
               >
@@ -342,7 +345,7 @@ function BacktestingPage() {
               type="submit"
               className={twMerge(
                 "w-full",
-                portfolioSimulationMonthlyData.length === 0 && "bg-red-600"
+                portfolioSimulationMonthlyData.length === 0 && "bg-red-600",
               )}
               disabled={portfolioSimulationMonthlyData.length === 0}
             >

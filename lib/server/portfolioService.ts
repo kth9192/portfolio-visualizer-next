@@ -57,7 +57,7 @@ export class PortfolioService {
               shares: asset.shares?.toNumber() || 0,
               created: asset.created,
               updated: asset.updated,
-            })
+            }),
           ),
           setting: createPortfolioSettingDTO({
             id: setting.id,
@@ -91,25 +91,55 @@ export class PortfolioService {
   }
 
   async savePortfolio(
-    portfolioData: PortfolioCreateDTO
+    portfolioData: PortfolioCreateDTO & { portfolio_id?: string },
   ): Promise<PortfolioCreateDTO | null> {
+    console.log("portfolio modify test", portfolioData);
+
     try {
       await this.prisma.$transaction(async (tx) => {
-        const portfolio = await tx.portfolios.create({
-          data: {
-            name: portfolioData.name,
-            initial_amount: portfolioData.initialAmount,
-            description: portfolioData.description,
-            user_id: portfolioData.user_id,
-          },
-        });
+        let portfolio;
+        if (portfolioData.portfolio_id) {
+          console.log("portfolio update");
 
-        const setting = await tx.portfolio_settings.create({
-          data: {
+          portfolio = await tx.portfolios.update({
+            where: {
+              id: portfolioData.portfolio_id,
+            },
+            data: {
+              name: portfolioData.name,
+              initial_amount: portfolioData.initialAmount,
+              description: portfolioData.description,
+              user_id: portfolioData.user_id,
+            },
+          });
+        } else {
+          portfolio = await tx.portfolios.create({
+            data: {
+              name: portfolioData.name,
+              initial_amount: portfolioData.initialAmount,
+              description: portfolioData.description,
+              user_id: portfolioData.user_id,
+            },
+          });
+        }
+
+        const setting = await tx.portfolio_settings.upsert({
+          where: { portfolio_id: portfolio.id },
+          update: {
+            start_date: portfolioData.setting.startDate!,
+            end_date: portfolioData.setting.endDate!,
+            rebalance_frequency: portfolioData.setting.rebalanceFrequency,
+          },
+          create: {
             portfolio_id: portfolio.id,
             start_date: portfolioData.setting.startDate!,
             end_date: portfolioData.setting.endDate!,
+            rebalance_frequency: portfolioData.setting.rebalanceFrequency,
           },
+        });
+
+        await tx.portfolio_assets.deleteMany({
+          where: { portfolio_id: portfolio.id },
         });
 
         const assets = await tx.portfolio_assets.createMany({
@@ -121,8 +151,18 @@ export class PortfolioService {
           })),
         });
 
-        const metrics = await tx.portfolio_metrics.create({
-          data: {
+        const metrics = await tx.portfolio_metrics.upsert({
+          where: { portfolio_id: portfolio.id },
+
+          update: {
+            total_return: portfolioData.metrics.totalReturn,
+            cagr: portfolioData.metrics.cagr,
+            mdd: portfolioData.metrics.mdd,
+            volatility: portfolioData.metrics.volatility,
+            sharp_ratio: portfolioData.metrics.sharpRatio,
+            final_amount: portfolioData.metrics.finalAmount,
+          },
+          create: {
             portfolio_id: portfolio.id,
             total_return: portfolioData.metrics.totalReturn,
             cagr: portfolioData.metrics.cagr,
@@ -141,14 +181,7 @@ export class PortfolioService {
         };
       });
 
-      return createPortfolioReqDTO({
-        name: portfolioData.name,
-        initialAmount: portfolioData.initialAmount,
-        description: portfolioData.description,
-        setting: portfolioData.setting,
-        assets: portfolioData.assets,
-        metrics: portfolioData.metrics,
-      });
+      return createPortfolioReqDTO({ ...portfolioData });
     } catch (error) {
       console.error("portfolio service save error", error);
 
@@ -186,7 +219,7 @@ export class PortfolioService {
             shares: asset.shares?.toNumber() || 0,
             created: asset.created,
             updated: asset.updated,
-          })
+          }),
         ),
         setting: createPortfolioSettingDTO({
           id: portfolio.portfolio_settings.id,
@@ -256,7 +289,7 @@ export class PortfolioService {
             shares: asset.shares?.toNumber() || 0,
             created: asset.created,
             updated: asset.updated,
-          })
+          }),
         ),
         setting: createPortfolioSettingDTO({
           id: portfolioWithRelations.portfolio_settings.id,

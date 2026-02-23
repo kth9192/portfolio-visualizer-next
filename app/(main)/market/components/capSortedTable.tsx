@@ -59,7 +59,7 @@ function CapSortedTable({ stockRankings }: CapSortedTableProps) {
                   key={item.id}
                   className={twMerge(
                     "hover:bg-muted/50 transition-colors",
-                    index === 19 ? "border-b-red-500" : "",
+                    index === 19 ? "border-dashed border-b-red-500 " : "",
                   )}
                 >
                   <TableCell>

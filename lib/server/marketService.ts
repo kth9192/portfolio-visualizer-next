@@ -1,17 +1,13 @@
-import { createETFHolding, ETFHolding } from "@/app/interface/dto/etf";
+import { PrismaClient } from "@/app/generated/prisma";
 import {
   createMarketRanking,
-  createMarketAnalyzeData,
-  MarketRanking,
   createMarketTradingValueTrend,
-  MarketTradingValueTrend,
   MarketRankingResponse,
+  MarketTradingValueTrend,
 } from "@/app/interface/dto/market";
-import { PrismaClient } from "@/app/generated/prisma";
 import { prisma } from "@/lib/prisma";
-import { format, isWeekend, subDays, subYears } from "date-fns";
-import { tr } from "date-fns/locale";
 import { Decimal } from "@prisma/client-runtime-utils";
+import { format, isWeekend, subDays, subYears } from "date-fns";
 
 export class MarketService {
   private prisma: PrismaClient;

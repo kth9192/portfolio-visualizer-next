@@ -12,34 +12,37 @@ export const getPortfolios = async (): Promise<ApiResponse<PortfolioDTO[]>> => {
 };
 
 export const getPortfolioById = async (
-  portfolioId: string
+  portfolioId: string,
 ): Promise<ApiResponse<PortfolioDTO>> => {
   const res = await apiInstance.get<ApiResponse<PortfolioDTO>>(
-    `/portfolio/${portfolioId}`
+    `/portfolio/${portfolioId}`,
   );
 
   return res.data;
 };
 
 export const postSavePortfolio = async (
-  portfolio: PortfolioCreateDTO
+  portfolio: PortfolioCreateDTO,
+  portfolioId?: string,
 ): Promise<ApiResponse<PortfolioDTO>> => {
+  console.log("api call", portfolio, portfolioId);
+
   const res = await apiInstance.post<ApiResponse<PortfolioDTO>>(
     "/portfolio",
-    portfolio,
+    { ...portfolio, portfolio_id: portfolioId },
     {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-    }
+    },
   );
 
   return res.data;
 };
 
 export const deletePortfolio = async (
-  portfolioId: string
+  portfolioId: string,
 ): Promise<ApiResponse<PortfolioDTO>> => {
   const res = await apiInstance.delete<ApiResponse<PortfolioDTO>>(
     `/portfolio/${portfolioId}`,
@@ -48,7 +51,7 @@ export const deletePortfolio = async (
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-    }
+    },
   );
 
   return res.data;

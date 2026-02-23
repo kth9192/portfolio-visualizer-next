@@ -30,7 +30,7 @@ export interface ETFAssetDTO extends ETFInfoDTO {
 export const createETFAssetDTO = (
   data: ETFInfoDTO,
   weight: number,
-  shares: number
+  shares: number,
 ): ETFAssetDTO => {
   return {
     symbol: data.symbol,
@@ -104,7 +104,7 @@ export interface PortfolioAssetDTO {
 }
 
 export const createPortfolioAssetDTO = (
-  portfolioAssetData: PortfolioAssetDTO
+  portfolioAssetData: PortfolioAssetDTO,
 ) => {
   return {
     id: portfolioAssetData.id,
@@ -125,7 +125,7 @@ export interface PortfolioAssetCreateDTO {
 }
 
 export const createPortfolioAssetCreateDTO = (
-  portfolioAssetData: PortfolioAssetCreateDTO
+  portfolioAssetData: PortfolioAssetCreateDTO,
 ) => {
   return {
     portfolio_id: portfolioAssetData.portfolio_id,
@@ -146,7 +146,7 @@ export interface PortfolioSettingDTO {
 }
 
 export const createPortfolioSettingDTO = (
-  portfolioSettingData: PortfolioSettingDTO
+  portfolioSettingData: PortfolioSettingDTO,
 ) => {
   return {
     id: portfolioSettingData.id,
@@ -166,7 +166,7 @@ export interface PortfolioSettingReqDTO {
 }
 
 export const createPortfolioSettingReqDTO = (
-  portfolioSettingData: PortfolioSettingReqDTO
+  portfolioSettingData: PortfolioSettingReqDTO,
 ) => {
   return {
     startDate: portfolioSettingData.startDate,
@@ -189,7 +189,7 @@ export interface PortfolioMetricsDTO {
 }
 
 export const createPortfolioMetricsDTO = (
-  portfolioMetricsData: PortfolioMetricsDTO
+  portfolioMetricsData: PortfolioMetricsDTO,
 ) => {
   return {
     id: portfolioMetricsData.id,
@@ -215,7 +215,7 @@ export interface PortfolioMetricsReqDTO {
 }
 
 export const createPortfolioMetricsReqDTO = (
-  portfolioMetricsData: PortfolioMetricsReqDTO
+  portfolioMetricsData: PortfolioMetricsReqDTO,
 ) => {
   return {
     totalReturn: portfolioMetricsData.totalReturn,
@@ -232,6 +232,7 @@ export interface PortfolioCreateDTO {
   initialAmount: number;
   description?: string;
   user_id?: string;
+  portfolio_id?: string;
   assets: PortfolioAssetReqDTO[];
   setting: PortfolioSettingReqDTO;
   metrics: PortfolioMetricsReqDTO;
@@ -243,6 +244,7 @@ export const createPortfolioReqDTO = (portfolioData: PortfolioCreateDTO) => {
     initialAmount: portfolioData.initialAmount,
     description: portfolioData.description,
     user_id: portfolioData.user_id,
+    portfolio_id: portfolioData.portfolio_id,
     assets: portfolioData.assets,
     setting: portfolioData.setting,
     metrics: portfolioData.metrics,

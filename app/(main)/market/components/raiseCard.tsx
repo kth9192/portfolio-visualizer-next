@@ -18,19 +18,19 @@ function RaiseCard({ stockRankings }: RaiseCardProps) {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between h-full pb-2">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium">상승 종목</CardTitle>
         <TrendingUp className="h-4 w-4 text-green-600" />
       </CardHeader>
-      <CardContent>
-        <div className="flex  gap-2 ">
+      <CardContent className="flex flex-col justify-between h-full">
+        <div className="flex flex-wrap gap-2 ">
           {raisedStocks.length > 0
             ? raisedStocks.map((item) => (
                 <CardTicker key={`raised-${item.symbol}`} item={item} />
               ))
             : "-"}
         </div>
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="text-xs text-muted-foreground mt-auto">
           전체 {raisedStocks.length}개 중
         </p>
       </CardContent>

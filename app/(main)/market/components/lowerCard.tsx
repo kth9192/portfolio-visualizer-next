@@ -18,19 +18,19 @@ function LowerCard({ stockRankings }: LowerCardProps) {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between h-full pb-2">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium">하락 종목</CardTitle>
         <TrendingDown className="h-4 w-4 text-red-600" />
       </CardHeader>
-      <CardContent>
-        <div className="flex text-2xl gap-2  ">
+      <CardContent className="flex flex-col justify-between h-full">
+        <div className="flex flex-wrap text-2xl gap-2  ">
           {loweredStocks.length > 0
             ? loweredStocks.map((item) => (
                 <CardTicker key={`lower-${item.symbol}`} item={item} />
               ))
             : "-"}
         </div>
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="text-xs text-muted-foreground mt-auto">
           전체 {loweredStocks.length}개 중
         </p>
       </CardContent>

@@ -8,6 +8,7 @@ import useGetEtfInfos from "@/lib/hooks/query/useGetEtfInfos";
 import useGetPortfolios from "@/lib/hooks/query/useGetPortfolios";
 import useGetTrends from "@/lib/hooks/query/useGetTrends";
 import { formatWithCommas } from "@/lib/utils";
+import { format } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
