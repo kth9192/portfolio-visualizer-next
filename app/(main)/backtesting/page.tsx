@@ -225,8 +225,6 @@ function BacktestingPage() {
   }, [executeBacktesting, formState.isValid, executeMonthlyBacktest]);
 
   const handleSave = async () => {
-    //TODO:수정인 경우에 포트폴리오 저장이 아닌 데이터 수정으로 변경하기
-
     if (!formState.isValid) {
       showToast.error("포트폴리오가 유효하지 않습니다");
       return;

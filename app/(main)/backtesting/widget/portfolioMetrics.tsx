@@ -119,7 +119,7 @@ function PortfolioMetrics({
     };
 
     const symbols = Array.from(
-      new Set(filteredBenchmarks.map((benchmark) => benchmark.symbol))
+      new Set(filteredBenchmarks.map((benchmark) => benchmark.symbol)),
     );
 
     // 벤치마크 월 차트 데이터
@@ -172,7 +172,7 @@ function PortfolioMetrics({
 
     // 누적 수익률 계산
     const cumulativeReturn = portfolioSimulationData.map(
-      (item) => item.cumulativeReturn
+      (item) => item.cumulativeReturn,
     );
     const totalReturn = cumulativeReturn[cumulativeReturn.length - 1] * 100;
 
@@ -190,13 +190,13 @@ function PortfolioMetrics({
 
     // MDD 계산
     const mddData = chartSeries[0].data.map(
-      (point) => 100 * (1 + point.y / 100)
+      (point) => 100 * (1 + point.y / 100),
     );
     const mdd = calculatMaximumDrawdown(mddData);
 
     // 변동성 계산
     const dailyReturns = calculateDailyReturns(
-      portfolioSimulationData.map((item) => 1 + item.cumulativeReturn)
+      portfolioSimulationData.map((item) => 1 + item.cumulativeReturn),
     );
     let volatility = 0;
     if (dailyReturns.length > 0) {
@@ -313,7 +313,7 @@ function PortfolioMetrics({
                     const date = format(
                       new Date(w.globals.seriesX[0][dataPointIndex]),
                       "yyyy-MM",
-                      { locale: ko }
+                      { locale: ko },
                     );
 
                     let tooltipContent = `<div class="p-3 bg-white shadow-lg rounded-lg ">
@@ -340,8 +340,8 @@ function PortfolioMetrics({
                           <div class="flex items-center justify-between">
                             <span class="text-sm font-medium text-gray-700">${seriesName}:</span>
                             <span class="ml-2 font-bold " style="color:${seriesColor}">${value.toFixed(
-                          2
-                        )}%</span>
+                              2,
+                            )}%</span>
                           </div>
                         `;
                       }
@@ -395,7 +395,7 @@ function PortfolioMetrics({
               <p
                 className={twMerge(
                   "text-lg font-medium",
-                  metrics.totalReturn > 0 ? "text-green-600" : "text-red-600"
+                  metrics.totalReturn > 0 ? "text-green-600" : "text-red-600",
                 )}
               >
                 {metrics.totalReturn.toFixed(2)}%
@@ -424,7 +424,7 @@ function PortfolioMetrics({
               <p
                 className={twMerge(
                   "text-lg font-medium",
-                  metrics.cagr > 0 ? "text-green-600" : "text-red-600"
+                  metrics.cagr > 0 ? "text-green-600" : "text-red-600",
                 )}
               >
                 {(metrics.cagr * 100).toFixed(2)}%
@@ -504,8 +504,8 @@ function PortfolioMetrics({
                   metrics.sharpRatio > 1
                     ? "text-green-600"
                     : metrics.sharpRatio > 0.5
-                    ? "text-yellow-600"
-                    : "text-red-600"
+                      ? "text-yellow-600"
+                      : "text-red-600",
                 )}
               >
                 {metrics.sharpRatio.toFixed(3)}
@@ -517,7 +517,7 @@ function PortfolioMetrics({
               <p className="text-lg font-medium text-gray-900">
                 {differenceInYears(
                   watch("setting.endDate"),
-                  watch("setting.startDate")
+                  watch("setting.startDate"),
                 )}
                 년
               </p>
