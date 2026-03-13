@@ -1,7 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-// 실용적이고 간단한 구현 (any 사용하되 타입 추론 활용)
 export function deepMerge<T>(target: T, source: Partial<T>): T {
   if (!source || typeof source !== "object") return target;
 
@@ -21,7 +20,7 @@ export function deepMerge<T>(target: T, source: Partial<T>): T {
     ) {
       (result as Record<string, unknown>)[key] = deepMerge(
         targetVal,
-        sourceVal
+        sourceVal,
       );
     } else if (sourceVal !== undefined) {
       (result as Record<string, unknown>)[key] = sourceVal;

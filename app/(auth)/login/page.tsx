@@ -82,7 +82,7 @@ function LoginPage() {
               className="w-full h-10 underline py-5 shadow bg-white hover:text-white hover:bg-black  transition-colors"
               onClick={handleGuestLogin}
             >
-              게스트 계정으로 시작하기
+              가입없이 로그인하기
             </Button>
           )}
         </div>
