@@ -49,7 +49,6 @@ function PortfolioList() {
             <PortfolioListItem
               key={portfolio.id}
               portfolio={portfolio}
-              expendedItemId={expendedItem}
               handleAnalyzeOpen={handleAnalyzePanelOpen}
             />
             // <div

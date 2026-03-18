@@ -87,8 +87,11 @@ function PortfolioMetrics({
       return chartSeries;
     }
 
+    const portfolioFirstMonth = portfolioSimulationData[0]?.yearMonth;
     const startDate = new Date(startDateWatch);
     const endDate = new Date(endDateWatch);
+
+    console.log("benchmarks", benchmarks);
 
     // 벤치마크 데이터 필터링 및 정제
     const filteredBenchmarks = benchmarks.filter((benchmark) => {
@@ -129,18 +132,24 @@ function PortfolioMetrics({
         .filter((benchmark) => benchmark.symbol === symbol)
         .sort((a, b) => a.year_month.localeCompare(b.year_month));
 
-      // 첫 번째 데이터의 cumulative_value를 기준점으로 설정
-      const baseValue = symbolData[0]?.cumulative_value || 100;
+      // ✅ 포트폴리오 시작 달과 동일한 달의 cumulative_value를 baseValue로
+      const relevantData = symbolData.filter(
+        (d) => d.year_month >= portfolioFirstMonth,
+      );
+
+      const baseValue = relevantData[0]?.cumulative_value ?? 100;
 
       return {
         name: `${symbol} (벤치마크)`,
-        data: symbolData.map((data) => {
-          return {
-            x: new Date(data.year_month).getTime(),
-            // 첫 번째 값을 0%로 정규화
-            y: ((data.cumulative_value - baseValue) / baseValue) * 100,
-          };
-        }),
+        data: symbolData
+          .filter((d) => d.year_month >= portfolioFirstMonth)
+          .map((data) => {
+            return {
+              x: new Date(data.year_month).getTime(),
+              // 첫 번째 값을 0%로 정규화
+              y: ((data.cumulative_value - baseValue) / baseValue) * 100,
+            };
+          }),
       };
     });
 
@@ -156,6 +165,14 @@ function PortfolioMetrics({
   useEffect(() => {
     console.log("reworkChartSeries", reworkChartSeries);
   }, [reworkChartSeries]);
+
+  useEffect(() => {
+    console.log(
+      "startDateWatch, endDateWatch",
+      format(startDateWatch, "yyyy-MM-dd"),
+      format(endDateWatch, "yyyy-MM-dd"),
+    );
+  }, [startDateWatch, endDateWatch]);
 
   // 성과지표 계산
   const metrics = useMemo(() => {

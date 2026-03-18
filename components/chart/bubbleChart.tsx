@@ -1,8 +1,7 @@
-"use client";
-
-import React, { lazy } from "react";
 import { ApexOptions } from "apexcharts";
 import dynamic from "next/dynamic";
+import React from "react";
+
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
   loading: () => (
@@ -12,23 +11,23 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ),
 });
 
-interface PieChartProps {
+interface BubbleChartProps {
   options?: ApexOptions;
   series: ApexOptions["series"];
   containerClass?: string;
 }
 
-function PieChart({ options, series, containerClass }: PieChartProps) {
+function BubbleChart({ options, series, containerClass }: BubbleChartProps) {
   return (
     <ReactApexChart
       options={options}
       series={series}
       className={containerClass}
-      type="pie"
+      type="bubble"
       height="100%"
       width="100%"
     />
   );
 }
 
-export default PieChart;
+export default BubbleChart;

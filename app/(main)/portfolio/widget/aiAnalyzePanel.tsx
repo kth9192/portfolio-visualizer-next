@@ -8,10 +8,9 @@ import React, { useEffect, useRef, useState } from "react";
 
 interface AiAnalyzePanelProps {
   portfolio: PortfolioDTO;
-  extendedItemId: string;
 }
 
-function AiAnalyzePanel({ portfolio, extendedItemId }: AiAnalyzePanelProps) {
+function AiAnalyzePanel({ portfolio }: AiAnalyzePanelProps) {
   const hasAnalyzedRef = useRef(false);
   const {
     isLoading,
@@ -25,7 +24,7 @@ function AiAnalyzePanel({ portfolio, extendedItemId }: AiAnalyzePanelProps) {
 
   useEffect(() => {
     const handleAnalyze = async () => {
-      if (extendedItemId === portfolio.id && !hasAnalyzedRef.current) {
+      if (!hasAnalyzedRef.current) {
         hasAnalyzedRef.current = true;
         await analyzeStreaming(createPortfolioAnalysisInput(portfolio));
       }
@@ -38,10 +37,14 @@ function AiAnalyzePanel({ portfolio, extendedItemId }: AiAnalyzePanelProps) {
     };
   }, []);
 
+  //TODO: 대화 기능 UI 구현 어떻게?
+  //TODO: 메세지 속도 조절
+
   return (
-    <div className="flex flex-col rounded-lg bg-white">
-      <div className="flex items-center gap-2">
+    <div className="flex flex-col rounded-lg bg-white p-6">
+      <div className="flex items-center gap-2 mb-4">
         <Sparkles className="h-5 w-5 text-yellow-500" />
+        <h2 className="font-semibold ">AI 분석</h2>
       </div>
 
       <div className="flex flex-col overflow-y-auto space-y-3">

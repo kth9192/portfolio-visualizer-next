@@ -14,7 +14,7 @@ import { format } from "date-fns";
 export const createInitialPortfolio = (
   assets: PortfolioAssetReqDTO[],
   initialAmount: number,
-  priceMap: Map<string, number[]>
+  priceMap: Map<string, number[]>,
 ) => {
   const initialShares = new Map<string, number>();
 
@@ -46,10 +46,12 @@ export const createInitialMonthlyPortfolio = (
   assets: PortfolioAssetReqDTO[],
   initialAmount: number,
   priceMap: MonthlyPriceData,
-  firstMonth: string
+  firstMonth: string,
 ) => {
   const initialShares = new Map<string, number>();
   const firstMonthPrices = priceMap[firstMonth];
+
+  console.log("test", firstMonthPrices);
 
   if (!firstMonthPrices) {
     throw new Error(`${firstMonth}의 가격 데이터가 없습니다.`);
@@ -82,7 +84,7 @@ export const createInitialMonthlyPortfolio = (
 
 export const createPriceMap = (
   priceInfos: BacktestingRes["priceInfos"],
-  commonDatesSet: Set<string>
+  commonDatesSet: Set<string>,
 ) => {
   const priceMap = new Map<string, number[]>();
   priceInfos.forEach((priceInfo) => {
@@ -90,7 +92,7 @@ export const createPriceMap = (
       priceInfo.ticker,
       priceInfo.prices
         .filter((price) => commonDatesSet.has(format(price.date, "yyyy-MM-dd")))
-        .map((item) => item.adj_close)
+        .map((item) => item.adj_close),
     );
   });
   return priceMap;
@@ -101,28 +103,28 @@ export const calculateRebalancing = (
   priceMap: Map<string, number[]>,
   currentShares: Map<string, number>,
   remainingCash: number,
-  dayIdx: number
+  dayIdx: number,
 ) => {
   const totalPortfolioValue = calculatePortfolioValue(
     assets,
     priceMap,
     currentShares,
     remainingCash,
-    dayIdx
+    dayIdx,
   );
 
   const newShares = calculateNewShares(
     assets,
     priceMap,
     totalPortfolioValue,
-    dayIdx
+    dayIdx,
   );
 
   const totalUsedForRebalancing = calculateTotalUsedAmount(
     assets,
     newShares,
     priceMap,
-    dayIdx
+    dayIdx,
   );
 
   const newRemainingCash = totalPortfolioValue - totalUsedForRebalancing;
@@ -138,7 +140,7 @@ export const calculatePortfolioValue = (
   priceMap: Map<string, number[]>,
   currentShares: Map<string, number>,
   remainingCash: number,
-  dayIdx: number
+  dayIdx: number,
 ) => {
   return (
     remainingCash +
@@ -154,7 +156,7 @@ export const calculateNewShares = (
   assets: PortfolioAssetReqDTO[],
   priceMap: Map<string, number[]>,
   totalPortfolioValue: number,
-  dayIdx: number
+  dayIdx: number,
 ) => {
   const newShares = new Map<string, number>();
 
@@ -173,7 +175,7 @@ export const calculateTotalUsedAmount = (
   assets: PortfolioAssetReqDTO[],
   shares: Map<string, number>,
   priceMap: Map<string, number[]>,
-  dayIdx: number
+  dayIdx: number,
 ) => {
   return assets.reduce((total, asset) => {
     const assetShares = shares.get(asset.symbol) ?? 0;
@@ -184,7 +186,7 @@ export const calculateTotalUsedAmount = (
 };
 
 export const createMonthPriceMap = (
-  etfPriceInfo: ETFPriceMonthlyDTO[]
+  etfPriceInfo: ETFPriceMonthlyDTO[],
 ): MonthlyPriceData => {
   const monthlyPriceMap: MonthlyPriceData = {};
 
@@ -192,7 +194,7 @@ export const createMonthPriceMap = (
     //날짜가 존재하지 않는다면
     if (!data.year_month || !data.symbol || data.adj_close <= 0) {
       console.warn(
-        `데이터 에러: ${data.symbol} ${data.year_month} = ${data.close}`
+        `데이터 에러: ${data.symbol} ${data.year_month} = ${data.close}`,
       );
       return;
     }
@@ -209,7 +211,7 @@ export const createMonthPriceMap = (
 
 export const getCommonMonths = (
   priceMap: MonthlyPriceData,
-  assets: { symbol: string }[]
+  assets: { symbol: string }[],
 ): string[] => {
   const symbols = assets.map((asset) => asset.symbol);
 
@@ -230,7 +232,7 @@ export const getCommonMonths = (
 export const rebalancePortfolio = (
   assets: MonthlyBacktestAsset[],
   currentPortfolioValue: number,
-  monthPrices: Record<string, number>
+  monthPrices: Record<string, number>,
 ) => {
   const currentShares = new Map<string, number>();
   //구성 자산에 대해
@@ -251,7 +253,7 @@ export const rebalancePortfolio = (
 export const rebalancePortfolioForChart = (
   portfolio: PortfolioAssetPackage,
   currentPortfolioValue: number,
-  monthPrices: Record<string, number>
+  monthPrices: Record<string, number>,
 ) => {
   const currentShares = new Map<string, number>();
   //구성 자산에 대해
@@ -273,7 +275,7 @@ export const calculatePortfolioValueMonth = (
   assets: MonthlyBacktestAsset[],
   shares: Map<string, number>,
   monthPrices: Record<string, number>,
-  remainingCash: number = 0
+  remainingCash: number = 0,
 ): number => {
   const assetValue = assets.reduce((total, asset) => {
     const shareCount = shares.get(asset.symbol) ?? 0;
@@ -287,7 +289,7 @@ export const calculatePortfolioValueMonth = (
 export const checkRebalanceCondition = (
   yearMonth: string,
   index: number,
-  rebalanceFrequency: RebalanceFrequency
+  rebalanceFrequency: RebalanceFrequency,
 ): boolean => {
   if (index === 0) return false; // 첫 번째 월은 리밸런싱 하지 않음
 
@@ -334,7 +336,7 @@ export const calculateDailyReturns = (prices: number[]): number[] => {
  * @returns 퍼센트로 변환된 일간 수익률 배열
  */
 export const calculateDailyReturnsPercent = (
-  dailyReturns: number[]
+  dailyReturns: number[],
 ): string[] => {
   return dailyReturns.map((price) => `${(price * 100).toFixed(2)}%`);
 };
@@ -371,7 +373,7 @@ export const calculateVariance = (dailyReturns: number[]) => {
 export const calculateCAGR = (
   startVal: number,
   endVal: number,
-  years: number
+  years: number,
 ): number => {
   if (startVal <= 0 || endVal <= 0 || years <= 0) return 0;
 
@@ -422,7 +424,7 @@ export const getRebalanceDates = (
   tradeDates: Date[],
   startDate: Date,
   endDate: Date,
-  frequency: RebalanceFrequency
+  frequency: RebalanceFrequency,
 ) => {
   const dates: Date[] = [];
   const current = new Date(startDate);
@@ -468,7 +470,7 @@ export const getRebalanceDates = (
           targetDates.find(
             (targetDate) =>
               date.getFullYear() === targetDate.getFullYear() &&
-              date.getMonth() === targetDate.getMonth()
+              date.getMonth() === targetDate.getMonth(),
           )
         ) {
           dates.push(date);
@@ -478,7 +480,7 @@ export const getRebalanceDates = (
   }
 
   return [...new Set(dates.map((date) => date.getTime()))].map(
-    (date) => new Date(date)
+    (date) => new Date(date),
   );
 };
 
@@ -501,3 +503,22 @@ export const getCommonDates = (pricesInfo: ETFTimeSeriesDTO[]): string[] => {
     }, [])
     .sort();
 };
+
+function getPerETFMonthlyReturns(
+  priceMap: Record<string, Record<string, number>>,
+  symbol: string,
+): number[] {
+  const sortedMonths = Object.keys(priceMap).sort();
+  const returns: number[] = [];
+
+  for (let i = 1; i < sortedMonths.length; i++) {
+    const prevMonth = sortedMonths[i - 1][symbol];
+    const currentMonth = sortedMonths[i][symbol];
+
+    if (prevMonth && currentMonth && prevMonth > 0) {
+      returns.push((currentMonth - prevMonth) / prevMonth);
+    }
+  }
+
+  return returns;
+}

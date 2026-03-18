@@ -5,35 +5,20 @@ import { rebalanceFrequencyToKorean } from "@/app/interface/enum/rebanalceFreque
 import DeletePortfolioDialog from "@/components/dialog/deletePortfolioDialog";
 import { Button } from "@/components/ui/button";
 import useDeletePortfolio from "@/lib/hooks/mutation/useDeleteProtfolio";
-import { cn, formatWithCommas } from "@/lib/utils";
+import { formatWithCommas } from "@/lib/utils";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale/ko";
-import {
-  Calendar,
-  ChevronDown,
-  DollarSign,
-  SquarePen,
-  Trash,
-  Zap,
-} from "lucide-react";
+import { Calendar, DollarSign, SquarePen, Trash, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { useState } from "react";
-import AiAnalyzePanel from "./aiAnalyzePanel";
 
 interface PortfolioListItemProps {
   portfolio: PortfolioDTO;
-  expendedItemId: string;
   handleAnalyzeOpen: (portfolioId: string) => void;
 }
 
 function PortfolioListItem({
   portfolio,
-  expendedItemId,
   handleAnalyzeOpen,
 }: PortfolioListItemProps) {
   const router = useRouter();
@@ -54,12 +39,25 @@ function PortfolioListItem({
     handleAnalyzeOpen(portfolioId);
   };
 
+  const handleMoveToPortfolioDetail = (portfolioId: string) => {
+    router.push(`/portfolio/${portfolioId}`);
+  };
+
   return (
-    <div className="flex flex-col bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-6">
-      <div className="flex justify-between items-start">
+    <div
+      className="flex flex-col bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 p-6 
+      "
+    >
+      <div className="flex justify-between items-start ">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-3">
-            <h3 className="text-xl font-bold text-gray-900">
+            <h3
+              className="text-xl font-bold text-gray-900 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleMoveToPortfolioDetail(portfolio.id);
+              }}
+            >
               {portfolio.name}
             </h3>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -134,35 +132,6 @@ function PortfolioListItem({
           </DeletePortfolioDialog>
         </div>
       </div>
-
-      <Collapsible
-        open={isOpen}
-        onOpenChange={setOpen}
-        className="flex flex-col w-full"
-      >
-        <CollapsibleTrigger asChild>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => handlePortfolioAnalyze(portfolio.id)}
-            className="w-fit mt-1 ml-auto"
-          >
-            <ChevronDown
-              className={cn(
-                isOpen ? "rotate-180 " : "rotate-0",
-                "transition-all",
-              )}
-            />
-            AI 분석
-          </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <AiAnalyzePanel
-            portfolio={portfolio}
-            extendedItemId={expendedItemId}
-          />
-        </CollapsibleContent>
-      </Collapsible>
     </div>
   );
 }
