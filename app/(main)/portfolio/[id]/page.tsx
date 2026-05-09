@@ -32,6 +32,7 @@ import useGetBacktestingData from "@/lib/hooks/query/useGetBacktestingData";
 import { usePortfolioSimulationMonthly } from "@/lib/hooks/usePortfolioSimulationMonthly";
 import useGetBacktestingMonthlyData from "@/lib/hooks/query/useGetBacktestingMonthlyData";
 import useGetBenchmarkInfos from "@/lib/hooks/query/useGetBenchmarks";
+import RiskBubbleCard from "./components/riskBubbleCard";
 
 const getChartOptions = (startDate: Date, endDate: Date): ApexOptions =>
   ({
@@ -175,8 +176,8 @@ function PortfolioDetailPage() {
 
     if (!benchmarks?.length) return [portfolioSeries];
 
-    const start = new Date(portfolioData.setting.startDate);
-    const end = new Date(portfolioData.setting.endDate);
+    const start = new Date(portfolioData?.setting.startDate);
+    const end = new Date(portfolioData?.setting.endDate);
     const toYM = (d: Date) => d.getFullYear() * 100 + d.getMonth() + 1;
 
     const filteredBenchmarks = benchmarks.filter(({ year_month }) => {
@@ -431,15 +432,10 @@ function PortfolioDetailPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">리스크-수익률</CardTitle>
-            <Activity className="h-5 w-5 text-orange-600" />
-          </CardHeader>
-          <CardContent>
-            {/* <BubbleChart options={options} series={series} /> */}
-          </CardContent>
-        </Card>
+        <RiskBubbleCard
+          portfolioData={portfolioData}
+          monthlyPortfolioData={monthlyPortfolioData}
+        />
 
         <AiAnalyzePanel portfolio={portfolioData} />
       </div>

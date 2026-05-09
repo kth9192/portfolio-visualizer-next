@@ -54,82 +54,84 @@ function CapSortedTable({ stockRankings }: CapSortedTableProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {stockRankings.map((item, index) => (
-                <TableRow
-                  key={item.id}
-                  className={twMerge(
-                    "hover:bg-muted/50 transition-colors",
-                    index === 19 ? "border-dashed border-b-red-500 " : "",
-                  )}
-                >
-                  <TableCell>
-                    <Badge
-                      variant={"secondary"}
-                      className="w-8 h-8 flex items-center justify-center font-bold"
-                    >
-                      {item.rank}
-                    </Badge>
-                  </TableCell>
-
-                  <TableCell className="text-right">
-                    {item.change > 0 ? (
-                      <Badge
-                        variant="default"
-                        className="bg-green-100 text-green-700 hover:bg-green-200"
-                      >
-                        <TrendingUp className="h-3 w-3 mr-1" />+{item.change}
-                      </Badge>
-                    ) : item.change < 0 ? (
-                      <Badge
-                        variant="default"
-                        className="bg-red-100 text-red-700 hover:bg-red-200"
-                      >
-                        <TrendingDown className="h-3 w-3 mr-1" />
-                        {item.change}
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary" className="bg-gray-100">
-                        <Minus className="h-3 w-3 " />
-                      </Badge>
+              {stockRankings
+                .sort((pre, post) => pre.rank - post.rank)
+                .map((item, index) => (
+                  <TableRow
+                    key={item.id}
+                    className={twMerge(
+                      "hover:bg-muted/50 transition-colors",
+                      index === 19 ? "border-dashed border-b-red-500 " : "",
                     )}
-                  </TableCell>
-
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div className="relative h-8 w-8 rounded-full overflow-hidden border-1 border-gray-100">
-                        <Image
-                          src={item.logoUrl || NullImage}
-                          alt={item.shortName}
-                          fill
-                          className="object-cover"
-                          sizes="100%"
-                        />
-                      </div>
+                  >
+                    <TableCell>
                       <Badge
-                        variant="outline"
-                        className="font-mono font-semibold"
+                        variant={"secondary"}
+                        className="w-8 h-8 flex items-center justify-center font-bold"
                       >
-                        {item.symbol}
+                        {item.rank}
                       </Badge>
-                    </div>
-                  </TableCell>
+                    </TableCell>
 
-                  <TableCell className="font-medium">
-                    {item.shortName}
-                  </TableCell>
+                    <TableCell className="text-right">
+                      {item.change > 0 ? (
+                        <Badge
+                          variant="default"
+                          className="bg-green-100 text-green-700 hover:bg-green-200"
+                        >
+                          <TrendingUp className="h-3 w-3 mr-1" />+{item.change}
+                        </Badge>
+                      ) : item.change < 0 ? (
+                        <Badge
+                          variant="default"
+                          className="bg-red-100 text-red-700 hover:bg-red-200"
+                        >
+                          <TrendingDown className="h-3 w-3 mr-1" />
+                          {item.change}
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary" className="bg-gray-100">
+                          <Minus className="h-3 w-3 " />
+                        </Badge>
+                      )}
+                    </TableCell>
 
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1 font-semibold">
-                      <DollarSign className="h-4 w-4 text-muted-foreground" />
-                      {item.regularMarketPrice.toLocaleString()}
-                    </div>
-                  </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <div className="relative h-8 w-8 rounded-full overflow-hidden border-1 border-gray-100">
+                          <Image
+                            src={item.logoUrl || NullImage}
+                            alt={item.shortName}
+                            fill
+                            className="object-cover"
+                            sizes="100%"
+                          />
+                        </div>
+                        <Badge
+                          variant="outline"
+                          className="font-mono font-semibold"
+                        >
+                          {item.symbol}
+                        </Badge>
+                      </div>
+                    </TableCell>
 
-                  <TableCell className="text-right font-mono text-sm">
-                    {formatWithCommas(item.regularMarketVolume)}
-                  </TableCell>
-                </TableRow>
-              ))}
+                    <TableCell className="font-medium">
+                      {item.shortName}
+                    </TableCell>
+
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1 font-semibold">
+                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                        {item.regularMarketPrice.toLocaleString()}
+                      </div>
+                    </TableCell>
+
+                    <TableCell className="text-right font-mono text-sm">
+                      {formatWithCommas(item.regularMarketVolume)}
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </div>

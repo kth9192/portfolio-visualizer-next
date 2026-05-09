@@ -190,7 +190,7 @@ export const createMonthPriceMap = (
 ): MonthlyPriceData => {
   const monthlyPriceMap: MonthlyPriceData = {};
 
-  etfPriceInfo.forEach((data) => {
+  etfPriceInfo?.forEach((data) => {
     //날짜가 존재하지 않는다면
     if (!data.year_month || !data.symbol || data.adj_close <= 0) {
       console.warn(

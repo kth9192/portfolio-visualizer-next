@@ -53,15 +53,6 @@ export function usePortfolioSimulationMonthly({
 
     const commonMonths = getCommonMonths(priceMap, assets);
 
-    console.log("1. filteredData 길이:", filteredData.length);
-    console.log("2. filteredData 샘플:", filteredData.slice(0, 3));
-    console.log("3. priceMap 키 수:", Object.keys(priceMap).length);
-    console.log("4. priceMap 첫 항목:", Object.entries(priceMap)[0]);
-    console.log(
-      "5. assets symbols:",
-      assets.map((a) => a.symbol),
-    );
-
     if (commonMonths.length === 0) {
       console.warn(
         "공통 월 데이터 없음. assets:",
